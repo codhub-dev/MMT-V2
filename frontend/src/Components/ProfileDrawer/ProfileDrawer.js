@@ -9,11 +9,13 @@ import React, {
 import { googleLogout } from "@react-oauth/google";
 import ConfirmModal from "../ConfirmModal/ConfirmModal";
 import { CloseOutlined } from "@ant-design/icons";
+import AdminPortal from "../../Pages/AdminPortal/AdminPortal";
 import GetHelpModal from "../GetHelpModal/GetHelpModal";
 import PrivacyPolicyModal from "../PrivacyPolicyModal/PrivacyPolicyModal";
 import AboutUsModal from "../AboutUsModal/AboutUsModal";
 import { Axios } from "../../Config/Axios/Axios";
 import { UserContext } from "../../App";
+import { useNavigate } from "react-router-dom";
 const ReachableContext = createContext(null);
 const UnreachableContext = createContext(null);
 
@@ -24,6 +26,7 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
   const [loading, setLoading] = useState(true);
 
   const { user } = useContext(UserContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // const userCred = jwtDecode(localStorage.getItem("token"));
@@ -111,6 +114,14 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
             {user?.email}
           </p>
           <div className="mb-4 pb-2 d-flex flex-column gap-2">
+            <button
+              type="button"
+              className="btn btn-outline-primary btn-floating"
+              onClick={() => {navigate("/admin")}}
+            >
+              {/* <PersonCircleIcon /> */}
+              Admin Portal
+            </button>
             <button
               type="button"
               className="btn btn-outline-primary btn-floating"
