@@ -71,7 +71,7 @@ connectDB().then(() => {
 	try {
 		// Listen on provided IP and port, on all network interfaces.
 		server.listen(port, '0.0.0.0', () => {
-			console.log(`Server connected to http://35.154.222.198:${port}`);
+			console.log(`Server connected to port:${port}`);
 		});
 	} catch (error) {
 		console.log('Cannot connect to the server');
