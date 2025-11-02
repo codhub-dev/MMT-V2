@@ -2,22 +2,31 @@ import { Card, Statistic } from 'antd'
 import { ArrowUpOutlined } from '@ant-design/icons';
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
+import { ArrowUpRightIcon } from '@primer/octicons-react';
 
 const StatisticCard = (props) => {
 
   const nav = useNavigate()
 
   return (
-    <Card hoverable bordered={false} style={{background: '#59a4ff'}} onClick={()=>{nav(props.route)}}>
-        <div className='d-flex align-items-center justify-content-between'>
+    <Card hoverable bordered={false} className={props.cardType === "primary" ? "primary rounded-4" : "rounded-3"} onClick={() => { props.route && nav(props.route) }}>
+      <div className='d-flex align-items-center justify-content-between'>
         <Statistic
-          title={props.title}
+          title={
+            <div className='w-100 d-flex justify-content-between align-items-center'>
+              <div>{props.title}</div>
+              <div className='d-flex align-items-center justify-content-center bg-white' style={{height: 30, width:30, borderRadius: "100%"}}>
+                <ArrowUpRightIcon size={16} fill='#158141' />
+              </div>
+            </div>
+          }
           value={props.value}
+          className='w-100'
           precision={2}
           valueStyle={{
-            color: '#000',
-            fontWeight: 800,
-            fontSize:24
+            color: '#fff',
+            fontWeight: 460,
+            fontSize: 46
           }}
         />
         {/* <Statistic
@@ -31,8 +40,8 @@ const StatisticCard = (props) => {
             fontSize:16
           }}
           /> */}
-          </div>
-      </Card>
+      </div>
+    </Card>
   )
 }
 

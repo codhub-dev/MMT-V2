@@ -74,12 +74,12 @@ const CatalogModal = forwardRef(({ vehicleId, regNo, isFinanced }, ref) => {
                 style={{ alignItems: "flex-start" }}
               >
                 <span className="fw-bold m-0 p-0">Fuel Expenses</span>
-                <span
+                {/* <span
                   className="p-0 m-0"
                   style={{ fontSize: 10, fontStyle: "oblique" }}
                 >
                   this month
-                </span>
+                </span> */}
               </div>
             </div>
             <div className="bg-white p-1 rounded text-black w-50">
@@ -105,12 +105,12 @@ const CatalogModal = forwardRef(({ vehicleId, regNo, isFinanced }, ref) => {
                 style={{ alignItems: "flex-start" }}
               >
                 <span className="fw-bold m-0 p-0">Def Expenses</span>
-                <span
+                {/* <span
                   className="p-0 m-0"
                   style={{ fontSize: 10, fontStyle: "oblique" }}
                 >
                   this month
-                </span>
+                </span> */}
               </div>
             </div>
             <div className="bg-white p-1 rounded text-black w-50">
@@ -138,12 +138,12 @@ const CatalogModal = forwardRef(({ vehicleId, regNo, isFinanced }, ref) => {
                 style={{ alignItems: "flex-start" }}
               >
                 <span className="fw-bold m-0 p-0">Other Expenses</span>
-                <span
+                {/* <span
                   className="p-0 m-0"
                   style={{ fontSize: 10, fontStyle: "oblique" }}
                 >
                   this month
-                </span>
+                </span> */}
               </div>
             </div>
             <div className="bg-white p-1 rounded text-black w-50">
