@@ -9,6 +9,7 @@ import VehicleModal from "../../Components/VehicleModal/VehicleModal";
 import LoaderOverlay from "../../Components/LoaderOverlay/LoaderOverlay";
 import "../../Styles/Dashboard.css";
 import { PlusIcon } from "@primer/octicons-react";
+import MonthlyChart from "../../Components/Dashboard/MonthlyChart/MonthlyChart";
 
 const Dashboard = () => {
   const [contentLoader, setContentLoader] = useState(true);
@@ -71,8 +72,8 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-4 rounded-4" style={{ background: "#f6f6f6" }}>
-      <div className="d-flex justify-content-between align-items-center mb-4">
+    <div className="p-4 rounded-4 d-flex flex-column gap-3" style={{ background: "#f6f6f6" }}>
+      <div className="d-flex justify-content-between align-items-center mb-2">
         <div className="d-flex flex-column">
           <b style={{ fontSize: "26px" }}>Dashboard</b>
           <span style={{ fontSize: "14px", color: "#939393" }}>Overview of your truck's performance</span>
@@ -88,7 +89,7 @@ const Dashboard = () => {
           <Spin size="large" />
         </div>
       ) : (
-        <div className="dashboard-container">
+        <div className="dashboard-grid-container">
           <StatisticCard
             cardType="primary"
             title={
@@ -177,26 +178,29 @@ const Dashboard = () => {
         </div>
       )}
 
-      <Divider
+      {/* <Divider
         style={{
           borderColor: "#000",
           margin: "50px 0px",
         }}
       >
         Manage Vehicles
-      </Divider>
-      <div className="dashboard-container vehicleCard px-4 pb-5">
+      </Divider> */}
+      <div className="dashboard-container">
+        <MonthlyChart />
+      </div>
+      <div className="dashboard-grid-container vehicleCard px-4 pb-5">
         {trucks?.map((truck) => {
           return <VehicleCard key={truck._id} data={truck} />;
         })}
 
-        <button
+        {/* <button
           className="bg-light rounded d-flex align-items-center justify-content-center"
           style={{ border: "2px dashed #cbcbcb", minHeight: 150 }}
           onClick={callVehicleModal}
         >
           <PlusCircleFilled style={{ fontSize: 76, color: "#d6d6d6" }} />
-        </button>
+        </button> */}
       </div>
       <VehicleModal
         ref={vehicleModalRef}

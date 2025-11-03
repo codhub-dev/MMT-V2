@@ -237,7 +237,7 @@ const CalculateLoan = () => {
 
   return (
     <>
-      <div className="dashboard-container mb-5 display-grid w-100 justify-content-center">
+      <div className="dashboard-grid-container mb-5 display-grid w-100 justify-content-center">
         <StatisticCard
           title={
             <b>

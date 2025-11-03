@@ -45,7 +45,7 @@
   box-shadow: 2px 3px 7px 2px #a6a6a6;
 }
 
-.dashboard-container {
+.dashboard-grid-container {
   display: grid;
   grid-template-columns: repeat(
     auto-fill,
@@ -57,7 +57,7 @@
 
 @media (min-width: 768px) {
   /* For tablets and above */
-  .dashboard-container {
+  .dashboard-grid-container {
     grid-template-columns: repeat(
       auto-fill,
       minmax(220px, 1fr)
@@ -68,7 +68,7 @@
 
 @media (min-width: 1024px) {
   /* For laptops and above */
-  .dashboard-container {
+  .dashboard-grid-container {
     grid-template-columns: repeat(
       5,
       1fr

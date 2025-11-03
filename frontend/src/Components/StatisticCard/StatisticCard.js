@@ -15,7 +15,7 @@ const StatisticCard = (props) => {
           title={
             <div className='w-100 d-flex justify-content-between align-items-center'>
               <div>{props.title}</div>
-              <div className='d-flex align-items-center justify-content-center bg-white' style={{height: 30, width:30, borderRadius: "100%"}}>
+              <div className='d-flex align-items-center justify-content-center bg-white' style={{ height: 30, width: 30, borderRadius: "100%" }}>
                 <ArrowUpRightIcon size={16} fill='#158141' />
               </div>
             </div>
@@ -23,6 +23,17 @@ const StatisticCard = (props) => {
           value={props.value}
           className='w-100'
           precision={2}
+          formatter={(value) => {
+            if (value >= 10000000) {
+              // 1 crore or more
+              return `${(value / 10000000).toFixed(2)}Cr`;
+            } else if (value >= 100000) {
+              // 1 lakh or more
+              return `${(value / 100000).toFixed(2)}L`;
+            } else {
+              return value.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+            }
+          }}
           valueStyle={{
             color: '#fff',
             fontWeight: 460,

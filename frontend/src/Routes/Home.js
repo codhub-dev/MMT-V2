@@ -16,7 +16,7 @@ const Home = () => {
         <div style={{ height: "100vh", width: "100vw", padding: 16 }}>
             <div className='d-flex gap-3'>
                 <SideBar />
-                <div className='d-flex flex-column gap-3'>
+                <div className='w-100 d-flex flex-column gap-3'>
                     <NavBar />
                     <Switch>
                         <Route path="/dashboard" element={<Dashboard />} />
