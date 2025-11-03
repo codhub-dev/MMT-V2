@@ -117,7 +117,7 @@ const NavBar = () => {
                 <img
                   src={
                     user?.picture
-                      ? user.picture
+                      ? user?.picture
                       : "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
                   }
                   className="rounded-circle"

@@ -1,46 +1,18 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Axios } from "../../Config/Axios/Axios";
 import { UserContext } from "../../App";
-import { Button, Divider, Spin } from "antd";
+import { Spin } from "antd";
 import StatisticCard from "../../Components/StatisticCard/StatisticCard";
-import VehicleCard from "../../Components/VehicleCard/VehicleCard";
-import { PlusCircleFilled } from "@ant-design/icons";
-import VehicleModal from "../../Components/VehicleModal/VehicleModal";
 import LoaderOverlay from "../../Components/LoaderOverlay/LoaderOverlay";
 import "../../Styles/Dashboard.css";
-import { PlusIcon } from "@primer/octicons-react";
 import MonthlyChart from "../../Components/Dashboard/MonthlyChart/MonthlyChart";
 
 const Dashboard = () => {
   const [contentLoader, setContentLoader] = useState(true);
-  const [analyticsLoader, setAnalyticsLoader] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [trucks, setTrucks] = useState([]);
+  const [analyticsLoader, setAnalyticsLoader] = useState(true);
   const [metadata, setMetadata] = useState([]);
   const { user } = useContext(UserContext);
-
-
-  useEffect(() => {
-    setContentLoader(true);
-    Axios.get(`/api/v1/app/truck/getAllTrucksByUser/${user.userId}`, {
-      params: {
-        addedBy: user.userId,
-      },
-      headers: {
-        authorization: `bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then((res) => {
-        setTrucks(res.data);
-        setContentLoader(false);
-      })
-      .catch((err) => {
-        setIsError(true);
-        setContentLoader(false);
-      });
-
-    return () => { };
-  }, []);
 
   useEffect(() => {
     setAnalyticsLoader(true);
@@ -56,20 +28,13 @@ const Dashboard = () => {
       .then((res) => {
         setMetadata(res.data);
         setAnalyticsLoader(false);
+        setContentLoader(false);
       })
       .catch((err) => {
         setIsError(true);
         // setContentLoader(false);
       });
   }, []);
-
-  const vehicleModalRef = useRef();
-
-  const callVehicleModal = () => {
-    if (vehicleModalRef.current) {
-      vehicleModalRef.current.showLoading();
-    }
-  };
 
   return (
     <div className="p-4 rounded-4 d-flex flex-column gap-3" style={{ background: "#f6f6f6" }}>
@@ -79,7 +44,7 @@ const Dashboard = () => {
           <span style={{ fontSize: "14px", color: "#939393" }}>Overview of your truck's performance</span>
         </div>
         <div>
-          <Button className="primary rounded-5 p-4" onClick={callVehicleModal}><PlusIcon /> Add Vehicle</Button>
+          {/* <Button className="primary rounded-5 p-4" onClick={callVehicleModal}><PlusIcon /> Add Vehicle</Button> */}
         </div>
       </div>
       <LoaderOverlay isVisible={contentLoader} />
@@ -189,25 +154,6 @@ const Dashboard = () => {
       <div className="dashboard-container">
         <MonthlyChart />
       </div>
-      <div className="dashboard-grid-container vehicleCard px-4 pb-5">
-        {trucks?.map((truck) => {
-          return <VehicleCard key={truck._id} data={truck} />;
-        })}
-
-        {/* <button
-          className="bg-light rounded d-flex align-items-center justify-content-center"
-          style={{ border: "2px dashed #cbcbcb", minHeight: 150 }}
-          onClick={callVehicleModal}
-        >
-          <PlusCircleFilled style={{ fontSize: 76, color: "#d6d6d6" }} />
-        </button> */}
-      </div>
-      <VehicleModal
-        ref={vehicleModalRef}
-        setTrucks={setTrucks}
-        trucks={trucks}
-        vehicleData={null}
-      />
     </div>
   );
 };

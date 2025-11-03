@@ -7,6 +7,7 @@ import ExpenseSummary from '../Pages/ExpenseSummary/ExpenseSummary'
 import CalculateLoan from '../Pages/CalculateLoan/CalculateLoan'
 import AdminPortal from '../Pages/AdminPortal/AdminPortal'
 import SideBar from '../Components/SideBar/SideBar'
+import Trucks from '../Pages/Trucks/Trucks'
 
 const Home = () => {
 
@@ -14,12 +15,13 @@ const Home = () => {
 
     return (
         <div style={{ height: "100vh", width: "100vw", padding: 16 }}>
-            <div className='d-flex gap-3'>
+            <div className='h-100 d-flex gap-3'>
                 <SideBar />
-                <div className='w-100 d-flex flex-column gap-3'>
+                <div className='h-100 w-100 d-flex flex-column gap-3'>
                     <NavBar />
                     <Switch>
                         <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/trucks" element={<Trucks />} />
                         <Route path="/admin" element={<AdminPortal />} />,
                         <Route path="/calculateLoan/:vehicleId?" element={<CalculateLoan />} />
                         <Route path="/expenseSummary/:catalog/:vehicleId?" element={<ExpenseSummary />} />
