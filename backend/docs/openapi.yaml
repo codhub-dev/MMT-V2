@@ -1,0 +1,754 @@
+openapi: 3.0.3
+info:
+  title: ManageMyTruck (MMT) Backend API
+  version: 1.0.0
+  description: |
+    🚛 **ManageMyTruck (MMT)** — A unified fleet and expense management system for logistics operators.
+
+    This API powers:
+    - Truck management
+    - Expense tracking (Fuel, DEF, Other, Total)
+    - Loan calculations
+    - User & Admin management
+    - Metadata analytics
+
+    ---
+    **Base URLs**
+    - Local: `http://localhost:8000`
+  contact:
+    name: APIBP-20242YB-Team-09
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter your JWT token as **Bearer <token>**
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Operation successful
+        status:
+          type: boolean
+          example: true
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Something went wrong
+        status:
+          type: boolean
+          example: false
+    Expense:
+      type: object
+      properties:
+        truckId: { type: string, description: The ID of the truck associated with the expense. }
+        userId: { type: string, description: The ID of the user who added the expense. }
+        amount: { type: number, format: float, example: 125.50 }
+        date: { type: string, format: date, example: "2025-10-26" }
+        notes: { type: string, example: "Regular maintenance fill" }
+        # Add more specific fields if known, e.g., mileage, gallons
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Health
+  - name: Auth
+  - name: User Profile
+  - name: Admin
+  - name: Truck Management
+  - name: Loan Calculations
+  - name: Fuel Expenses
+  - name: DEF Expenses
+  - name: Other Expenses
+  - name: Total Expenses
+  - name: Metadata
+
+paths:
+
+  ###########################################
+  # HEALTH
+  ###########################################
+  /health/checkHealth:
+    get:
+      tags: [Health]
+      summary: Check API health status
+      responses:
+        200:
+          description: Service is up and running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: OK }
+                  message: { type: string, example: Service is running }
+                  timestamp: { type: string, format: date-time, example: 2025-11-05T12:00:00Z }
+
+  ###########################################
+  # AUTH
+  ###########################################
+  /auth/signUp:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password, name]
+              properties:
+                username: { type: string, example: johndoe }
+                password: { type: string, example: strongpassword123 }
+                name: { type: string, example: John Doe }
+      responses:
+        201: { description: User registered successfully }
+        400: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /auth/logIn:
+    post:
+      tags: [Auth]
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1Ni...
+        401: { description: Invalid credentials }
+
+  /auth/logOut:
+    post:
+      tags: [Auth]
+      summary: Logout user
+      security: [{ bearerAuth: [] }]
+      responses:
+        200: { description: Logged out successfully }
+
+  /auth/whoami:
+    post:
+      tags: [Auth]
+      summary: Validate user token and return user identity
+      security: [{ bearerAuth: [] }]
+      responses:
+        200: { description: Token valid, returns user info }
+        401: { description: Token invalid or expired }
+
+  /auth/signUpWithGoogle:
+    post:
+      tags: [Auth]
+      summary: Sign up or login via Google
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token: { type: string, description: Google ID Token }
+      responses:
+        200: { description: Google user authenticated }
+
+  ###########################################
+  # USER PROFILE
+  ###########################################
+  /users/getMyProfile:
+    get:
+      tags: [User Profile]
+      summary: Get the current user's profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: User profile details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId: { type: string, example: U67890 }
+                  name: { type: string, example: John Doe }
+                  email: { type: string, example: john@example.com }
+                  isAdmin: { type: boolean, example: false }
+                  isSubscribed: { type: boolean, example: true }
+        401: { description: Unauthorized }
+
+  ###########################################
+  # ADMIN
+  ###########################################
+  /admin/getAlluser:
+    get:
+      tags: [Admin]
+      summary: Retrieve all users (Admin only)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200: { description: List of users returned }
+
+  /admin/getOneUserByUsername:
+    get:
+      tags: [Admin]
+      summary: Retrieve a user by username (Admin only)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: User found }
+        404: { description: User not found }
+
+  /admin/deleteOneUserByUsername:
+    get:
+      tags: [Admin]
+      summary: Delete user by username (Admin only)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: User deleted }
+
+  ###########################################
+  # TRUCK MANAGEMENT
+  ###########################################
+  /trucks/addTruck:
+    post:
+      tags: [Truck Management]
+      summary: Add a new truck
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [registrationNumber, model, addedBy]
+              properties:
+                registrationNumber: { type: string, example: "TRK1234" }
+                model: { type: string, example: "Volvo VNL" }
+                addedBy: { type: string, description: "The User ID of the owner/creator" }
+      responses:
+        201: { description: Truck added successfully }
+
+  /trucks/getAllTrucks:
+    get:
+      tags: [Truck Management]
+      summary: Get all trucks (Admin or All Users)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200: { description: List of all trucks }
+
+  /trucks/getTruckById/{id}:
+    get:
+      tags: [Truck Management]
+      summary: Get truck by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Truck details returned }
+        404: { description: Truck not found }
+
+  /trucks/getAllTrucksByUser/{addedBy}:
+    get:
+      tags: [Truck Management]
+      summary: Get all trucks added by a specific user ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: addedBy
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Trucks by user retrieved }
+
+  /trucks/updateTruckById/{id}:
+    put:
+      tags: [Truck Management]
+      summary: Update truck details by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model: { type: string, example: "Peterbilt 579" }
+      responses:
+        200: { description: Truck updated }
+
+  /trucks/deleteTruckById/{id}:
+    delete:
+      tags: [Truck Management]
+      summary: Delete truck by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Truck deleted }
+
+  ###########################################
+  # LOAN CALCULATIONS
+  ###########################################
+  /calculateLoan/addLoanCalculation:
+    post:
+      tags: [Loan Calculations]
+      summary: Add a new loan calculation
+      security: [{ bearerAuth: [] }]
+      responses:
+        201: { description: Loan calculation added }
+
+  /calculateLoan/getAllLoanCalculationsByTruckId:
+    get:
+      tags: [Loan Calculations]
+      summary: Get loan calculations by truck ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: truckId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Loan calculations retrieved }
+
+  /calculateLoan/getAllLoanCalculationsByUserId:
+    get:
+      tags: [Loan Calculations]
+      summary: Get all loan calculations by user ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Loan calculations for user retrieved }
+
+  /calculateLoan/deleteLoanCalculationById/{id}:
+    delete:
+      tags: [Loan Calculations]
+      summary: Delete loan calculation by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Loan calculation deleted }
+
+  /calculateLoan/downloadLoanCalculationExcel:
+    get:
+      tags: [Loan Calculations]
+      summary: Download loan calculation data as Excel for a specific query
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  /calculateLoan/downloadAllLoanCalculationExcel:
+    get:
+      tags: [Loan Calculations]
+      summary: Download all loan calculations as Excel (Admin/Global)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  ###########################################
+  # DEF EXPENSES
+  ###########################################
+  /defExpenses/addDefExpense:
+    post:
+      tags: [DEF Expenses]
+      summary: Add a new DEF expense
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Expense' }
+      responses:
+        201: { description: DEF expense added }
+
+  /defExpenses/getAllDefExpensesByTruckId:
+    get:
+      tags: [DEF Expenses]
+      summary: Get all DEF expenses by truck ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: truckId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: DEF expenses fetched }
+
+  /defExpenses/getAllDefExpensesByUserId:
+    get:
+      tags: [DEF Expenses]
+      summary: Get all DEF expenses by user ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: DEF expenses fetched }
+
+  /defExpenses/updateDefExpenseByTruckId/{id}:
+    put:
+      tags: [DEF Expenses]
+      summary: Update a DEF expense by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: DEF expense updated }
+
+  /defExpenses/deleteDefExpenseById/{id}:
+    delete:
+      tags: [DEF Expenses]
+      summary: Delete a DEF expense by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: DEF expense deleted }
+
+  /defExpenses/downloadDefExpensesExcel:
+    get:
+      tags: [DEF Expenses]
+      summary: Download filtered DEF expenses as Excel
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  /defExpenses/downloadAllDefExpensesExcel:
+    get:
+      tags: [DEF Expenses]
+      summary: Download all DEF expenses as Excel (Admin/Global)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+
+  ###########################################
+  # FUEL EXPENSES
+  ###########################################
+  /fuelExpenses/addFuelExpense:
+    post:
+      tags: [Fuel Expenses]
+      summary: Add a new fuel expense
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Expense' }
+            # Consider adding fuel-specific fields like 'gallons', 'mileage'
+      responses:
+        201: { description: Fuel expense added }
+
+  /fuelExpenses/getAllFuelExpensesByTruckId:
+    get:
+      tags: [Fuel Expenses]
+      summary: Get all fuel expenses by truck ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: truckId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Fuel expenses fetched }
+
+  /fuelExpenses/getAllFuelExpensesByUserId:
+    get:
+      tags: [Fuel Expenses]
+      summary: Get all fuel expenses by user ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Fuel expenses fetched }
+
+  /fuelExpenses/updateFuelExpenseByTruckId/{id}:
+    put:
+      tags: [Fuel Expenses]
+      summary: Update a fuel expense by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Fuel expense updated }
+
+  /fuelExpenses/deleteFuelExpenseById/{id}:
+    delete:
+      tags: [Fuel Expenses]
+      summary: Delete a fuel expense by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Fuel expense deleted }
+
+  /fuelExpenses/downloadFuelExpensesExcel:
+    get:
+      tags: [Fuel Expenses]
+      summary: Download filtered fuel expenses as Excel
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  /fuelExpenses/downloadAllFuelExpensesExcel:
+    get:
+      tags: [Fuel Expenses]
+      summary: Download all fuel expenses as Excel (Admin/Global)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+
+  ###########################################
+  # OTHER EXPENSES
+  ###########################################
+  /otherExpenses/addOtherExpense:
+    post:
+      tags: [Other Expenses]
+      summary: Add a new other expense
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Expense' }
+      responses:
+        201: { description: Other expense added }
+
+  /otherExpenses/getAllOtherExpensesByTruckId:
+    get:
+      tags: [Other Expenses]
+      summary: Get all other expenses by truck ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: truckId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Other expenses fetched }
+
+  /otherExpenses/getAllOtherExpensesByUserId:
+    get:
+      tags: [Other Expenses]
+      summary: Get all other expenses by user ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Other expenses fetched }
+
+  /otherExpenses/updateOtherExpenseByTruckId/{id}:
+    put:
+      tags: [Other Expenses]
+      summary: Update an other expense by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Other expense updated }
+
+  /otherExpenses/deleteOtherExpenseById/{id}:
+    delete:
+      tags: [Other Expenses]
+      summary: Delete an other expense by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Other expense deleted }
+
+  /otherExpenses/downloadOtherExpensesExcel:
+    get:
+      tags: [Other Expenses]
+      summary: Download filtered other expenses as Excel
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  /otherExpenses/downloadAllOtherExpensesExcel:
+    get:
+      tags: [Other Expenses]
+      summary: Download all other expenses as Excel (Admin/Global)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  ###########################################
+  # TOTAL EXPENSES
+  ###########################################
+  /totalExpenses/getAllTotalExpensesByUserId:
+    get:
+      tags: [Total Expenses]
+      summary: Get total expenses for a user
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Total expenses retrieved }
+
+  /totalExpenses/downloadAllTotalExpensesExcel:
+    get:
+      tags: [Total Expenses]
+      summary: Download all total expenses as Excel (Admin/Global)
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  ###########################################
+  # METADATA
+  ###########################################
+  /metadata/getMetadataByTruckId:
+    get:
+      tags: [Metadata]
+      summary: Get analytical metadata by truck ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: truckId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Metadata fetched }
+
+  /metadata/getMetadataByUserId:
+    get:
+      tags: [Metadata]
+      summary: Get analytical metadata by user ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Metadata fetched }
+
+  /metadata/getProfileMetadataByUserId:
+    get:
+      tags: [Metadata]
+      summary: Get profile-related metadata by user ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        200: { description: Profile metadata retrieved }
