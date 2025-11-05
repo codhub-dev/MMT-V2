@@ -105,8 +105,8 @@ Follow these steps to set up the project locally:
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone <private_repo_url>
-cd manage-my-truck
+git clone https://github.com/BITSSAP2025AugAPIBP3Sections/APIBP-20242YB-Team-09.git
+cd APIBP-20242YB-Team-09
 ```
 2️⃣ Setup Backend
 ```bash
