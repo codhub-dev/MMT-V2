@@ -1,41 +1,141 @@
-# Manage My Truck (MMT)
+<p align="center">
+  <img src="frontend/public/mmt_logo.png" alt="Manage My Truck Logo" width="100"/>
+</p>
 
-Manage My Truck (MMT) is a comprehensive platform designed to help you manage your truck's expenses, profits, costs, maintenance, and more. Developed using the MERN stack (MongoDB, Express.js, React, and Node.js), MMT provides an intuitive interface for efficient truck management.
+<h1 align="center">🚛 Manage My Truck</h1>
 
-## Features
+<p align="center">
+  Fleet management platform built with React, Node.js, Express & MongoDB.
+  <br/>
+  <i>Empowering transport businesses with analytics, automation & control.</i>
+</p>
 
-- **Expense Tracking:** Monitor and categorize all your truck-related expenses.
-- **Profit Analysis:** Analyze your profits over different periods.
-- **Cost Management:** Track and manage costs associated with truck operation and maintenance.
-- **Maintenance Scheduling:** Schedule and keep track of maintenance tasks.
-- **User-Friendly Interface:** Intuitive and responsive UI developed with React.
+<p align="center">
+  <a href="#-project-overview">
+    📖 <b>About</b>
+  </a> •
+  <a href="#-getting-started">
+    ⚙️ <b>Setup</b>
+  </a> •
+  <a href="#-tech-stack">
+    🛠️ <b>Tech Stack</b>
+  </a> •
+  <a href="#-api-capabilities">
+    🔌 <b>APIs</b>
+  </a> •
+  <a href="#-team">
+    👥 <b>Team</b>
+  </a>
+</p>
 
-## Technologies Used
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square" alt="Status"/>
+  <img src="https://img.shields.io/badge/Internal_Project-No_Public_Access-orange?style=flat-square" alt="Internal Project"/>
+  <img src="https://img.shields.io/badge/Made%20with-❤️-red?style=flat-square" alt="Made with love"/>
+</p>
 
-- **Frontend:**
-  - React
-  - Redux (for state management)
-  - React Router (for navigation)
-  - Bootstrap / AntDesign
+---
 
-- **Backend:**
-  - Node.js
-  - Express.js
-  - MongoDB (database)
+# 🚀 Project Overview
 
-- **Deployment:**
-  - Docker (containerization)
-  - Render / Vercel (for deployment)
+**Manage My Truck** is a comprehensive fleet management platform that enables transport businesses to efficiently manage trucks, track expenses, monitor profits, and generate insightful reports.  
+It delivers automation, analytics, and operational control through a clean, intuitive interface.
 
-## Installation
+---
 
-### Prerequisites
+# 🧩 Features
 
-- Node.js and npm (Node Package Manager)
-- MongoDB (locally or through a cloud service like MongoDB Atlas)
+- 🚛 **Fleet Management** – Add, view, and manage trucks & drivers.  
+- 💰 **Expense Tracking** – Log fuel, DEF, and other operational expenses.  
+- 📈 **Profit & Salary Insights** – Calculate profits and driver salaries automatically.  
+- 📊 **Analytics & Reports** – Visual dashboards with monthly/yearly summaries.  
+- 📧 **Email Alerts** – Automatic notifications and summary reports.  
+- 🔐 **Secure Login** – Role-based access via Google OAuth & JWT.  
+- 💻 **Modern UI** – Responsive design with React, Bootstrap, and Ant Design.  
 
-### Clone the Repository
+---
 
+# 🛠️ Tech Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React.js, Bootstrap, Ant Design |
+| **Backend** | Node.js (Express.js) |
+| **Database** | MongoDB |
+| **Authentication** | Google OAuth, JWT |
+| **Infrastructure** | AWS EC2, AWS S3, Render, Vercel |
+| **Language** | JavaScript (ES6) |
+
+---
+
+# 🔌 API Capabilities
+
+### ✅ **Authentication & Authorization**
+- Google OAuth and JWT-based sessions  
+- Role-based access (**Admin / Fleet Manager**)  
+
+### 🚚 **Fleet & Expense Management**
+- Manage trucks, drivers, and various expenses (Fuel, DEF, Other)  
+- Automated profit and salary computation  
+- Loan management  
+
+### 📊 **Analytics & Reporting**
+- Real-time dashboard insights  
+- Expense summaries and trends  
+- Export reports to **PDF/CSV**  
+
+### 📧 **Communication & Alerts**
+- Automated mailing services for alerts and summaries  
+- Configurable dashboard for custom analytics  
+
+---
+
+# 🔁 REST vs GraphQL Support
+
+| **API Type** | **Modules / Usage** |
+|---------------|---------------------|
+| 🧩 **REST APIs** | Authentication & Google OAuth <br> User Management <br> Truck Operations <br> Expense Management <br> Loan Calculations |
+| 🔍 **GraphQL APIs** | Expense Aggregation <br> Analytics Dashboards <br> Admin Insights & Metadata |
+
+---
+
+# ⚙️ Getting Started
+
+Follow these steps to set up the project locally:
+
+### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/<yourusername>/manage-my-truck.git
+git clone <private_repo_url>
 cd manage-my-truck
+```
+2️⃣ Setup Backend
+```bash
+cd backend
+npm install
+npm start
+```
+
+3️⃣ Setup Frontend
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Your app will now be running at:
+
+```
+Frontend → http://localhost:3000
+Backend → http://localhost:8000
+```
+---
+
+# Contributors
+
+| [<img src="https://avatars.githubusercontent.com/u/85933206?v=4" width="100" height="100" style="border-radius:50%"/>](https://github.com/brindas) | [<img src="https://avatars.githubusercontent.com/u/73706705?s=400&u=150831dea33fa9328172f02f5b05c4e9bc1e1b18&v=4" width="100" height="100" style="border-radius:50%"/>](https://github.com/ebytom) | [<img src="https://avatars.githubusercontent.com/u/79135241?v=4" width="100" height="100" style="border-radius:50%"/>](https://github.com/govindmj) | [<img src="https://avatars.githubusercontent.com/u/85976132?v=4" width="100" height="100" style="border-radius:50%"/>](https://github.com/joyaldevassy) | [<img src="https://avatars.githubusercontent.com/u/79042847?v=4" width="100" height="100" style="border-radius:50%"/>](https://github.com/nehabimal) |
+|:--:|:--:|:--:|:--:|:--:|
+| **Brinda S** | **Eby Tom** | **Govind M J** | **Joyal Devassy** | **Neha Bimal** |
+---
+
+<p align="center">Made with ❤️ by <b>Team AWengerS</b></p>
+
