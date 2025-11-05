@@ -1,4 +1,5 @@
 // backend/docs/swagger.js
+const path = require('path');
 const swaggerJsdoc = require('swagger-jsdoc');
 
 const options = {
@@ -20,32 +21,45 @@ const options = {
       },
     ],
     components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
+      // securitySchemes: {
+      //   bearerAuth: {
+      //     type: 'http',
+      //     scheme: 'bearer',
+      //     bearerFormat: 'JWT',
+      //   },
+      // },
       schemas: {
         ErrorResponse: {
           type: 'object',
           properties: {
-            message: { type: 'string', example: 'Something went wrong' },
-            status: { type: 'boolean', example: false },
+            message: {
+              type: 'string',
+              example: 'Something went wrong',
+            },
+            status: {
+              type: 'boolean',
+              example: false,
+            },
           },
         },
         SuccessResponse: {
           type: 'object',
           properties: {
-            message: { type: 'string', example: 'Operation successful' },
-            status: { type: 'boolean', example: true },
+            message: {
+              type: 'string',
+              example: 'Operation successful',
+            },
+            status: {
+              type: 'boolean',
+              example: true,
+            },
           },
         },
       },
     },
   },
-  apis: ['./routes/*.js'],
+
+  apis: [path.join(__dirname, '../routes/**/*.js')],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
