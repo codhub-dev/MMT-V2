@@ -65,16 +65,16 @@ const SideBar = ({ navOpen, setNavOpen }) => {
 
             <div className="sidebar-bottom">
                 {/* Contact Card */}
-                <div className="sidebar-upgrade-card">
-                    <div className="sidebar-upgrade-overlay"></div>
+                <div className="sidebar-contact-card">
+                    <div className="sidebar-contact-overlay"></div>
 
-                    <div className="upgrade-card-content">
-                        <div className="upgrade-title">Need Tweaks?</div>
-                        <div className="upgrade-subtitle">
+                    <div className="contact-card-content">
+                        <div className="contact-title">Need Tweaks?</div>
+                        <div className="contact-subtitle">
                             Reach out to us for customizations or tailored solutions.
                         </div>
 
-                        <button className="upgrade-btn">Contact Us</button>
+                        <button className="contact-btn">Contact Us</button>
                     </div>
                 </div>
             </div>

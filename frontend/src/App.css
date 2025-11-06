@@ -271,7 +271,7 @@
 /* --------------------------sidebar card--------------------------------- */
 
 /* Sidebar layout fixes */
-.sidebar-upgrade-card {
+.sidebar-contact-card {
     position: relative;
     margin: 20px 10px 0 10px;
     padding: 20px;
@@ -287,7 +287,7 @@
 }
 
 /* Dark overlay for readability */
-.sidebar-upgrade-overlay {
+.sidebar-contact-overlay {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.65); 
@@ -295,21 +295,21 @@
 }
 
 /* Content wrapper */
-.upgrade-card-content {
+.contact-card-content {
     position: relative;
     z-index: 2;
     text-align: center;
 }
 
 /* Title */
-.upgrade-title {
+.contact-title {
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 6px;
 }
 
 /* Subtext */
-.upgrade-subtitle {
+.contact-subtitle {
     font-size: 13px;
     line-height: 1.4;
     opacity: 0.9;
@@ -317,7 +317,7 @@
 }
 
 /* CTA Button */
-.upgrade-btn {
+.contact-btn {
     background: #1a7f37;
     width: 100%;
     padding: 10px 0;
@@ -330,6 +330,6 @@
     transition: background 0.2s ease-in-out;
 }
 
-.upgrade-btn:hover {
+.contact-btn:hover {
     background: #166a2f;
 }
