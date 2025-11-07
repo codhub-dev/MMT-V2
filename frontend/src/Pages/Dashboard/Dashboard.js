@@ -6,6 +6,7 @@ import StatisticCard from "../../Components/StatisticCard/StatisticCard";
 import LoaderOverlay from "../../Components/LoaderOverlay/LoaderOverlay";
 import "../../Styles/Dashboard.css";
 import MonthlyChart from "../../Components/Dashboard/MonthlyChart/MonthlyChart";
+import DriverProfileWidget from "../../Components/DriverProfileWidget/DriverProfileWidget";
 
 const Dashboard = () => {
   const [contentLoader, setContentLoader] = useState(true);
@@ -153,6 +154,7 @@ const Dashboard = () => {
       </Divider> */}
       <div className="dashboard-container">
         <MonthlyChart />
+        <DriverProfileWidget />
       </div>
     </div>
   );
