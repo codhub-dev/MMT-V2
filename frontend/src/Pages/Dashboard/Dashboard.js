@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Axios } from "../../Config/Axios/Axios";
 import { UserContext } from "../../App";
-import { Spin } from "antd";
+import { Spin, Row, Col } from "antd";
 import StatisticCard from "../../Components/StatisticCard/StatisticCard";
 import LoaderOverlay from "../../Components/LoaderOverlay/LoaderOverlay";
+import DashboardCard from "../../Components/DashboardCard/DashboardCard";
+import { CARD_SIZES, getResponsiveProps } from "../../Utils/dashboardLayoutUtils";
 import "../../Styles/Dashboard.css";
 import MonthlyChart from "../../Components/Dashboard/MonthlyChart/MonthlyChart";
 import DriverProfileWidget from "../../Components/DriverProfileWidget/DriverProfileWidget";
@@ -55,107 +57,139 @@ const Dashboard = () => {
           <Spin size="large" />
         </div>
       ) : (
-        <div className="dashboard-grid-container">
-          <StatisticCard
-            cardType="primary"
-            title={
-              <span>
-                <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                  Total Expense{" "}
+        <div className="statistics-carousel-container">
+          <div className="statistics-carousel">
+            <StatisticCard
+              cardType="primary"
+              title={
+                <span>
+                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
+                    Total Expense{" "}
+                  </span>
+                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
+                    {" "}
+                    this month
+                  </span> */}
                 </span>
-                {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                  {" "}
-                  this month
-                </span> */}
-              </span>
-            }
-            value={metadata.monthlyExpenses?.monthlyGrandTotal}
-            thisMonth={metadata.grandTotal}
-            route={'/expenseSummary/totalExpenses'}
-          />
-          <StatisticCard
-            cardType="primary"
-            title={
-              <span>
-                <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                  Fuel Expense{" "}
+              }
+              value={metadata.monthlyExpenses?.monthlyGrandTotal}
+              thisMonth={metadata.grandTotal}
+              route={'/expenseSummary/totalExpenses'}
+            />
+            <StatisticCard
+              cardType="primary"
+              title={
+                <span>
+                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
+                    Fuel Expense{" "}
+                  </span>
+                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
+                    {" "}
+                    this month
+                  </span> */}
                 </span>
-                {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                  {" "}
-                  this month
-                </span> */}
-              </span>
-            }
-            thisMonth={metadata.fuelTotal}
-            value={metadata.monthlyExpenses?.fuel}
-            route={'/expenseSummary/fuelExpenses'}
-          />
-          <StatisticCard
-            cardType="primary"
-            title={
-              <span>
-                <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                  Def Expense{" "}
+              }
+              thisMonth={metadata.fuelTotal}
+              value={metadata.monthlyExpenses?.fuel}
+              route={'/expenseSummary/fuelExpenses'}
+            />
+            <StatisticCard
+              cardType="primary"
+              title={
+                <span>
+                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
+                    Def Expense{" "}
+                  </span>
+                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
+                    {" "}
+                    this month
+                  </span> */}
                 </span>
-                {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                  {" "}
-                  this month
-                </span> */}
-              </span>
-            }
-            thisMonth={metadata.defTotal}
-            value={metadata.monthlyExpenses?.def}
-            route={'/expenseSummary/defExpenses'}
-          />
-          <StatisticCard
-            cardType="primary"
-            title={
-              <span>
-                <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                  Other Expense{" "}
+              }
+              thisMonth={metadata.defTotal}
+              value={metadata.monthlyExpenses?.def}
+              route={'/expenseSummary/defExpenses'}
+            />
+            <StatisticCard
+              cardType="primary"
+              title={
+                <span>
+                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
+                    Other Expense{" "}
+                  </span>
+                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
+                    {" "}
+                    this month
+                  </span> */}
                 </span>
-                {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                  {" "}
-                  this month
-                </span> */}
-              </span>
-            }
-            thisMonth={metadata.otherTotal}
-            value={metadata.monthlyExpenses?.other}
-            route={'/expenseSummary/otherExpenses'}
-          />
-          <StatisticCard
-            cardType="primary"
-            title={
-              <span>
-                <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                  Fuel Consumed{" "}
+              }
+              thisMonth={metadata.otherTotal}
+              value={metadata.monthlyExpenses?.other}
+              route={'/expenseSummary/otherExpenses'}
+            />
+            <StatisticCard
+              cardType="primary"
+              title={
+                <span>
+                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
+                    Fuel Consumed{" "}
+                  </span>
+                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
+                    {" "}
+                    this month
+                  </span> */}
                 </span>
-                {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                  {" "}
-                  this month
-                </span> */}
-              </span>
-            }
-            thisMonth={metadata.fuelUsedTotal}
-            value={metadata.monthlyExpenses?.fuelUsed}
-            route={null}
-          />
+              }
+              thisMonth={metadata.fuelUsedTotal}
+              value={metadata.monthlyExpenses?.fuelUsed}
+              route={null}
+            />
+          </div>
         </div>
       )}
+      <Row gutter={[16, 16]} justify="start" align="stretch" className="dashboard-grid-row">
+        {/* MonthlyChart - Large card using predefined layout (no wrapper) */}
+        <Col {...getResponsiveProps('large')}>
+          <MonthlyChart />
+        </Col>
 
-      {/* <Divider
-        style={{
-          borderColor: "#000",
-          margin: "50px 0px",
-        }}
-      >
-        Manage Vehicles
-      </Divider> */}
-      <div className="dashboard-container">
-        <MonthlyChart />
-        <DriverProfileWidget />
-      </div>
+        {/* DriverProfileWidget - Medium card using predefined layout (no wrapper) */}
+        <Col {...getResponsiveProps('medium')}>
+          <DriverProfileWidget />
+        </Col>
+
+        {/* Examples of how to add more cards with different sizes */}
+        {/*
+        // For existing components that already have their own styling (no wrapper needed)
+        <Col {...getResponsiveProps('small')}>
+          <YourExistingStyledComponent />
+        </Col>
+
+        // For new components that need card styling and titles
+        <DashboardCard
+          colProps={getResponsiveProps('widget')}
+          title="Controls"
+          extra={<Button>Settings</Button>}
+        >
+          <YourNewComponent />
+        </DashboardCard>
+
+        // Chart component without wrapper
+        <Col {...getResponsiveProps('chart')}>
+          <YourChartComponent />
+        </Col>
+
+        // Full width component without wrapper
+        <Col {...getResponsiveProps('full')}>
+          <YourFullWidthComponent />
+        </Col>
+
+        // Custom layout with override
+        <Col {...getResponsiveProps('medium', { lg: 12, xl: 10 })}>
+          <YourCustomComponent />
+        </Col>
+        */}
+      </Row>
     </div>
   );
 };

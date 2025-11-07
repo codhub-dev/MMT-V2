@@ -69,7 +69,7 @@ const MonthlyChart = () => {
             },
         ],
     };
-    return <div className='bg-white p-3 rounded-4 w-50' style={{height: 400}}><DualAxes {...config} /></div>;
+    return <div className='bg-white p-3 rounded-4' style={{height: 400}}><DualAxes {...config} /></div>;
 };
 
 export default MonthlyChart;

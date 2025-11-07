@@ -100,7 +100,7 @@ const DriverProfileWidget = () => {
     editForm.resetFields();
     setEditPhotoUrl('');
     setSelectedDriver(updatedDriver);
-    setIsModalVisible(true); 
+    setIsModalVisible(true);
   };
 
   // Handle photo upload for add
@@ -152,31 +152,30 @@ const DriverProfileWidget = () => {
       background: "#fff",
       borderRadius: "12px",
       padding: "18px 22px",
-      margin: "24px 0",
       boxShadow: "0 2px 8px rgba(22,119,255,0.07)",
       width: 540,
       minWidth: 320,
       maxWidth: "100%",
-      height: 400, 
-      overflowY: "auto", 
+      height: 400,
+      overflowY: "auto",
       display: "inline-block"
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <b style={{
           margin: 0,
           color: "#222",
-          fontSize: "16px", 
-          fontWeight: 700,  
+          fontSize: "16px",
+          fontWeight: 700,
           letterSpacing: "0.2px"
         }}>
           Driver Profiles
         </b>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />}
+        <Button
+          type="primary"
+          icon={<PlusOutlined style={{fontSize: 15}} />}
           size="small"
           onClick={handleAddDriver}
-          style={{ borderRadius: 14, background: THEME_GREEN, fontWeight: 500, border: "none", fontSize: "12px", padding: "0 12px" }}
+          style={{ borderRadius: 16, background: THEME_GREEN, fontWeight: 500, border: "none", fontSize: "14px", padding: "16px" }}
         >
           Add
         </Button>
@@ -188,10 +187,10 @@ const DriverProfileWidget = () => {
           <List.Item
             style={{
               cursor: 'pointer',
-              borderRadius: "18px", 
+              borderRadius: "18px",
               transition: 'background 0.2s',
               marginBottom: 0,
-              padding: "6px 0",
+              padding: "6px 8px",
               background: "#fff",
               display: "flex",
               alignItems: "center",
@@ -204,7 +203,7 @@ const DriverProfileWidget = () => {
               <Avatar
                 src={driver.photo}
                 icon={!driver.photo && <UserOutlined />}
-                size={48} 
+                size={48}
                 style={{ backgroundColor: THEME_GREEN, color: "#fff" }}
               />
               <div>
@@ -232,13 +231,13 @@ const DriverProfileWidget = () => {
                 color: THEME_GREEN,
                 fontWeight: 700,
                 marginLeft: 12,
-                padding: "0 8px", 
-                background: "none", 
-                borderRadius: 0,   
+                padding: "0 8px",
+                background: "none",
+                borderRadius: 0,
                 display: "inline-block"
               }}
             >
-                
+
             </span>
           </List.Item>
         )}
@@ -246,7 +245,7 @@ const DriverProfileWidget = () => {
       {/* Driver Details Modal */}
       <Modal
         title={
-          <span style={{ fontWeight: 600, fontSize: 20, color: "#222" }}> 
+          <span style={{ fontWeight: 600, fontSize: 20, color: "#222" }}>
             {selectedDriver?.name}'s Details
           </span>
         }
@@ -261,10 +260,10 @@ const DriverProfileWidget = () => {
           </Button>
         ]}
         centered
-        bodyStyle={{ fontSize: 16, padding: 24, background: "#fff" }} 
+        bodyStyle={{ fontSize: 16, padding: 24, background: "#fff" }}
       >
         {selectedDriver && (
-          <div style={{ display: "flex", alignItems: "center", gap: 32 }}> 
+          <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
             <Avatar
               src={selectedDriver.photo || "https://randomuser.me/api/portraits/lego/1.jpg"}
               size={120}
@@ -299,7 +298,7 @@ const DriverProfileWidget = () => {
         onCancel={handleAddModalClose}
         footer={null}
         centered
-        bodyStyle={{ fontSize: 16, padding: 24, background: "#fff" }} 
+        bodyStyle={{ fontSize: 16, padding: 24, background: "#fff" }}
       >
         <Form
           form={form}
@@ -308,7 +307,7 @@ const DriverProfileWidget = () => {
         >
           <Form.Item label="Photo" name="photo">
             <Upload {...uploadProps}>
-              <Button icon={<UploadOutlined />}>Upload Passport Photo</Button>
+              <Button icon={<UploadOutlined />}>Upload License</Button>
             </Upload>
             {photoUrl && (
               <Avatar
@@ -317,8 +316,9 @@ const DriverProfileWidget = () => {
                 size={80}
                 style={{
                   marginTop: 12,
+                  marginLeft: 24,
                   width: "64px",
-                  height: "80px", 
+                  height: "80px",
                   objectFit: "cover",
                   background: THEME_GREEN
                 }}
@@ -394,7 +394,7 @@ const DriverProfileWidget = () => {
         onCancel={handleEditModalClose}
         footer={null}
         centered
-        bodyStyle={{ fontSize: 16, padding: 24, background: "#fff" }} 
+        bodyStyle={{ fontSize: 16, padding: 24, background: "#fff" }}
       >
         <Form
           form={editForm}
@@ -413,7 +413,7 @@ const DriverProfileWidget = () => {
                 style={{
                   marginTop: 12,
                   width: "64px",
-                  height: "80px", 
+                  height: "80px",
                   objectFit: "cover",
                   background: THEME_GREEN
                 }}
