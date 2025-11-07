@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import React, { useState } from "react";
+import { ToastProvider } from "./Components/ToastContext/ToastContext";
 import "./App.css";
 import Routes from "./Routes/Routes";
 
@@ -15,7 +16,9 @@ function App() {
     <div className="d-flex App">
       <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_URL}>
         <UserContext.Provider value={{ user, setUser }}>
-          <Routes />
+          <ToastProvider>
+            <Routes />
+          </ToastProvider>
         </UserContext.Provider>
       </GoogleOAuthProvider>
     </div>
