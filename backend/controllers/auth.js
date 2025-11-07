@@ -8,17 +8,28 @@ const { catchAsyncError } = require("../middleware/catchAsyncError");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 module.exports.signUpWithGoogle = async (req, res) => {
-  const token  =   req.headers.authorization?.split(" ")[1];
-
+  const token = req.headers.authorization?.split(" ")[1];
+  console.log("Google Sign-In Token:", token);
 
   try {
-    // Verify the token with Google
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    let payload;
+    if (token && token.split('.').length === 3) {
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } else {
+      const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${token}`);
 
-    const payload = ticket.getPayload();
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user info: ${response.statusText}`);
+      }
+
+      payload = await response.json();
+      payload.sub = payload.id;
+    }
+
     const userId = payload.sub;
     const email = payload.email;
     const picture = payload.picture;
@@ -63,7 +74,21 @@ module.exports.signUpWithGoogle = async (req, res) => {
     });
   } catch (error) {
     console.error("Token verification or user handling failed:", error);
-    res.status(401).send("Unauthorized");
+
+    if (error.message.includes('Wrong number of segments')) {
+      res.status(400).json({
+        error: "Invalid token format. Expected ID token or valid access token."
+      });
+    } else if (error.message.includes('Failed to fetch user info')) {
+      res.status(401).json({
+        error: "Invalid or expired access token."
+      });
+    } else {
+      res.status(401).json({
+        error: "Token verification failed.",
+        details: error.message
+      });
+    }
   }
 };
 

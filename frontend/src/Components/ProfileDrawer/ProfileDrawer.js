@@ -28,9 +28,17 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
 
+  // Debug logging
+  useEffect(() => {
+    console.log("ProfileDrawer - User data:", user);
+    console.log("ProfileDrawer - User picture:", user?.picture);
+  }, [user]);
+
   useEffect(() => {
     // const userCred = jwtDecode(localStorage.getItem("token"));
     // setuserCredentials(userCred);
+
+    if (!user?.userId) return;
 
     setLoading(true);
 
@@ -50,7 +58,7 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
         setIsError(true);
         setLoading(false);
       });
-  }, []);
+  }, [user?.userId]);
 
   const onProfileClose = () => {
     setProfileOpen(false);
@@ -98,6 +106,7 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
         <div className="card-body text-center">
           <div className="mt-3 mb-4">
             <img
+              key={user?.picture ? `user-${user.picture}-${Date.now()}` : 'default-avatar'}
               src={
                 user?.picture
                   ? user.picture
@@ -106,6 +115,13 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
               className="rounded-circle img-fluid"
               style={{ width: "100px" }}
               alt="User"
+              onLoad={() => console.log("Image loaded successfully:", user?.picture)}
+              onError={(e) => {
+                console.log("Image failed to load:", user?.picture);
+                if (e.target.src !== "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp") {
+                  e.target.src = "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp";
+                }
+              }}
             />
           </div>
           <h4 className="mb-2">{user?.name}</h4>
