@@ -15,6 +15,10 @@ info:
     ---
     **Base URLs**
     - Local  : `http://localhost:8000`
+
+    **APIs Used**
+    - REST  : `http://localhost:8000/api/v1/app`
+    - graphQL  : `http://localhost:8000/graphql`
   contact:
     name: APIBP-20242YB-Team-09
     email: dev.codhub@gmail.com
@@ -325,8 +329,10 @@ tags:
     description: User profile management
   - name: Admin
     description: Administrative operations
-  - name: Truck Management
-    description: Truck CRUD operations
+  - name: Truck Management - GraphQL
+    description: GraphQL API for truck operations (queries and mutations)
+  - name: Truck Management - REST
+    description: REST API for truck CRUD operations (legacy endpoints)
   - name: Loan Calculations
     description: Loan payment tracking and calculations
   - name: Fuel Expenses
@@ -635,11 +641,623 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
   ###########################################
-  # TRUCK MANAGEMENT
+  # TRUCK MANAGEMENT - GRAPHQL API
+  ###########################################
+
+  /graphql:
+    post:
+      tags: [Truck Management - GraphQL]
+      summary: GraphQL API - Main Endpoint
+      description: |
+        ## GraphQL Endpoint for Truck Management
+
+        **Base URL**: `http://localhost:8000/graphql`
+
+        This single endpoint handles all truck-related GraphQL operations through queries and mutations.
+
+        ### Features
+        - ✅ Single endpoint for all operations
+        - ✅ Request only the fields you need
+        - ✅ Strong typing and validation
+        - ✅ Batch operations support
+        - ✅ Interactive GraphQL Playground
+
+        ### Available Operations
+        See individual operation endpoints below for detailed examples.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  description: GraphQL query or mutation string
+                variables:
+                  type: object
+                  description: Variables for parameterized queries
+                operationName:
+                  type: string
+                  description: Name of the operation to execute (for multi-operation documents)
+              example:
+                query: "query { getAllTrucks { message trucks { id registrationNo make model } } }"
+      responses:
+        200:
+          description: Successful GraphQL response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: Query/mutation result
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                        locations:
+                          type: array
+                          items:
+                            type: object
+                        path:
+                          type: array
+                          items:
+                            type: string
+        400:
+          description: Bad request - Invalid GraphQL syntax
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+
+  /graphql#getTruckById:
+    post:
+      tags: [Truck Management - GraphQL]
+      summary: Query - Get Truck by ID
+      description: |
+        ### GraphQL Query: getTruckById
+
+        Retrieves detailed information about a specific truck by its ID.
+
+        **Operation Type**: Query
+        **Authentication**: Optional (depends on middleware)
+
+        ### GraphQL Query
+        ```graphql
+        query GetTruckById($id: ID!) {
+          getTruckById(id: $id) {
+            message
+            truck {
+              id
+              addedBy
+              registrationNo
+              make
+              model
+              year
+              isFinanced
+              financeAmount
+              imgURL
+              chassisNo
+              engineNo
+              desc
+              createdAt
+            }
+          }
+        }
+        ```
+
+        ### cURL Example
+        ```bash
+        curl -X POST http://localhost:8000/graphql \
+          -H "Content-Type: application/json" \
+          -d '{
+            "query": "query GetTruckById($id: ID!) { getTruckById(id: $id) { message truck { id registrationNo make model year } } }",
+            "variables": { "id": "507f1f77bcf86cd799439012" }
+          }'
+        ```
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                query: |
+                  query GetTruckById($id: ID!) {
+                    getTruckById(id: $id) {
+                      message
+                      truck {
+                        id
+                        registrationNo
+                        make
+                        model
+                        year
+                        isFinanced
+                        financeAmount
+                      }
+                    }
+                  }
+                variables:
+                  id: "507f1f77bcf86cd799439012"
+      responses:
+        200:
+          description: Truck found successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getTruckById:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "Truck retrieved successfully"
+                          truck:
+                            $ref: '#/components/schemas/Truck'
+
+  /graphql#getAllTrucks:
+    post:
+      tags: [Truck Management - GraphQL]
+      summary: Query - Get All Trucks
+      description: |
+        ### GraphQL Query: getAllTrucks
+
+        Retrieves all trucks in the system.
+
+        **Operation Type**: Query
+
+        ### GraphQL Query
+        ```graphql
+        query GetAllTrucks {
+          getAllTrucks {
+            message
+            trucks {
+              id
+              addedBy
+              registrationNo
+              make
+              model
+              year
+              isFinanced
+              financeAmount
+              createdAt
+            }
+          }
+        }
+        ```
+
+        ### cURL Example
+        ```bash
+        curl -X POST http://localhost:8000/graphql \
+          -H "Content-Type: application/json" \
+          -d '{"query": "{ getAllTrucks { message trucks { id registrationNo make model } } }"}'
+        ```
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                query: |
+                  query GetAllTrucks {
+                    getAllTrucks {
+                      message
+                      trucks {
+                        id
+                        registrationNo
+                        make
+                        model
+                        year
+                      }
+                    }
+                  }
+      responses:
+        200:
+          description: Trucks retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getAllTrucks:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "Trucks retrieved successfully"
+                          trucks:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Truck'
+
+  /graphql#getAllTrucksByUser:
+    post:
+      tags: [Truck Management - GraphQL]
+      summary: Query - Get Trucks by User
+      description: |
+        ### GraphQL Query: getAllTrucksByUser
+
+        Retrieves all trucks added by a specific user.
+
+        **Operation Type**: Query
+
+        ### GraphQL Query
+        ```graphql
+        query GetTrucksByUser($addedBy: String!) {
+          getAllTrucksByUser(addedBy: $addedBy) {
+            message
+            trucks {
+              id
+              registrationNo
+              make
+              model
+              year
+              isFinanced
+              financeAmount
+            }
+          }
+        }
+        ```
+
+        ### cURL Example
+        ```bash
+        curl -X POST http://localhost:8000/graphql \
+          -H "Content-Type: application/json" \
+          -d '{
+            "query": "query GetTrucksByUser($addedBy: String!) { getAllTrucksByUser(addedBy: $addedBy) { message trucks { id registrationNo } } }",
+            "variables": { "addedBy": "507f1f77bcf86cd799439011" }
+          }'
+        ```
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                query: |
+                  query GetTrucksByUser($addedBy: String!) {
+                    getAllTrucksByUser(addedBy: $addedBy) {
+                      message
+                      trucks {
+                        id
+                        registrationNo
+                        make
+                        model
+                      }
+                    }
+                  }
+                variables:
+                  addedBy: "507f1f77bcf86cd799439011"
+      responses:
+        200:
+          description: Trucks retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      getAllTrucksByUser:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                          trucks:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Truck'
+
+  /graphql#addTruck:
+    post:
+      tags: [Truck Management - GraphQL]
+      summary: Mutation - Add New Truck
+      description: |
+        ### GraphQL Mutation: addTruck
+
+        Creates a new truck in the system.
+
+        **Operation Type**: Mutation
+
+        ### GraphQL Mutation
+        ```graphql
+        mutation AddTruck($input: TruckInput!) {
+          addTruck(input: $input) {
+            message
+            truck {
+              id
+              addedBy
+              registrationNo
+              make
+              model
+              year
+              isFinanced
+              financeAmount
+              imgURL
+              chassisNo
+              engineNo
+              desc
+              createdAt
+            }
+          }
+        }
+        ```
+
+        ### Input Schema
+        - `addedBy`: String! (Required) - User ID who owns the truck
+        - `registrationNo`: String! (Required) - Truck registration number
+        - `make`: String - Truck manufacturer
+        - `model`: String - Truck model
+        - `year`: Int - Manufacturing year
+        - `isFinanced`: Boolean - Whether truck is financed
+        - `financeAmount`: Float - Finance amount if applicable
+        - `imgURL`: [String] - Array of image URLs
+        - `chassisNo`: String - Chassis number
+        - `engineNo`: String - Engine number
+        - `desc`: String - Description
+
+        ### cURL Example
+        ```bash
+        curl -X POST http://localhost:8000/graphql \
+          -H "Content-Type: application/json" \
+          -d '{
+            "query": "mutation AddTruck($input: TruckInput!) { addTruck(input: $input) { message truck { id registrationNo } } }",
+            "variables": {
+              "input": {
+                "addedBy": "user123",
+                "registrationNo": "TRK-5678",
+                "make": "Volvo",
+                "model": "VNL 760",
+                "year": 2023
+              }
+            }
+          }'
+        ```
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                query: |
+                  mutation AddTruck($input: TruckInput!) {
+                    addTruck(input: $input) {
+                      message
+                      truck {
+                        id
+                        registrationNo
+                        make
+                        model
+                        year
+                      }
+                    }
+                  }
+                variables:
+                  input:
+                    addedBy: "507f1f77bcf86cd799439011"
+                    registrationNo: "TRK-1234-AB"
+                    make: "Volvo"
+                    model: "VNL 760"
+                    year: 2023
+                    isFinanced: true
+                    financeAmount: 50000.00
+      responses:
+        200:
+          description: Truck added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      addTruck:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "Truck added successfully"
+                          truck:
+                            $ref: '#/components/schemas/Truck'
+
+  /graphql#updateTruckById:
+    post:
+      tags: [Truck Management - GraphQL]
+      summary: Mutation - Update Truck
+      description: |
+        ### GraphQL Mutation: updateTruckById
+
+        Updates an existing truck's information.
+
+        **Operation Type**: Mutation
+
+        ### GraphQL Mutation
+        ```graphql
+        mutation UpdateTruck($id: ID!, $input: TruckUpdateInput!) {
+          updateTruckById(id: $id, input: $input) {
+            message
+            truck {
+              id
+              registrationNo
+              make
+              model
+              year
+              isFinanced
+              financeAmount
+            }
+          }
+        }
+        ```
+
+        ### Input Schema
+        All fields are optional:
+        - `registrationNo`: String
+        - `make`: String
+        - `model`: String
+        - `year`: Int
+        - `isFinanced`: Boolean
+        - `financeAmount`: Float
+        - `imgURL`: [String]
+        - `chassisNo`: String
+        - `engineNo`: String
+        - `desc`: String
+
+        ### cURL Example
+        ```bash
+        curl -X POST http://localhost:8000/graphql \
+          -H "Content-Type: application/json" \
+          -d '{
+            "query": "mutation UpdateTruck($id: ID!, $input: TruckUpdateInput!) { updateTruckById(id: $id, input: $input) { message truck { id registrationNo } } }",
+            "variables": {
+              "id": "507f1f77bcf86cd799439012",
+              "input": { "year": 2024, "make": "Freightliner" }
+            }
+          }'
+        ```
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                query: |
+                  mutation UpdateTruck($id: ID!, $input: TruckUpdateInput!) {
+                    updateTruckById(id: $id, input: $input) {
+                      message
+                      truck {
+                        id
+                        registrationNo
+                        make
+                        model
+                        year
+                      }
+                    }
+                  }
+                variables:
+                  id: "507f1f77bcf86cd799439012"
+                  input:
+                    make: "Freightliner"
+                    model: "Cascadia"
+                    year: 2024
+      responses:
+        200:
+          description: Truck updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      updateTruckById:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "Truck updated successfully"
+                          truck:
+                            $ref: '#/components/schemas/Truck'
+
+  /graphql#deleteTruckById:
+    post:
+      tags: [Truck Management - GraphQL]
+      summary: Mutation - Delete Truck
+      description: |
+        ### GraphQL Mutation: deleteTruckById
+
+        Deletes a truck and all its associated expenses (fuel, DEF, other).
+
+        **Operation Type**: Mutation
+        **Warning**: This operation cannot be undone!
+
+        ### GraphQL Mutation
+        ```graphql
+        mutation DeleteTruck($id: ID!) {
+          deleteTruckById(id: $id) {
+            message
+            success
+          }
+        }
+        ```
+
+        ### cURL Example
+        ```bash
+        curl -X POST http://localhost:8000/graphql \
+          -H "Content-Type: application/json" \
+          -d '{
+            "query": "mutation DeleteTruck($id: ID!) { deleteTruckById(id: $id) { message success } }",
+            "variables": { "id": "507f1f77bcf86cd799439012" }
+          }'
+        ```
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                query: |
+                  mutation DeleteTruck($id: ID!) {
+                    deleteTruckById(id: $id) {
+                      message
+                      success
+                    }
+                  }
+                variables:
+                  id: "507f1f77bcf86cd799439012"
+      responses:
+        200:
+          description: Truck deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deleteTruckById:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "Truck and associated expenses deleted successfully"
+                          success:
+                            type: boolean
+                            example: true
+
+  ###########################################
+  # TRUCK MANAGEMENT - REST API (LEGACY)
   ###########################################
   /trucks/addTruck:
     post:
-      tags: [Truck Management]
+      tags: [Truck Management - REST]
       summary: Add a new truck
       description: Creates a new truck entry in the system
       requestBody:
@@ -709,7 +1327,7 @@ paths:
 
   /trucks/getAllTrucks:
     get:
-      tags: [Truck Management]
+      tags: [Truck Management - REST]
       summary: Get all trucks
       description: Retrieves all trucks in the system (Admin) or user's trucks
       responses:
@@ -729,7 +1347,7 @@ paths:
 
   /trucks/getTruckById/{id}:
     get:
-      tags: [Truck Management]
+      tags: [Truck Management - REST]
       summary: Get truck by ID
       description: Retrieves detailed information about a specific truck
       parameters:
@@ -761,7 +1379,7 @@ paths:
 
   /trucks/getAllTrucksByUser/{addedBy}:
     get:
-      tags: [Truck Management]
+      tags: [Truck Management - REST]
       summary: Get all trucks by user ID
       description: Retrieves all trucks added by a specific user
       parameters:
@@ -789,7 +1407,7 @@ paths:
 
   /trucks/updateTruckById/{id}:
     put:
-      tags: [Truck Management]
+      tags: [Truck Management - REST]
       summary: Update truck by ID
       description: Updates an existing truck's information
       parameters:
@@ -848,7 +1466,7 @@ paths:
 
   /trucks/deleteTruckById/{id}:
     delete:
-      tags: [Truck Management]
+      tags: [Truck Management - REST]
       summary: Delete truck by ID
       description: Permanently deletes a truck from the system
       parameters:
