@@ -8,7 +8,8 @@ import DashboardCard from "../../Components/DashboardCard/DashboardCard";
 import { CARD_SIZES, getResponsiveProps } from "../../Utils/dashboardLayoutUtils";
 import "../../Styles/Dashboard.css";
 import MonthlyChart from "../../Components/Dashboard/MonthlyChart/MonthlyChart";
-import DriverProfileWidget from "../../Components/DriverProfileWidget/DriverProfileWidget";
+import AlertsWidget from "../../Components/Dashboard/AlertsWidget/AlertsWidget";
+// import DriverProfileWidget from "../../Components/DriverProfileWidget/DriverProfileWidget";
 
 const Dashboard = () => {
   const [contentLoader, setContentLoader] = useState(true);
@@ -154,8 +155,13 @@ const Dashboard = () => {
         </Col>
 
         {/* DriverProfileWidget - Medium card using predefined layout (no wrapper) */}
-        <Col {...getResponsiveProps('medium')}>
+        {/* <Col {...getResponsiveProps('medium')}>
           <DriverProfileWidget />
+        </Col> */}
+
+        {/* AlertsWidget - Medium card using predefined layout (no wrapper) */}
+        <Col {...getResponsiveProps('medium')}>
+          <AlertsWidget />
         </Col>
 
         {/* Examples of how to add more cards with different sizes */}
