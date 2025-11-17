@@ -3,6 +3,7 @@ const DefExpense = require('../models/defExpense-model');
 const User = require('../models/user-model');
 const Truck = require('../models/truck-model');
 const OtherExpense = require('../models/otherExpense-model');
+const Income = require('../models/income-model');
 const { default: mongoose } = require('mongoose');
 
 const moment = require("moment")
@@ -234,9 +235,110 @@ const getProfileMetadataByUserId = async (req, res) => {
     }
 };
 
+const getSixMonthsDataByUserId = async (req, res) => {
+    const { userId } = req.query;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'Invalid User ID' });
+    }
+
+    try {
+        // Get the last 6 months
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+            const monthStart = moment().subtract(i, 'months').startOf('month').toDate();
+            const monthEnd = moment().subtract(i, 'months').endOf('month').toDate();
+            const monthName = moment().subtract(i, 'months').format('MMM');
+            
+            months.push({
+                name: monthName,
+                start: monthStart,
+                end: monthEnd
+            });
+        }
+
+        const expensesData = [];
+        const incomeData = [];
+
+        // Process each month
+        for (const month of months) {
+            // Fuel expenses
+            const fuelResult = await FuelExpense.aggregate([
+                {
+                    $match: {
+                        addedBy: userId,
+                        date: { $gte: month.start, $lte: month.end }
+                    }
+                },
+                { $group: { _id: null, totalCost: { $sum: "$cost" } } }
+            ]);
+            const fuelTotal = fuelResult.length > 0 ? fuelResult[0].totalCost : 0;
+
+            // DEF expenses
+            const defResult = await DefExpense.aggregate([
+                {
+                    $match: {
+                        addedBy: userId,
+                        date: { $gte: month.start, $lte: month.end }
+                    }
+                },
+                { $group: { _id: null, totalCost: { $sum: "$cost" } } }
+            ]);
+            const defTotal = defResult.length > 0 ? defResult[0].totalCost : 0;
+
+            // Other expenses
+            const otherResult = await OtherExpense.aggregate([
+                {
+                    $match: {
+                        addedBy: userId,
+                        date: { $gte: month.start, $lte: month.end }
+                    }
+                },
+                { $group: { _id: null, totalCost: { $sum: "$cost" } } }
+            ]);
+            const otherTotal = otherResult.length > 0 ? otherResult[0].totalCost : 0;
+
+            // Income
+            const incomeResult = await Income.aggregate([
+                {
+                    $match: {
+                        addedBy: userId,
+                        date: { $gte: month.start, $lte: month.end }
+                    }
+                },
+                { $group: { _id: null, totalAmount: { $sum: "$amount" } } }
+            ]);
+            const incomeTotal = incomeResult.length > 0 ? incomeResult[0].totalAmount : 0;
+
+            // Add to expensesData array
+            expensesData.push(
+                { time: month.name, value: fuelTotal, type: 'Fuel' },
+                { time: month.name, value: defTotal, type: 'Def' },
+                { time: month.name, value: otherTotal, type: 'Other' }
+            );
+
+            // Add to incomeData array
+            incomeData.push({
+                time: month.name,
+                Income: incomeTotal
+            });
+        }
+
+        const result = {
+            expensesData,
+            incomeData
+        };
+
+        return res.json(result);
+    } catch (error) {
+        console.error("Error calculating six months data:", error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 module.exports = {
     getMetadataByTruckId,
     getMetadataByUserId,
-    getProfileMetadataByUserId
+    getProfileMetadataByUserId,
+    getSixMonthsDataByUserId
 };
