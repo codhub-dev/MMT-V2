@@ -236,7 +236,7 @@ const CalculateLoan = () => {
   };
 
   return (
-    <div className="h-100 p-4 rounded-4 d-flex flex-column gap-3" style={{ background: "#f6f6f6" }}>
+    <div>
       <div className="d-flex flex-column">
         <b style={{ fontSize: "26px" }}>Loan Calculation</b>
         <span style={{ fontSize: "14px", color: "#939393" }}>Track and manage your vehicle loan payments and expenses</span>

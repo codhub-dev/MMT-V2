@@ -48,7 +48,7 @@ const Trucks = () => {
     };
 
     return (
-        <div className="h-100 p-4 rounded-4 d-flex flex-column gap-3" style={{ background: "#f6f6f6" }}>
+        <div>
             <div className="d-flex justify-content-between align-items-center mb-2">
                 <div className="d-flex flex-column">
                     <b style={{ fontSize: "26px" }}>Trucks</b>

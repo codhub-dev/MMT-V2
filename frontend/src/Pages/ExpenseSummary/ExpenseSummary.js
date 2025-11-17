@@ -737,7 +737,7 @@ const ExpenseSummary = () => {
   };
 
   return (
-    <div className="h-100 p-4 rounded-4 d-flex flex-column gap-3" style={{ background: "#f6f6f6" }}>
+    <div>
       <div className="d-flex flex-column">
         <b style={{ fontSize: "26px" }}>{vehicleId ? `Expense Summary for ${vehicleId}` : "Expense Summary"}</b>
         <span style={{ fontSize: "14px", color: "#939393" }}>

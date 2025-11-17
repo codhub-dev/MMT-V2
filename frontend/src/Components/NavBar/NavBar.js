@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Axios } from "../../Config/Axios/Axios";
 import { useContext } from "react";
 import { UserContext } from "../../App";
+import { useMobile } from "../MobileContext/MobileContext";
 
 const NavBar = ({ sidebarOpen, setSidebarOpen }) => {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -24,6 +25,7 @@ const NavBar = ({ sidebarOpen, setSidebarOpen }) => {
   });
 
   const { user } = useContext(UserContext);
+  const { isMobile } = useMobile();
   const loc = useLocation();
   const navigate = useNavigate();
 
@@ -69,19 +71,24 @@ const NavBar = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <div>
       <Space style={{ background: "#f6f6f6" }} className="p-4 w-100 rounded-4 d-flex justify-content-between">
-          <Button
-            type="dark"
-            className="p-2"
-            style={{
-              background: "white",
-              borderRadius: "100%",
-              height: "40px",
-              width: "40px",
-            }}
-            onClick={toggleMobileSidebar}
-          >
-            <MenuFoldOutlined style={{ color: "black", fontSize: 18 }} />
-          </Button>
+          <div style={{ width: "40px", height: "40px" }}>
+            <Button
+              type="dark"
+              className="p-2"
+              style={{
+                background: "white",
+                borderRadius: "100%",
+                height: "40px",
+                width: "40px",
+                display: (isMobile && !sidebarOpen) ? "flex" : "none",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+              onClick={toggleMobileSidebar}
+            >
+              <MenuFoldOutlined style={{ color: "black", fontSize: 18 }} />
+            </Button>
+          </div>
 
           <div className="d-flex">
             <Button
