@@ -25,6 +25,8 @@ const defExpensesRoutes = require("./routes/defExpenses");
 const otherExpensesRoutes = require("./routes/otherExpenses");
 const totalExpensesRoutes = require("./routes/totalExpenses");
 const calculateLoanRoutes = require("./routes/calculateLoan");
+const driverProfilesRoutes = require("./routes/driverProfiles");
+const alertsRoutes = require("./routes/alerts");
 const metadata = require("./routes/metadata");
 const healthRouter = require("./routes/health");
 
@@ -70,6 +72,8 @@ app.use("/api/v1/app/defExpenses", isAuthenticated, defExpensesRoutes);
 app.use("/api/v1/app/otherExpenses", isAuthenticated, otherExpensesRoutes);
 app.use("/api/v1/app/totalExpenses", isAuthenticated, totalExpensesRoutes);
 app.use("/api/v1/app/calculateLoan", isAuthenticated, calculateLoanRoutes);
+app.use("/api/v1/app/driverProfiles", isAuthenticated, driverProfilesRoutes);
+app.use("/api/v1/app/alerts", isAuthenticated, alertsRoutes);
 app.use("/api/v1/app/metadata", isAuthenticated, metadata);
 
 // error handler

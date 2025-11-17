@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Menu, Button } from "antd";
 import {
     HomeOutlined,
@@ -12,24 +12,13 @@ import {
     CloseOutlined
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { useMobile } from "../MobileContext/MobileContext";
 
 const SideBar = ({ isOpen = true, setIsOpen }) => {
     const [current, setCurrent] = useState();
-    const [isMobile, setIsMobile] = useState(false);
     const [logoLoading, setLogoLoading] = useState(true);
+    const { isMobile } = useMobile();
     const nav = useNavigate();
-
-    // Check if screen is mobile size
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth <= 768);
-        };
-
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
 
     const items = [
         {

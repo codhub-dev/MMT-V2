@@ -15,16 +15,18 @@ const Home = () => {
         <div style={{ height: "100vh", width: "100vw", padding: 16 }}>
             <div className='h-100 d-flex gap-3'>
                 <SideBar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-                <div className='h-100 w-100 d-flex flex-column gap-3 main-content'>
+                <div className='w-100 d-flex flex-column gap-3 main-content' style={{ maxHeight: "100vh", overflowY: "scroll" }}>
                     <NavBar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-                    <Switch>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/trucks" element={<Trucks />} />
-                        <Route path="/admin" element={<AdminPortal />} />,
-                        <Route path="/calculateLoan/:vehicleId?" element={<CalculateLoan />} />
-                        <Route path="/expenseSummary/:catalog/:vehicleId?" element={<ExpenseSummary />} />
-                        <Route path="/*" element={<Navigate to="/dashboard" replace />} />
-                    </Switch>
+                    <div className="h-100 p-4 rounded-4 d-flex flex-column gap-3" style={{ background: "#f6f6f6" }}>
+                        <Switch>
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/trucks" element={<Trucks />} />
+                            <Route path="/admin" element={<AdminPortal />} />,
+                            <Route path="/calculateLoan/:vehicleId?" element={<CalculateLoan />} />
+                            <Route path="/expenseSummary/:catalog/:vehicleId?" element={<ExpenseSummary />} />
+                            <Route path="/*" element={<Navigate to="/dashboard" replace />} />
+                        </Switch>
+                    </div>
                 </div>
             </div>
         </div>

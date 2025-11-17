@@ -9,7 +9,8 @@ import { CARD_SIZES, getResponsiveProps } from "../../Utils/dashboardLayoutUtils
 import "../../Styles/Dashboard.css";
 import MonthlyChart from "../../Components/Dashboard/MonthlyChart/MonthlyChart";
 import AlertsWidget from "../../Components/Dashboard/AlertsWidget/AlertsWidget";
-// import DriverProfileWidget from "../../Components/DriverProfileWidget/DriverProfileWidget";
+import DriverProfileWidget from "../../Components/Dashboard/DriverProfileWidget/DriverProfileWidget";
+import SchedulerWidget from "../../Components/Dashboard/SchedulerWidget/SchedulerWidget";
 
 const Dashboard = () => {
   const [contentLoader, setContentLoader] = useState(true);
@@ -41,7 +42,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="h-100 p-4 rounded-4 d-flex flex-column gap-3" style={{ background: "#f6f6f6" }}>
+    <>
       <div className="d-flex justify-content-between align-items-center mb-2">
         <div className="d-flex flex-column">
           <b style={{ fontSize: "26px" }}>Dashboard</b>
@@ -150,53 +151,22 @@ const Dashboard = () => {
       )}
       <Row gutter={[16, 16]} justify="start" align="stretch" className="dashboard-grid-row">
         {/* MonthlyChart - Large card using predefined layout (no wrapper) */}
-        <Col {...getResponsiveProps('large')}>
+        <Col {...getResponsiveProps('medium')}>
           <MonthlyChart />
         </Col>
 
         {/* DriverProfileWidget - Medium card using predefined layout (no wrapper) */}
-        {/* <Col {...getResponsiveProps('medium')}>
+        <Col {...getResponsiveProps('medium')}>
           <DriverProfileWidget />
-        </Col> */}
+        </Col>
 
         {/* AlertsWidget - Medium card using predefined layout (no wrapper) */}
         <Col {...getResponsiveProps('medium')}>
-          <AlertsWidget />
+            {/* <SchedulerWidget /> */}
+            <AlertsWidget />
         </Col>
-
-        {/* Examples of how to add more cards with different sizes */}
-        {/*
-        // For existing components that already have their own styling (no wrapper needed)
-        <Col {...getResponsiveProps('small')}>
-          <YourExistingStyledComponent />
-        </Col>
-
-        // For new components that need card styling and titles
-        <DashboardCard
-          colProps={getResponsiveProps('widget')}
-          title="Controls"
-          extra={<Button>Settings</Button>}
-        >
-          <YourNewComponent />
-        </DashboardCard>
-
-        // Chart component without wrapper
-        <Col {...getResponsiveProps('chart')}>
-          <YourChartComponent />
-        </Col>
-
-        // Full width component without wrapper
-        <Col {...getResponsiveProps('full')}>
-          <YourFullWidthComponent />
-        </Col>
-
-        // Custom layout with override
-        <Col {...getResponsiveProps('medium', { lg: 12, xl: 10 })}>
-          <YourCustomComponent />
-        </Col>
-        */}
       </Row>
-    </div>
+    </>
   );
 };
 

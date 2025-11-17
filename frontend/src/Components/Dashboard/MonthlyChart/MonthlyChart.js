@@ -45,7 +45,7 @@ const MonthlyChart = () => {
                 stack: true,
                 colorField: 'type',
                 style: {
-                    maxWidth: 50,
+                    maxWidth: 24,
                     radiusTopLeft: 20,
                     radiusTopRight: 20,
                     radiusBottomLeft: 0,
@@ -69,7 +69,15 @@ const MonthlyChart = () => {
             },
         ],
     };
-    return <div className='bg-white p-3 rounded-4'><DualAxes {...config} /></div>;
+    return <div
+        className='bg-white p-3 h-100 rounded-4'
+        style={{
+            background: '#fff',
+            borderRadius: 12,
+            padding: 30,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        }}
+    ><DualAxes {...config} /></div>;
 };
 
 export default MonthlyChart;

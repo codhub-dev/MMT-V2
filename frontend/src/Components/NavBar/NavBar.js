@@ -68,114 +68,86 @@ const NavBar = ({ sidebarOpen, setSidebarOpen }) => {
 
   return (
     <div>
-      {/* {(loc.pathname.startsWith("/expenseSummary/") || loc.pathname.startsWith("/calculateLoan/")) ? (
-        <Space style={{ background: "#f6f6f6" }} className="p-4 w-100 rounded-3 d-flex justify-content-between">
+      <Space style={{ background: "#f6f6f6" }} className="p-4 w-100 rounded-4 d-flex justify-content-between">
           <Button
             type="dark"
             className="p-2"
             style={{
-              border: "1px solid white",
-              borderRadius: "160px",
+              background: "white",
+              borderRadius: "100%",
               height: "40px",
               width: "40px",
             }}
-            onClick={() => navigate(-1)}
+            onClick={toggleMobileSidebar}
           >
-            <LeftOutlined style={{ color: "white", fontSize: 18 }} />
+            <MenuFoldOutlined style={{ color: "black", fontSize: 18 }} />
           </Button>
-          <div>
-            <b className="text-white fw-800 fs-5">
-              {registrationNo ? registrationNo : "All Trucks"} -{" "}
-              {loc.pathname.split("/")[1] === "calculateLoan" ? "Calculate Loan" : expenses[loc.pathname.split("/")[2]]}
-            </b>
-          </div>
-        </Space>
-      ) : ( */}
-        <Space style={{ background: "#f6f6f6" }} className="p-4 w-100 rounded-4 d-flex justify-content-between">
-          <div></div>
-          <div className="d-flex gap-3">
+
+          <div className="d-flex">
             <Button
               type="dark"
-              className="p-2"
               style={{
-                background: "white",
+                border: "1px solid black",
                 borderRadius: "100%",
                 height: "40px",
                 width: "40px",
+                position: "relative",
+                overflow: "hidden"
               }}
-              onClick={toggleMobileSidebar}
+              onClick={showProfileDrawer}
             >
-              <MenuFoldOutlined style={{ color: "black", fontSize: 18 }} />
-            </Button>
-
-            <div className="d-flex">
-              <Button
-                type="dark"
+              {imageLoading && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "#f0f0f0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "50%"
+                  }}
+                >
+                  <div style={{
+                    width: "12px",
+                    height: "12px",
+                    border: "2px solid #ccc",
+                    borderTop: "2px solid #007bff",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite"
+                  }}></div>
+                </div>
+              )}
+              <img
+                src={
+                  user?.picture
+                    ? user?.picture
+                    : "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                }
+                className="rounded-circle"
                 style={{
-                  border: "1px solid black",
-                  borderRadius: "100%",
                   height: "40px",
                   width: "40px",
-                  position: "relative",
-                  overflow: "hidden"
+                  opacity: imageLoading ? 0 : 1,
+                  transition: "opacity 0.3s ease"
                 }}
-                onClick={showProfileDrawer}
-              >
-                {imageLoading && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      backgroundColor: "#f0f0f0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: "50%"
-                    }}
-                  >
-                    <div style={{
-                      width: "12px",
-                      height: "12px",
-                      border: "2px solid #ccc",
-                      borderTop: "2px solid #007bff",
-                      borderRadius: "50%",
-                      animation: "spin 1s linear infinite"
-                    }}></div>
-                  </div>
-                )}
-                <img
-                  src={
-                    user?.picture
-                      ? user?.picture
-                      : "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-                  }
-                  className="rounded-circle"
-                  style={{
-                    height: "40px",
-                    width: "40px",
-                    opacity: imageLoading ? 0 : 1,
-                    transition: "opacity 0.3s ease"
-                  }}
-                  alt=""
-                  onLoad={() => setImageLoading(false)}
-                  onError={() => {
-                    setImageError(true);
-                    setImageLoading(false);
-                  }}
-                />
-              </Button>
-              <div className="ms-2 d-flex flex-column">
-                <b style={{ fontSize: "14px" }} >{user?.name}</b>
-                <span style={{ fontSize: "10px" }}>{user?.email}</span>
-              </div>
+                alt=""
+                onLoad={() => setImageLoading(false)}
+                onError={() => {
+                  setImageError(true);
+                  setImageLoading(false);
+                }}
+              />
+            </Button>
+            <div className="ms-2 d-flex flex-column">
+              <b style={{ fontSize: "14px" }} >{user?.name}</b>
+              <span style={{ fontSize: "10px" }}>{user?.email}</span>
             </div>
           </div>
-        </Space>
-      {/* )} */}
-
+      </Space>
       <ProfileDrawer
         profileOpen={profileOpen}
         setProfileOpen={setProfileOpen}
