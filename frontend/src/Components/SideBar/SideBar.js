@@ -70,7 +70,7 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                 />
             )}
 
-            <div className={`sidebar-container rounded-4 p-3 pt-4 ${isMobile && isOpen ? 'sidebar-mobile' : ''}`}>
+            <div className={`sidebar-container rounded-4 ${isMobile && isOpen ? 'sidebar-mobile' : ''}`}>
             {/* Mobile close button */}
             {isMobile && (
                 <Button
@@ -87,7 +87,7 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                 />
             )}
 
-            <div className="sidebar-top">
+            <div className="sidebar-top" style={{ paddingLeft: "20px", paddingRight: "20px" }}>
                 {/* Logo */}
                 <div className="d-flex gap-2 align-items-center mb-4">
                     <div style={{ width: 50, height: 50, position: "relative" }}>
@@ -142,7 +142,7 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                 />
             </div>
 
-            <div className="sidebar-bottom">
+            <div className="sidebar-bottom" style={{ paddingLeft: "20px", paddingRight: "20px" }}>
                 {/* Contact Card */}
                 <div className="sidebar-contact-card">
                     <div className="sidebar-contact-overlay"></div>

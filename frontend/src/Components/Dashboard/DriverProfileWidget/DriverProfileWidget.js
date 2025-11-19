@@ -271,11 +271,8 @@ const DriverProfileWidget = () => {
       borderRadius: "12px",
       padding: 26,
       boxShadow: "0 2px 8px rgba(22,119,255,0.07)",
-      width: "100%",
-      minWidth: 320,
       height: "100%",
       overflowY: "auto",
-      display: "inline-block"
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <b style={{

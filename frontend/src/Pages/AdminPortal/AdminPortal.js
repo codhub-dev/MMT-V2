@@ -84,7 +84,7 @@ export default function AdminPortal() {
 
   const columns = [
     {
-       title: <div style={{ textAlign: "center" }}>Name</div>,
+      title: <div style={{ textAlign: "center" }}>Name</div>,
       dataIndex: "name",
       key: "name",
       render: (text) => <Text strong>{text}</Text>,
@@ -110,11 +110,11 @@ export default function AdminPortal() {
       key: "status",
       render: (_, record) =>
         record.isSubscribed ? (
-          <Tag icon={<CheckCircleOutlined />} style={{width:"100%", textAlign:"center"}} color="success">
+          <Tag icon={<CheckCircleOutlined />} style={{ width: "100%", textAlign: "center" }} color="success">
             Subscribed
           </Tag>
         ) : (
-          <Tag icon={<CloseCircleOutlined />} style={{width:"100%", textAlign:"center"}} color="error">
+          <Tag icon={<CloseCircleOutlined />} style={{ width: "100%", textAlign: "center" }} color="error">
             Unsubscribed
           </Tag>
         ),
@@ -132,7 +132,7 @@ export default function AdminPortal() {
             onConfirm={() => confirmAction(record.id, "unsubscribe")}
             placement="topRight"
           >
-            <Button type="primary" danger style={{width:"100%"}} icon={<CloseCircleOutlined />}>
+            <Button type="primary" danger style={{ width: "100%" }} icon={<CloseCircleOutlined />}>
               Unsubscribe
             </Button>
           </Popconfirm>
@@ -144,7 +144,7 @@ export default function AdminPortal() {
             onConfirm={() => confirmAction(record.id, "subscribe")}
             placement="topRight"
           >
-            <Button type="primary" style={{width:"100%"}} icon={<UserAddOutlined />}>
+            <Button type="primary" style={{ width: "100%" }} icon={<UserAddOutlined />}>
               Subscribe
             </Button>
           </Popconfirm>
@@ -158,59 +158,23 @@ export default function AdminPortal() {
       filter === "all"
         ? true
         : filter === "subscribed"
-        ? user.isSubscribed
-        : !user.isSubscribed;
+          ? user.isSubscribed
+          : !user.isSubscribed;
     return matchesSearch && matchesFilter;
   });
 
   return (
-    <div
-        style={{
-            minHeight: "100vh",
-            backgroundColor: "#f8f9fa",
-            padding: "3rem 2rem",
-        }}
-    >
-      <Card
-        bordered={false}
-        style={{
-          borderRadius: 16,
-          boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-          marginBottom: "2rem",
-        }}
-      >
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Title
-              level={2}
-              style={{
-                margin: 0,
-                color: "#333",
-                fontWeight: 800,
-                letterSpacing: 0.5,
-              }}
-            >
-              Admin Dashboard
-            </Title>
-            <Text type="secondary">Manage users & subscriptions</Text>
-          </Col>
-          <Col>
-            <Button
-              icon={<ReloadOutlined />}
-              type="default"
-              onClick={fetchUsers}
-              loading={loading}
-            >
-              Refresh
-            </Button>
-          </Col>
-        </Row>
-      </Card>
+    <div>
+      <div className="d-flex flex-column">
+        <b style={{ fontSize: "26px" }}>Admin Dashboard</b>
+        <span style={{ fontSize: "14px", color: "#939393" }}>Manage users & subscriptions</span>
+      </div>
 
       <Card
         bordered={false}
         style={{
           marginBottom: "1.5rem",
+          marginTop: "1.5rem",
           borderRadius: 12,
           boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
         }}
@@ -228,7 +192,6 @@ export default function AdminPortal() {
           </Col>
           <Col className="pe-0">
             <Space style={{ width: "100%" }} align="center">
-              <FilterOutlined style={{ fontSize: 20, color: "#555" }} />
               <Select
                 size="large"
                 value={filter}
@@ -240,6 +203,17 @@ export default function AdminPortal() {
                 <Option value="unsubscribed">Unsubscribed</Option>
               </Select>
             </Space>
+          </Col>
+          <Col>
+            <Button
+              icon={<ReloadOutlined />}
+              type="default"
+              size="large"
+              onClick={fetchUsers}
+              loading={loading}
+            >
+              Refresh
+            </Button>
           </Col>
         </Row>
       </Card>

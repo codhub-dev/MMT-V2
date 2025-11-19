@@ -48,9 +48,6 @@ const Dashboard = () => {
           <b style={{ fontSize: "26px" }}>Dashboard</b>
           <span style={{ fontSize: "14px", color: "#939393" }}>Overview of your truck's performance</span>
         </div>
-        <div>
-          {/* <Button className="primary rounded-5 p-4" onClick={callVehicleModal}><PlusIcon /> Add Vehicle</Button> */}
-        </div>
       </div>
       <LoaderOverlay isVisible={contentLoader} />
       {analyticsLoader ? (
@@ -68,10 +65,6 @@ const Dashboard = () => {
                   <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
                     Total Expense{" "}
                   </span>
-                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                    {" "}
-                    this month
-                  </span> */}
                 </span>
               }
               value={metadata.monthlyExpenses?.monthlyGrandTotal}
@@ -85,10 +78,6 @@ const Dashboard = () => {
                   <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
                     Fuel Expense{" "}
                   </span>
-                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                    {" "}
-                    this month
-                  </span> */}
                 </span>
               }
               thisMonth={metadata.fuelTotal}
@@ -102,10 +91,6 @@ const Dashboard = () => {
                   <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
                     Def Expense{" "}
                   </span>
-                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                    {" "}
-                    this month
-                  </span> */}
                 </span>
               }
               thisMonth={metadata.defTotal}
@@ -119,10 +104,6 @@ const Dashboard = () => {
                   <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
                     Other Expense{" "}
                   </span>
-                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                    {" "}
-                    this month
-                  </span> */}
                 </span>
               }
               thisMonth={metadata.otherTotal}
@@ -136,10 +117,6 @@ const Dashboard = () => {
                   <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
                     Fuel Consumed{" "}
                   </span>
-                  {/* <span style={{ fontSize: 10, fontStyle: "oblique" }}>
-                    {" "}
-                    this month
-                  </span> */}
                 </span>
               }
               thisMonth={metadata.fuelUsedTotal}
@@ -150,20 +127,17 @@ const Dashboard = () => {
         </div>
       )}
       <Row gutter={[16, 16]} justify="start" align="stretch" className="dashboard-grid-row">
-        {/* MonthlyChart - Large card using predefined layout (no wrapper) */}
         <Col {...getResponsiveProps('medium')}>
           <MonthlyChart />
         </Col>
 
-        {/* DriverProfileWidget - Medium card using predefined layout (no wrapper) */}
         <Col {...getResponsiveProps('medium')}>
           <DriverProfileWidget />
         </Col>
 
-        {/* AlertsWidget - Medium card using predefined layout (no wrapper) */}
         <Col {...getResponsiveProps('medium')}>
-            {/* <SchedulerWidget /> */}
-            <AlertsWidget />
+          {/* <SchedulerWidget /> */}
+          <AlertsWidget />
         </Col>
       </Row>
     </>
