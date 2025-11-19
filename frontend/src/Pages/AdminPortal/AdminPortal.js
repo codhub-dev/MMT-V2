@@ -45,7 +45,7 @@ export default function AdminPortal() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      const filteredUsers = res.data.users.filter((user) => !user.isAdmin);
+      const filteredUsers = res.data.users.filter((user) => !user.isAdmin).map((user) => ({ ...user, id: user._id }));
       setUsers(filteredUsers);
     } catch (err) {
       message.error("Failed to fetch users");
