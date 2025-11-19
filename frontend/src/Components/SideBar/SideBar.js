@@ -27,10 +27,10 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
             children: [
                 { label: "Dashboard", key: "dashboard", icon: <HomeOutlined /> },
                 { label: "Trucks", key: "trucks", icon: <TruckOutlined /> },
-                { label: "Drivers", key: "drivers", icon: <TeamOutlined /> },
-                { label: "Calendar", key: "calendar", icon: <CalendarOutlined /> },
-                { label: "Analytics", key: "analytics", icon: <BarChartOutlined /> },
-                { label: "Team", key: "team", icon: <TeamOutlined /> }
+                { label: "Fuel Expense", key: "drivers", icon: <TeamOutlined /> },
+                { label: "Def Expense", key: "calendar", icon: <CalendarOutlined /> },
+                { label: "Other Expense", key: "analytics", icon: <BarChartOutlined /> },
+                { label: "Income", key: "team", icon: <TeamOutlined /> }
             ]
         },
         {
