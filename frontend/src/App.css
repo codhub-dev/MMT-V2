@@ -215,7 +215,7 @@
 /* --------------------------sidebar--------------------------------- */
 
 .sidebar-container {
-  width: 260px !important;
+  width: 280px !important;
   flex-shrink: 0 !important;
   background: #f6f6f6 !important;
   padding: 20px 0;
@@ -233,7 +233,7 @@
   .sidebar-container {
     position: fixed !important;
     top: 0 !important;
-    left: -280px !important; /* Hide by default */
+    left: -300px !important; /* Hide by default - slightly more than width for smooth animation */
     height: 100vh !important;
     z-index: 1000 !important;
     transition: left 0.3s ease-in-out !important;
@@ -272,7 +272,6 @@
 .custom-sidebar-menu {
     background: transparent !important;
     border-inline-end: none !important;
-    padding-right: 10px;
 }
 
 
@@ -414,4 +413,63 @@
 
 .contact-btn:hover {
     background: #166a2f;
+}
+
+/* --------------------------profile drawer consistency--------------------------------- */
+
+/* Ensure ProfileDrawer matches SideBar styling */
+.ant-drawer-right .ant-drawer-content-wrapper {
+  width: 280px !important;
+}
+
+.ant-drawer .ant-drawer-body {
+  padding: 0 !important;
+}
+
+/* Ensure consistent drawer styling */
+.ant-drawer .sidebar-container {
+  padding: 20px 0;
+  border-radius: 0;
+  margin: 0;
+  background: #f6f6f6 !important;
+}
+
+/* Ensure right side drawer animates correctly */
+.ant-drawer-right {
+  right: 0 !important;
+}
+
+.ant-drawer-right .ant-drawer-content-wrapper {
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Profile specific button styling to match sidebar aesthetic */
+.profile-btn-group .btn {
+  width: 100%;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: #555;
+  transition: all 0.2s ease;
+}
+
+.profile-btn-group .btn:hover {
+  background: #eaeaea;
+  border-color: #b5b5b5;
+  color: #222;
+}
+
+.profile-btn-group .btn-danger {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+}
+
+.profile-btn-group .btn-danger:hover {
+  background: #ff7875;
+  border-color: #ff7875;
 }
