@@ -157,6 +157,7 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
                     ? user.picture
                     : "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
                 }
+                referrerPolicy="no-referrer"
                 className="rounded-circle img-fluid"
                 style={{
                   width: "100px",
