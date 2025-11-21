@@ -977,38 +977,41 @@ const ExpenseSummary = () => {
           y: 500,
         }}
       />
-      {activeTruckId && (
-        <>
+      <div style={{ height: "100px" }}>
+       {
+          expensesList?.length &&
           <FloatButton
             shape="circle"
             type="default"
             style={{
-              insetInlineEnd: "calc(6% + 100px)",
               height: 80,
               width: 80,
               color: "white",
+              insetInlineEnd: activeTruckId && expensesList?.length ? "calc(6% + 90px)" : "6%",
             }}
             onClick={handleReportDownload}
-            disabled={expensesList?.length ? false : true}
             icon={<DownloadIcon size={20} />}
           />
+        }
+        {
+          activeTruckId &&
           <FloatButton
             shape="circle"
             type="primary"
             style={{
-              insetInlineEnd: "6%",
               height: 80,
               width: 80,
               padding: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              insetInlineEnd: "6%",
             }}
             onClick={callExpenseModal}
             icon={<PlusOutlined style={{ fontSize: 20 }} />}
           />
-        </>
-      )}
+        }
+      </div>
       <ExpenseModal
         ref={expenseModalRef}
         setExpensesList={setExpensesList}
