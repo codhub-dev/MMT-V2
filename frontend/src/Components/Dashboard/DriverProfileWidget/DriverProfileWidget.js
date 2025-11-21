@@ -502,9 +502,23 @@ const DriverProfileWidget = () => {
           <Form.Item
             label="Contact"
             name="contact"
-            rules={[{ required: true, message: 'Please enter contact number' }]}
+            rules={[
+              { required: true, message: 'Please enter contact number' },
+              { pattern: /^\d{10}$/, message: 'Contact number must be exactly 10 digits' }
+            ]}
+            validateTrigger={['onChange', 'onBlur']}
           >
-            <Input />
+            <Input
+              maxLength={10}
+              inputMode="numeric"
+              pattern="\d*"
+              placeholder="Enter 10 digit contact number"
+              onKeyPress={e => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+            />
           </Form.Item>
           <Form.Item
             label="Age"
@@ -601,9 +615,23 @@ const DriverProfileWidget = () => {
           <Form.Item
             label="Contact"
             name="contact"
-            rules={[{ required: true, message: 'Please enter contact number' }]}
+            rules={[
+              { required: true, message: 'Please enter contact number' },
+              { pattern: /^\d{10}$/, message: 'Contact number must be exactly 10 digits' }
+            ]}
+            validateTrigger={['onChange', 'onBlur']}
           >
-            <Input />
+            <Input
+              maxLength={10}
+              inputMode="numeric"
+              pattern="\d*"
+              placeholder="Enter 10 digit contact number"
+              onKeyPress={e => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+            />
           </Form.Item>
           <Form.Item
             label="Age"
