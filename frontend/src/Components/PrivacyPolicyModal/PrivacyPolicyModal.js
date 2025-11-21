@@ -6,6 +6,9 @@ const PrivacyPolicyModal = forwardRef(({}, ref) => {
   const showModal = () => {
     setIsModalOpen(true);
   };
+  const hideModal = () => {
+    setIsModalOpen(false);
+  }
   const handleOk = () => {
     setIsModalOpen(false);
   };
@@ -15,6 +18,7 @@ const PrivacyPolicyModal = forwardRef(({}, ref) => {
 
   useImperativeHandle(ref, () => ({
     showModal,
+    hideModal,
   }));
 
   return (
