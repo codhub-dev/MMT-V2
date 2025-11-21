@@ -1,14 +1,15 @@
 const { default: mongoose, get } = require('mongoose');
 const Truck = require('../models/truck-model');
-const FuelExpense = require('../models/fuelExpense-model'); 
-const DefExpense = require('../models/defExpense-model'); 
+const FuelExpense = require('../models/fuelExpense-model');
+const DefExpense = require('../models/defExpense-model');
 const OtherExpense = require('../models/otherExpense-model');
 const logger = require('../utils/logger');
+const { getFullContext } = require('../utils/requestContext');
 
 const addTruck = async (req, res) => {
     try {
         const { addedBy, registrationNo, make, model, isFinanced, financeAmount, year, imgURL, chassisNo, engineNo, desc } = req.body;
-        logger.info("Adding new truck", { addedBy, registrationNo, make, model });
+        logger.info("Adding new truck", getFullContext(req, { addedBy, registrationNo, make, model, isFinanced }));
 
         const newTruck = new Truck({
             addedBy,
@@ -21,7 +22,7 @@ const addTruck = async (req, res) => {
             imgURL,
             chassisNo,
             engineNo,
-            desc,   
+            desc,
         });
 
         const savedTruck = await newTruck.save();
@@ -58,7 +59,7 @@ const getTruckById = async (req, res) => {
     }
 };
 
-const getAllTruckByUser = async (req, res) => {    
+const getAllTruckByUser = async (req, res) => {
     try {
         const { addedBy } = req.params;
         logger.info("Fetching all trucks by user", { userId: addedBy });
@@ -83,7 +84,7 @@ const updateTruckById = async (req, res) => {
         const { id } = req.params;
         const { registrationNo, make, model, year, imgURL, isFinanced, financeAmount, chassisNo, engineNo, desc } = req.body.values;
         logger.info("Updating truck", { truckId: id, registrationNo });
-        
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
             logger.warn("Invalid truck ID for update", { truckId: id });
             return res.status(400).json({ message: 'Invalid truck ID' });

@@ -6,19 +6,20 @@ const Truck = require("../models/truck-model");
 
 // Use global logger (which already handles Papertrail HTTPS + console)
 const logger = require("../utils/logger");
+const { getFullContext } = require("../utils/requestContext");
 
 // Controller to add a new loan filling record
 const addLoanCalculation = async (req, res) => {
   try {
     const { truckId, addedBy, date, cost, additionalCharges, note } = req.body;
 
-    logger.info("Adding new loan calculation", {
+    logger.info("Adding new loan calculation", getFullContext(req, {
       truckId,
       addedBy,
       date,
       cost,
       additionalCharges
-    });
+    }));
 
     const newLoanCalculation = new LoanCalculation({
       truckId,
@@ -31,11 +32,11 @@ const addLoanCalculation = async (req, res) => {
 
     const savedLoanCalculation = await newLoanCalculation.save();
 
-    logger.info("Loan calculation added successfully", {
+    logger.info("Loan calculation added successfully", getFullContext(req, {
       calculationId: savedLoanCalculation._id,
       truckId,
       cost
-    });
+    }));
 
     res.status(201).json(savedLoanCalculation);
   } catch (error) {

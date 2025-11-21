@@ -3,15 +3,19 @@ const DriverProfile = require('../models/driverProfiles-model');
 const { catchAsyncError } = require('../middleware/catchAsyncError');
 const ErrorHandler = require('../middleware/errorHandlers');
 const logger = require('../utils/logger');
+const { getFullContext } = require('../utils/requestContext');
 
 // Add a new driver profile
 const addDriverProfile = catchAsyncError(async (req, res, next) => {
     try {
         const { addedBy, name, contact, age, experience, license, gender, photo } = req.body;
 
+        logger.info('Adding new driver profile', getFullContext(req, { addedBy, name, license, age }));
+
         // Check if license number already exists
         const existingDriver = await DriverProfile.findOne({ license });
         if (existingDriver) {
+            logger.warn('Driver creation failed - license already exists', getFullContext(req, { license }));
             return next(new ErrorHandler("Driver with this license number already exists", 400));
         }
 
@@ -28,12 +32,12 @@ const addDriverProfile = catchAsyncError(async (req, res, next) => {
 
         const savedDriver = await newDriver.save();
 
-        logger.info(`Driver profile created`, {
+        logger.info('Driver profile created successfully', getFullContext(req, {
             driverId: savedDriver._id,
             addedBy,
             name,
             license
-        });
+        }));
 
         res.status(201).json({
             success: true,
@@ -42,11 +46,10 @@ const addDriverProfile = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error adding driver profile:', error);
-        logger.error(`Failed to add driver profile`, {
+        logger.error('Failed to add driver profile', getFullContext(req, {
             error: error.message,
-            stack: error.stack,
-            body: req.body
-        });
+            stack: error.stack
+        }));
         return next(new ErrorHandler('Failed to add driver profile', 500));
     }
 });
@@ -56,15 +59,21 @@ const getDriverProfileById = catchAsyncError(async (req, res, next) => {
     try {
         const { id } = req.params;
 
+        logger.info('Fetching driver profile by ID', getFullContext(req, { driverId: id }));
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            logger.warn('Invalid driver profile ID', getFullContext(req, { driverId: id }));
             return next(new ErrorHandler('Invalid driver profile ID', 400));
         }
 
         const driver = await DriverProfile.findById(id);
 
         if (!driver) {
+            logger.warn('Driver profile not found', getFullContext(req, { driverId: id }));
             return next(new ErrorHandler('Driver profile not found', 404));
         }
+
+        logger.info('Driver profile retrieved successfully', getFullContext(req, { driverId: id, name: driver.name }));
 
         res.status(200).json({
             success: true,
@@ -82,10 +91,14 @@ const getAllDriverProfilesByUser = catchAsyncError(async (req, res, next) => {
     try {
         const { addedBy } = req.params;
 
+        logger.info('Fetching driver profiles by user', getFullContext(req, { userId: addedBy }));
+
         const drivers = await DriverProfile.find({
             addedBy,
             isActive: true
         }).sort({ createdAt: -1 });
+
+        logger.info('Driver profiles retrieved successfully', getFullContext(req, { userId: addedBy, count: drivers.length }));
 
         res.status(200).json({
             success: true,
@@ -103,6 +116,8 @@ const getAllDriverProfilesByUser = catchAsyncError(async (req, res, next) => {
 const getAllDriverProfiles = catchAsyncError(async (req, res, next) => {
     try {
         const { page = 1, limit = 10, search = '', isActive } = req.query;
+
+        logger.info('Fetching all driver profiles (admin)', getFullContext(req, { page, limit, search, isActive }));
 
         // Build search query
         let query = {};

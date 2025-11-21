@@ -5,12 +5,13 @@ const User = require("../models/user-model");
 const ErrorHandler = require("../middleware/errorHandlers");
 const { catchAsyncError } = require("../middleware/catchAsyncError");
 const logger = require("../utils/logger");
+const { getFullContext } = require("../utils/requestContext");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 module.exports.signUpWithGoogle = async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
-  logger.info("Google Sign-In attempt", { hasToken: !!token });
+  logger.info("Google Sign-In attempt", getFullContext(req, { hasToken: !!token }));
 
   try {
     let payload;
@@ -124,10 +125,10 @@ module.exports.whoami = catchAsyncError(async (req, res, next) => {
 
 module.exports.logIn = catchAsyncError(async (req, res, next) => {
   const { username, password } = req.body;
-  logger.info("Login attempt", { username });
+  logger.info("Login attempt", getFullContext(req, { username }));
 
   if (!username || !password) {
-    logger.warn("Login failed: Missing credentials", { username });
+    logger.warn("Login failed: Missing credentials", getFullContext(req, { username }));
     return next(new ErrorHandler("username or password not passed", 400));
   }
 
@@ -136,13 +137,13 @@ module.exports.logIn = catchAsyncError(async (req, res, next) => {
   });
 
   if (!user) {
-    logger.warn("Login failed: User not found", { username });
+    logger.warn("Login failed: User not found", getFullContext(req, { username }));
     return next(new ErrorHandler("Invalid credentials or user not found", 401));
   }
 
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (!passwordMatch) {
-    logger.warn("Login failed: Invalid password", { username });
+    logger.warn("Login failed: Invalid password", getFullContext(req, { username }));
     return next(new ErrorHandler("Invalid credentials", 401));
   }
 
@@ -156,7 +157,7 @@ module.exports.logIn = catchAsyncError(async (req, res, next) => {
     }
   );
 
-  logger.info("User logged in successfully", { username });
+  logger.info("User logged in successfully", getFullContext(req, { username, userId: user._id }));
 
   res.json({
     code: 200,
@@ -167,10 +168,10 @@ module.exports.logIn = catchAsyncError(async (req, res, next) => {
 
 module.exports.signUp = async (req, res, next) => {
   const { username, password, name } = req.body;
-  logger.info("Sign up attempt", { username, name });
+  logger.info("Sign up attempt", getFullContext(req, { username, name }));
 
   if (!username || !password || !name) {
-    logger.warn("Sign up failed: Missing required fields", { username, name });
+    logger.warn("Sign up failed: Missing required fields", getFullContext(req, { username, name }));
     return next(
       new ErrorHandler("username or password not passed or not validated", 400)
     );
@@ -181,7 +182,7 @@ module.exports.signUp = async (req, res, next) => {
   });
 
   if (user) {
-    logger.warn("Sign up failed: Username already exists", { username });
+    logger.warn("Sign up failed: Username already exists", getFullContext(req, { username }));
     return res
       .status(409)
       .json({ message: "username already exists", code: 409 });
@@ -203,32 +204,32 @@ module.exports.signUp = async (req, res, next) => {
   const result = await newUser.save();
 
   if (result !== null) {
-    logger.info("User created successfully", { username, userId: result._id });
+    logger.info("User created successfully", getFullContext(req, { username, userId: result._id }));
     res.json({
       code: 200,
       message: "User created",
       data: result,
     });
   } else {
-    logger.error("Failed to create user", { username });
+    logger.error("Failed to create user", getFullContext(req, { username }));
     return next(new ErrorHandler("Failed to create user", 500));
   }
 };
 
 module.exports.logOut = catchAsyncError(async (req, res, next) => {
   try {
-    logger.info("User logged out");
+    logger.info("User logged out", getFullContext(req, { username: req.username }));
   } catch (error) {
-    logger.error("Logout error", { error: error.message });
+    logger.error("Logout error", getFullContext(req, { error: error.message }));
   }
 });
 
 module.exports.changePassword = catchAsyncError(async (req, res, next) => {
   const { username, password } = req.body;
-  logger.info("Password change attempt", { username });
+  logger.info("Password change attempt", getFullContext(req, { username }));
 
   if (!username || !password) {
-    logger.warn("Password change failed: Missing credentials", { username });
+    logger.warn("Password change failed: Missing credentials", getFullContext(req, { username }));
     return next(new ErrorHandler("username or password not found", 400));
   }
 
@@ -244,11 +245,11 @@ module.exports.changePassword = catchAsyncError(async (req, res, next) => {
   );
 
   if (!user) {
-    logger.error("Password change failed: User not found", { username });
+    logger.error("Password change failed: User not found", getFullContext(req, { username }));
     return next(new ErrorHandler("user password not updated", 400));
   }
 
-  logger.info("Password changed successfully", { username });
+  logger.info("Password changed successfully", getFullContext(req, { username }));
 
   res.json({
     code: 200,

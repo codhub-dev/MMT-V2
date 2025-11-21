@@ -3,20 +3,21 @@ const Alert = require('../models/alert-model');
 const { catchAsyncError } = require('../middleware/catchAsyncError');
 const ErrorHandler = require('../middleware/errorHandlers');
 const logger = require('../utils/logger');
+const { getFullContext } = require('../utils/requestContext');
 
 // Add a new alert
 const addAlert = catchAsyncError(async (req, res, next) => {
     try {
         const { addedBy, title, description, alertDate, type, priority, truckId, driverId } = req.body;
 
-        logger.info('Creating new alert', {
+        logger.info('Creating new alert', getFullContext(req, {
             addedBy,
             title,
             type,
             priority,
             truckId,
             driverId
-        });
+        }));
 
         const newAlert = new Alert({
             addedBy,
@@ -31,13 +32,13 @@ const addAlert = catchAsyncError(async (req, res, next) => {
 
         const savedAlert = await newAlert.save();
 
-        logger.info('Alert created successfully', {
+        logger.info('Alert created successfully', getFullContext(req, {
             alertId: savedAlert._id,
             addedBy,
             title: savedAlert.title,
             type: savedAlert.type,
             priority: savedAlert.priority
-        });
+        }));
 
         res.status(201).json({
             success: true,
@@ -46,11 +47,10 @@ const addAlert = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error adding alert:', error);
-        logger.error('Failed to create alert', {
+        logger.error('Failed to create alert', getFullContext(req, {
             error: error.message,
-            stack: error.stack,
-            requestBody: req.body
-        });
+            stack: error.stack
+        }));
         if (error.name === 'ValidationError') {
             return next(new ErrorHandler(Object.values(error.errors)[0].message, 400));
         }
@@ -63,8 +63,10 @@ const getAlertById = catchAsyncError(async (req, res, next) => {
     try {
         const { id } = req.params;
 
+        logger.info('Fetching alert by ID', getFullContext(req, { alertId: id }));
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            logger.warn('Invalid alert ID provided', { alertId: id });
+            logger.warn('Invalid alert ID provided', getFullContext(req, { alertId: id }));
             return next(new ErrorHandler('Invalid alert ID', 400));
         }
 
@@ -73,15 +75,15 @@ const getAlertById = catchAsyncError(async (req, res, next) => {
             .populate('driverId', 'name license');
 
         if (!alert) {
-            logger.warn('Alert not found', { alertId: id });
+            logger.warn('Alert not found', getFullContext(req, { alertId: id }));
             return next(new ErrorHandler('Alert not found', 404));
         }
 
-        logger.info('Alert retrieved successfully', {
+        logger.info('Alert retrieved successfully', getFullContext(req, {
             alertId: id,
             title: alert.title,
             type: alert.type
-        });
+        }));
 
         res.status(200).json({
             success: true,

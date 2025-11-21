@@ -4,6 +4,7 @@ const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
 const logger = require("../utils/logger");
+const { getFullContext } = require("../utils/requestContext");
 
 const otherNameConversions = {
   toll: "Toll",
@@ -19,6 +20,8 @@ const addOtherExpense = async (req, res) => {
   try {
     const { truckId, addedBy, date, category, cost, note, other } = req.body;
 
+    logger.info("Adding new other expense", getFullContext(req, { truckId, addedBy, category, cost }));
+
     const newOtherExpense = new OtherExpense({
       truckId,
       addedBy,
@@ -30,19 +33,19 @@ const addOtherExpense = async (req, res) => {
     });
 
     const savedOtherExpense = await newOtherExpense.save();
-    logger.info(`Other expense added successfully for truck ${truckId} by user ${addedBy}`, {
-      userId: addedBy,
+    logger.info("Other expense added successfully", getFullContext(req, {
+      expenseId: savedOtherExpense._id,
       truckId,
       category,
       cost
-    });
+    }));
     res.status(201).json(savedOtherExpense);
   } catch (error) {
     console.error("Error adding other filling:", error);
-    logger.error(`Failed to add other expense: ${error.message}`, {
+    logger.error("Failed to add other expense", getFullContext(req, {
       error: error.message,
       stack: error.stack
-    });
+    }));
     res.status(500).json({ message: "Failed to add other filling" });
   }
 };
