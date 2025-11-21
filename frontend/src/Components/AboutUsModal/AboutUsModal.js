@@ -5,11 +5,15 @@ const AboutUsModal = forwardRef(({}, ref) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const showModal = () => setIsModalOpen(true);
+  const hideModal = () => {
+    setIsModalOpen(false);
+  }
   const handleOk = () => setIsModalOpen(false);
   const handleCancel = () => setIsModalOpen(false);
 
   useImperativeHandle(ref, () => ({
     showModal,
+    hideModal,
   }));
 
   return (
