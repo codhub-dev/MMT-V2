@@ -305,7 +305,6 @@ const downloadDefExpensesExcel = async (req, res) => {
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
-    // Ensure the dates are in UTC and set the time to 00:00:00 to avoid time zone issues
     const startDate = selectedDates
       ? moment.utc(selectedDates[0]).startOf("day").toDate()
       : null;
@@ -313,22 +312,15 @@ const downloadDefExpensesExcel = async (req, res) => {
       ? moment.utc(selectedDates[1]).endOf("day").toDate()
       : null;
 
-    // Build the query filter
     const query = { truckId };
-
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
-        // If startDate and endDate are the same, match that specific date
         query.date = { $eq: startDate };
       } else {
-        // Match the range between startDate and endDate
         query.date = { $gte: startDate, $lte: endDate };
       }
     }
 
-    console.log("Query:", query);
-
-    // Fetch all DEF expenses for the given truckId and date range
     const defExpenses = await DefExpense.find(query).sort({ date: 1 });
     const truck = await TruckExpense.findById(truckId);
 
@@ -344,9 +336,7 @@ const downloadDefExpensesExcel = async (req, res) => {
     const data = defExpenses.map((expense, index) => {
       const date = new Date(expense.date);
       const formattedDate = date.toISOString().split("T")[0];
-
-      const range =
-        index > 0 ? expense.currentKM - defExpenses[index - 1].currentKM : 0;
+      const range = index > 0 ? expense.currentKM - defExpenses[index - 1].currentKM : 0;
 
       return {
         Date: formattedDate,
@@ -362,24 +352,39 @@ const downloadDefExpensesExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("DEF Expenses");
 
-    // Add the merged header row
+    // Main Title
     worksheet.mergeCells("A1:F1");
-    worksheet.getCell(
-      "A1"
-    ).value = `${truck.registrationNo} - DEF Expenses ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true, color: { argb: "FFFFFF" } }; // White font color
+    worksheet.getCell("A1").value = "Manage My Truck - DEF Expenses";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" }, // Black background
+      fgColor: { argb: "FF0C4736" },
     };
-    worksheet.getCell("A1").alignment = { horizontal: "center" };
+    worksheet.getRow(1).height = 36;
 
-    // Add the headings
+    // Subtitle (Truck and Date Range)
+    worksheet.mergeCells("A2:F2");
+    worksheet.getCell("A2").value = `${truck.registrationNo} | ${selectedDates[0]} to ${selectedDates[1]}`;
+    worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
+
+    // Column Headings
     const headings = ["Date", "Current KM", "Litres", "Cost", "Range", "Note"];
-    worksheet.addRow(headings).font = { bold: true };
+    const headerRow = worksheet.addRow(headings);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF57A773" }
+      };
+    });
+    headerRow.alignment = { horizontal: "center" };
+    headerRow.height = 24;
 
-    // Add the data
+    // Add Data Rows
     data.forEach((row) => {
       worksheet.addRow([
         row.Date,
@@ -389,6 +394,33 @@ const downloadDefExpensesExcel = async (req, res) => {
         row.Range,
         row.Note,
       ]);
+    });
+
+    // Set column widths
+    worksheet.columns = [
+      { width: 15 },
+      { width: 15 },
+      { width: 10 },
+      { width: 10 },
+      { width: 10 },
+      { width: 25 },
+    ];
+
+    // Add borders and center alignment to all cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        const existingFill = cell.fill;
+        cell.border = {
+          top: { style: "thin", color: { argb: "CCCCCC" } },
+          left: { style: "thin", color: { argb: "CCCCCC" } },
+          bottom: { style: "thin", color: { argb: "CCCCCC" } },
+          right: { style: "thin", color: { argb: "CCCCCC" } },
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        if (existingFill) {
+          cell.fill = existingFill;
+        }
+      });
     });
 
     // Write the workbook to a buffer
@@ -427,7 +459,6 @@ const downloadAllDefExpensesExcel = async (req, res) => {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    // Ensure the dates are in UTC and set the time to 00:00:00 to avoid time zone issues
     const startDate = selectedDates
       ? moment.utc(selectedDates[0]).startOf("day").toDate()
       : null;
@@ -435,20 +466,15 @@ const downloadAllDefExpensesExcel = async (req, res) => {
       ? moment.utc(selectedDates[1]).endOf("day").toDate()
       : null;
 
-    // Build the query filter
     const query = { addedBy: userId };
-
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
-        // If startDate and endDate are the same, match that specific date
         query.date = { $eq: startDate };
       } else {
-        // Match the range between startDate and endDate
         query.date = { $gte: startDate, $lte: endDate };
       }
     }
 
-    // Fetch all DEF expenses for the given userId and date range
     const defExpenses = await DefExpense.find(query).sort({ date: 1 });
 
     if (defExpenses.length === 0) {
@@ -459,14 +485,14 @@ const downloadAllDefExpensesExcel = async (req, res) => {
       });
     }
 
-    // Prepare data for Excel with registration numbers
+    // Prepare data for Excel with registration number
     const data = await Promise.all(
       defExpenses.map(async (expense) => {
-        const truck = await TruckExpense.findById(expense.truckId);
-        const registrationNo = truck ? truck.registrationNo : "Unknown";
-
         const date = new Date(expense.date);
         const formattedDate = date.toISOString().split("T")[0];
+
+        const truck = await TruckExpense.findById(expense.truckId);
+        const registrationNo = truck ? truck.registrationNo : "Unknown";
 
         return {
           Date: formattedDate,
@@ -483,24 +509,39 @@ const downloadAllDefExpensesExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("DEF Expenses");
 
-    // Add the merged header row
+    // Main Title
     worksheet.mergeCells("A1:F1");
-    worksheet.getCell(
-      "A1"
-    ).value = `DEF Expenses ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true, color: { argb: "FFFFFF" } }; // White font color
+    worksheet.getCell("A1").value = "Manage My Truck - All DEF Expenses";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" }, // Black background
+      fgColor: { argb: "FF0C4736" },
     };
-    worksheet.getCell("A1").alignment = { horizontal: "center" };
+    worksheet.getRow(1).height = 36;
 
-    // Add the headings
+    // Subtitle (Date Range)
+    worksheet.mergeCells("A2:F2");
+    worksheet.getCell("A2").value = `Date Range: ${selectedDates[0]} to ${selectedDates[1]}`;
+    worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
+
+    // Column Headings
     const headings = ["Date", "Registration No", "Current KM", "Litres", "Cost", "Note"];
-    worksheet.addRow(headings).font = { bold: true };
+    const headerRow = worksheet.addRow(headings);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF57A773" }
+      };
+    });
+    headerRow.alignment = { horizontal: "center" };
+    headerRow.height = 24;
 
-    // Add the data
+    // Add Data Rows
     data.forEach((row) => {
       worksheet.addRow([
         row.Date,
@@ -510,6 +551,33 @@ const downloadAllDefExpensesExcel = async (req, res) => {
         row.Cost,
         row.Note,
       ]);
+    });
+
+    // Set column widths
+    worksheet.columns = [
+      { width: 15 },
+      { width: 20 },
+      { width: 15 },
+      { width: 10 },
+      { width: 10 },
+      { width: 25 },
+    ];
+
+    // Add borders and center alignment to all cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        const existingFill = cell.fill;
+        cell.border = {
+          top: { style: "thin", color: { argb: "CCCCCC" } },
+          left: { style: "thin", color: { argb: "CCCCCC" } },
+          bottom: { style: "thin", color: { argb: "CCCCCC" } },
+          right: { style: "thin", color: { argb: "CCCCCC" } },
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        if (existingFill) {
+          cell.fill = existingFill;
+        }
+      });
     });
 
     // Write the workbook to a buffer
@@ -530,12 +598,9 @@ const downloadAllDefExpensesExcel = async (req, res) => {
   } catch (error) {
     logger.error("Error generating Excel file", { error: error.message, stack: error.stack });
     console.error("Error generating Excel file:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to generate Excel file", error: error.message });
+    res.status(500).json({ message: "Failed to generate Excel file", error: error.message });
   }
 };
-
 
 module.exports = {
   addDefExpense,
