@@ -9,13 +9,17 @@ const VehicleCard = ({ data }) => {
   const vehicleModalRef = useRef();
   const catalogModalRef = useRef();
 
-  const callVehicleModal = () => {
+  const callVehicleModal = (e) => {
+    e.stopPropagation();
     if (vehicleModalRef.current) {
       vehicleModalRef.current.showLoading();
     }
   };
 
-  const callCatalogModal = () => {
+  const callCatalogModal = (e) => {
+    if (e) {
+      e.stopPropagation();
+    }
     if (catalogModalRef.current) {
       catalogModalRef.current.showLoading();
     }
@@ -30,10 +34,10 @@ const VehicleCard = ({ data }) => {
       <Card
         hoverable
         bordered
-        style={{border: "1px solid #cbcbcb"}}
-        cover={<img alt="truck" height={180} style={{objectFit: 'cover'}} src={data && data.imgURL && data.imgURL.length > 0
-          ? data.imgURL[0]?.thumbUrl:'./truck.jpg'} />}
-          onClick={callCatalogModal}
+        style={{ border: "1px solid #cbcbcb" }}
+        cover={<img alt="truck" height={180} style={{ objectFit: 'cover' }} src={data && data.imgURL && data.imgURL.length > 0
+          ? data.imgURL[0]?.thumbUrl : './truck.jpg'} />}
+        onClick={callCatalogModal}
         actions={[
           <EditFilled
             key="edit"
@@ -47,10 +51,10 @@ const VehicleCard = ({ data }) => {
           />,
         ]}
       >
-        <Meta title={data.registrationNo} description={data.desc} style={{height: '80px', overflow:'hidden'}} />
+        <Meta title={data.registrationNo} description={data.desc} style={{ height: '80px', overflow: 'hidden' }} />
       </Card>
       <VehicleModal ref={vehicleModalRef} addNewVehicle={addNewVehicle} vehicleData={data} />
-      <CatalogModal ref={catalogModalRef} vehicleId={data._id} isFinanced={data.isFinanced} regNo={data.registrationNo}/>
+      <CatalogModal ref={catalogModalRef} vehicleId={data._id} isFinanced={data.isFinanced} regNo={data.registrationNo} />
     </>
   );
 };

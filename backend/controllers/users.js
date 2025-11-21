@@ -12,10 +12,10 @@ module.exports.getMyProfile = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Application id not valid", 400));
     }
 
-    const user = await userModel.findOne({ 
-        username: decodedUser.username 
+    const user = await userModel.findOne({
+        username: decodedUser.username
     });
-    
+
     delete user.password;
 
     logger.info("Profile retrieved successfully", getFullContext(req, {

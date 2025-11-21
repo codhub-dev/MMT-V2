@@ -565,7 +565,7 @@ const downloadAllFuelExpensesExcel = async (req, res) => {
     worksheet.getCell("A2").value = `Date Range: ${selectedDates[0]} to ${selectedDates[1]}`;
     worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
     worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
-    
+
 
     // Column Headings
     const headings = [

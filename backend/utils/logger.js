@@ -35,7 +35,7 @@ const logger = winston.createLogger({
 // Only enable Papertrail if explicitly configured via environment variable
 if (process.env.ENABLE_PAPERTRAIL === 'true') {
   const PapertrailHTTPSTransport = require('./papertrailHttpsTransport');
-  
+
   // Papertrail HTTPS transport configuration
   const papertrailTransport = new PapertrailHTTPSTransport({
     endpoint: process.env.PAPERTRAIL_HTTPS_ENDPOINT,
