@@ -54,22 +54,21 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
 
         {/* Hero Section */}
         <div style={{
-          background: 'linear-gradient(135deg, #1890ff 0%, #722ed1 100%)',
+          background: '#1890ff',
           padding: '30px',
-          borderRadius: '12px',
+          borderRadius: '8px',
           marginBottom: '24px',
           color: 'white',
           textAlign: 'center',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
         }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🛡️</div>
           <h2 style={{
             color: 'white',
             margin: '0 0 12px 0',
             fontSize: '24px',
             fontWeight: 'bold'
           }}>
-            Your Privacy Matters
+            Privacy Policy
           </h2>
           <p style={{
             fontSize: '16px',
@@ -93,16 +92,12 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
           {/* Information We Collect */}
           <div style={{ marginBottom: '32px' }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
               marginBottom: '20px',
               padding: '16px',
-              background: 'linear-gradient(135deg, #f0f5ff 0%, #bae7ff 100%)',
+              background: '#f8f9fa',
               borderRadius: '8px',
-              borderLeft: '5px solid #1890ff'
+              borderLeft: '4px solid #1890ff'
             }}>
-              <span style={{ fontSize: '24px' }}>📊</span>
               <h3 style={{ color: '#1890ff', margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
                 Information We Collect
               </h3>
@@ -113,36 +108,36 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #52c41a'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#52c41a' }}>👤 Personal Info:</strong>
+                  <strong style={{ color: '#1890ff' }}>Personal Info:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>Name, email, phone number for account management.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #fa8c16'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#fa8c16' }}>🚛 Truck Data:</strong>
+                  <strong style={{ color: '#1890ff' }}>Truck Data:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>Expenses, maintenance, and operational details you provide.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #722ed1'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#722ed1' }}>📈 Usage Data:</strong>
+                  <strong style={{ color: '#1890ff' }}>Usage Data:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>Interaction data, IP addresses, and cookies for analytics.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #f5222d'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#f5222d' }}>📍 Location Data:</strong>
+                  <strong style={{ color: '#1890ff' }}>Location Data:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>If enabled, for location-based features and route optimization.</span>
                 </div>
               </div>
@@ -152,17 +147,13 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
           {/* How We Use Information */}
           <div style={{ marginBottom: '32px' }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
               marginBottom: '20px',
               padding: '16px',
-              background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
+              background: '#f8f9fa',
               borderRadius: '8px',
-              borderLeft: '5px solid #52c41a'
+              borderLeft: '4px solid #1890ff'
             }}>
-              <span style={{ fontSize: '24px' }}>⚙️</span>
-              <h3 style={{ color: '#52c41a', margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
+              <h3 style={{ color: '#1890ff', margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
                 How We Use Your Information
               </h3>
             </div>
@@ -174,34 +165,34 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
                   borderRadius: '6px',
                   borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#1890ff' }}>🔧 Service Provision:</strong>
+                  <strong style={{ color: '#1890ff' }}>Service Provision:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>To operate, maintain, and improve our platform features.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #52c41a'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#52c41a' }}>💬 Communication:</strong>
+                  <strong style={{ color: '#1890ff' }}>Communication:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>For account updates, support, and important notifications.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #fa8c16'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#fa8c16' }}>📊 Analytics:</strong>
+                  <strong style={{ color: '#1890ff' }}>Analytics:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>To understand usage patterns and improve user experience.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #722ed1'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#722ed1' }}>🆘 Support:</strong>
+                  <strong style={{ color: '#1890ff' }}>Support:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>To respond to your inquiries and provide technical assistance.</span>
                 </div>
               </div>
@@ -211,17 +202,13 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
           {/* Information Sharing */}
           <div style={{ marginBottom: '32px' }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
               marginBottom: '20px',
               padding: '16px',
-              background: 'linear-gradient(135deg, #fff7e6 0%, #ffd591 100%)',
+              background: '#f8f9fa',
               borderRadius: '8px',
-              borderLeft: '5px solid #fa8c16'
+              borderLeft: '4px solid #1890ff'
             }}>
-              <span style={{ fontSize: '24px' }}>🤝</span>
-              <h3 style={{ color: '#fa8c16', margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
+              <h3 style={{ color: '#1890ff', margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
                 Information Sharing
               </h3>
             </div>
@@ -233,25 +220,25 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
                   borderRadius: '6px',
                   borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#1890ff' }}>🔧 Service Providers:</strong>
+                  <strong style={{ color: '#1890ff' }}>Service Providers:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>With trusted third-party services that help us operate our platform.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #f5222d'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#f5222d' }}>⚖️ Legal Compliance:</strong>
+                  <strong style={{ color: '#1890ff' }}>Legal Compliance:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>When required by law or to protect our rights and users.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #722ed1'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#722ed1' }}>🏢 Business Transfers:</strong>
+                  <strong style={{ color: '#1890ff' }}>Business Transfers:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>In case of a merger, acquisition, or sale of business assets.</span>
                 </div>
               </div>
@@ -261,17 +248,13 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
           {/* Your Rights */}
           <div style={{ marginBottom: '32px' }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
               marginBottom: '20px',
               padding: '16px',
-              background: 'linear-gradient(135deg, #f9f0ff 0%, #d3adf7 100%)',
+              background: '#f8f9fa',
               borderRadius: '8px',
-              borderLeft: '5px solid #722ed1'
+              borderLeft: '4px solid #1890ff'
             }}>
-              <span style={{ fontSize: '24px' }}>✊</span>
-              <h3 style={{ color: '#722ed1', margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
+              <h3 style={{ color: '#1890ff', margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
                 Your Rights & Controls
               </h3>
             </div>
@@ -281,27 +264,27 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #52c41a'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#52c41a' }}>✏️ Access & Correction:</strong>
+                  <strong style={{ color: '#1890ff' }}>Access & Correction:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>Update your personal information anytime through your account settings.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #fa8c16'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#fa8c16' }}>📧 Opt-Out:</strong>
+                  <strong style={{ color: '#1890ff' }}>Opt-Out:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>Unsubscribe from promotional communications at any time.</span>
                 </div>
                 <div style={{
                   padding: '12px',
                   background: '#f8f9fa',
                   borderRadius: '6px',
-                  borderLeft: '3px solid #f5222d'
+                  borderLeft: '3px solid #1890ff'
                 }}>
-                  <strong style={{ color: '#f5222d' }}>🗑️ Account Deletion:</strong>
+                  <strong style={{ color: '#1890ff' }}>Account Deletion:</strong>
                   <span style={{ marginLeft: '8px', color: '#555' }}>Request complete account and data deletion by contacting our support team.</span>
                 </div>
               </div>
@@ -312,12 +295,12 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
           <div style={{ display: 'grid', gap: '20px', marginBottom: '32px' }}>
             <div style={{
               padding: '20px',
-              background: 'linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%)',
+              background: '#f8f9fa',
               borderRadius: '8px',
-              borderLeft: '5px solid #f5222d'
+              borderLeft: '4px solid #1890ff'
             }}>
-              <h4 style={{ color: '#f5222d', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                🔗 Third-Party Links
+              <h4 style={{ color: '#1890ff', margin: '0 0 12px 0', fontSize: '16px', fontWeight: 'bold' }}>
+                Third-Party Links
               </h4>
               <p style={{ margin: 0, color: '#555', lineHeight: '1.5' }}>
                 Our platform may contain links to external websites. We are not responsible for the privacy practices
@@ -327,12 +310,12 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
 
             <div style={{
               padding: '20px',
-              background: 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
+              background: '#f8f9fa',
               borderRadius: '8px',
-              borderLeft: '5px solid #52c41a'
+              borderLeft: '4px solid #1890ff'
             }}>
-              <h4 style={{ color: '#52c41a', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                👶 Children's Privacy
+              <h4 style={{ color: '#1890ff', margin: '0 0 12px 0', fontSize: '16px', fontWeight: 'bold' }}>
+                Children's Privacy
               </h4>
               <p style={{ margin: 0, color: '#555', lineHeight: '1.5' }}>
                 Our platform is designed for business use and is not intended for children under 13 years of age.
@@ -342,12 +325,12 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
 
             <div style={{
               padding: '20px',
-              background: 'linear-gradient(135deg, #f0f5ff 0%, #bae7ff 100%)',
+              background: '#f8f9fa',
               borderRadius: '8px',
-              borderLeft: '5px solid #1890ff'
+              borderLeft: '4px solid #1890ff'
             }}>
-              <h4 style={{ color: '#1890ff', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                🔒 Data Security
+              <h4 style={{ color: '#1890ff', margin: '0 0 12px 0', fontSize: '16px', fontWeight: 'bold' }}>
+                Data Security
               </h4>
               <p style={{ margin: 0, color: '#555', lineHeight: '1.5' }}>
                 We implement industry-standard security measures to protect your information, including encryption,
@@ -360,14 +343,13 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
 
         {/* Contact & Updates Section */}
         <div style={{
-          background: 'linear-gradient(135deg, #52c41a 0%, #1890ff 100%)',
+          background: '#1890ff',
           padding: '30px',
-          borderRadius: '12px',
+          borderRadius: '8px',
           color: 'white',
           textAlign: 'center',
-          boxShadow: '0 8px 32px rgba(82, 196, 26, 0.3)'
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
         }}>
-          <div style={{ fontSize: '32px', marginBottom: '16px' }}>📞</div>
           <h3 style={{ color: 'white', margin: '0 0 16px 0', fontSize: '20px' }}>
             Questions or Concerns?
           </h3>
@@ -376,24 +358,21 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
               <strong>Manage My Truck (MMT)</strong>
             </p>
             <p style={{ margin: '0 0 8px 0', opacity: 0.95 }}>
-              📧 Email: dev.codhub@gmail.com
+              Email: dev.codhub@gmail.com
             </p>
-            <p style={{ margin: '0 0 8px 0', opacity: 0.95 }}>
-              📱 Phone: +91 8921581287
-            </p>
+
           </div>
           <div style={{
             padding: '16px',
-            background: 'rgba(255, 255, 255, 0.2)',
-            borderRadius: '8px',
-            backdropFilter: 'blur(10px)'
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '8px'
           }}>
             <p style={{ margin: '0 0 8px 0', fontSize: '14px', opacity: 0.9 }}>
               <strong>Policy Updates:</strong> We may update this privacy policy from time to time.
               We will notify you of any significant changes through our platform or via email.
             </p>
             <p style={{ margin: 0, fontSize: '14px', opacity: 0.9 }}>
-              <strong>Last Updated:</strong> November 2025
+              <strong>Last Updated:</strong> November 2024
             </p>
           </div>
         </div>
