@@ -169,8 +169,8 @@ const apis = {
     getAllExpenses: "getAllIncomesByUserId",
     updateAPI: "updateIncomeByTruckId",
     deleteAPI: "deleteIncomeById",
-    downloadAPI: "downloadIncomeExcel",
-    downloadAllAPI: "downloadAllIncomeExcel",
+    downloadAPI: "downloadIncomesExcel",
+    downloadAllAPI: "downloadAllIncomesExcel",
   },
   totalExpenses: {
     getAllExpensesById: "getAllTotalExpensesByTruckId",
