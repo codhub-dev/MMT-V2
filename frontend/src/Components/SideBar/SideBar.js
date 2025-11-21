@@ -37,11 +37,11 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
         },
         {
             type: "group",
-            label: "GENERAL",
+            label: "ADMIN",
             children: [
-                { label: "Settings", key: "settings", icon: <SettingOutlined /> },
-                { label: "Help", key: "help", icon: <QuestionCircleOutlined /> },
-                { label: "Logout", key: "logout", icon: <LogoutOutlined /> }
+                { label: "Admin Portal", key: "admin", icon: <SettingOutlined /> },
+                { label: "Logging", key: "log", icon: <QuestionCircleOutlined /> },
+                { label: "Artillery", key: "artillery", icon: <LogoutOutlined /> }
             ]
         }
     ];
