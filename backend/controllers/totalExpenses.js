@@ -186,7 +186,7 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
         const registrationNo = truck ? truck.registrationNo : "Unknown";
 
         const date = new Date(expense.date);
-        const formattedDate = moment(date).format("DD-MM-YYYY");
+        const formattedDate = date.toISOString().split("T")[0];
 
         return {
           ...expense,
@@ -199,8 +199,7 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
     // Sort combined expenses by date
     formattedExpenses.sort(
       (a, b) =>
-        new Date(a.date.split("-").reverse().join("-")) -
-        new Date(b.date.split("-").reverse().join("-"))
+        new Date(a.date) - new Date(b.date)
     );
 
     const data = formattedExpenses.map((expense) => ({
@@ -211,25 +210,43 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
       Note: expense.note || "",
     }));
 
+    // Create a new workbook and worksheet
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Total Expenses");
 
+    // Main Title
     worksheet.mergeCells("A1:E1");
-    worksheet.getCell(
-      "A1"
-    ).value = `Total Expenses ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true };
+    worksheet.getCell("A1").value = "Manage My Truck - Total Expenses";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" },
+      fgColor: { argb: "FF0C4736" },
     };
-    worksheet.getCell("A1").font.color = { argb: "FFFFFF" };
-    worksheet.getCell("A1").alignment = { horizontal: "center" };
+    worksheet.getRow(1).height = 36;
 
+    // Subtitle (Date Range)
+    worksheet.mergeCells("A2:E2");
+    worksheet.getCell("A2").value = `Date Range: ${selectedDates[0]} to ${selectedDates[1]}`;
+    worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
+
+    // Column Headings
     const headings = ["Date", "Registration", "Type", "Cost", "Note"];
-    worksheet.addRow(headings).font = { bold: true };
+    const headerRow = worksheet.addRow(headings);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF57A773" }
+      };
+    });
+    headerRow.alignment = { horizontal: "center" };
+    headerRow.height = 24;
 
+    // Add Data Rows
     data.forEach((row) => {
       worksheet.addRow([
         row.Date,
@@ -240,6 +257,33 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
       ]);
     });
 
+    // Set column widths
+    worksheet.columns = [
+      { width: 15 },
+      { width: 20 },
+      { width: 20 },
+      { width: 10 },
+      { width: 30 },
+    ];
+
+    // Add borders and center alignment to all cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        const existingFill = cell.fill;
+        cell.border = {
+          top: { style: "thin", color: { argb: "CCCCCC" } },
+          left: { style: "thin", color: { argb: "CCCCCC" } },
+          bottom: { style: "thin", color: { argb: "CCCCCC" } },
+          right: { style: "thin", color: { argb: "CCCCCC" } },
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        if (existingFill) {
+          cell.fill = existingFill;
+        }
+      });
+    });
+
+    // Write the workbook to a buffer
     const buffer = await workbook.xlsx.writeBuffer();
 
     logger.info(`Total expenses Excel downloaded for user ${userId}`, {
