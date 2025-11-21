@@ -3,14 +3,15 @@ import { Menu, Button } from "antd";
 import {
     HomeOutlined,
     BarChartOutlined,
-    SettingOutlined,
     QuestionCircleOutlined,
-    LogoutOutlined,
     TruckOutlined,
     CloseOutlined,
     BankOutlined,
     FireOutlined,
-    WalletOutlined
+    WalletOutlined,
+    UserOutlined,
+    LineChartOutlined,
+    FileExclamationOutlined
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMobile } from "../MobileContext/MobileContext";
@@ -39,9 +40,9 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
             type: "group",
             label: "ADMIN",
             children: [
-                { label: "Admin Portal", key: "admin", icon: <SettingOutlined /> },
-                { label: "Logging", key: "log", icon: <QuestionCircleOutlined /> },
-                { label: "Artillery", key: "artillery", icon: <LogoutOutlined /> }
+                { label: "Admin Portal", key: "admin", icon: <UserOutlined /> },
+                { label: "Logging", key: "log", icon: <FileExclamationOutlined /> },
+                { label: "Artillery", key: "artillery", icon: <LineChartOutlined /> }
             ]
         }
     ];
