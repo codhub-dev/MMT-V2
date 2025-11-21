@@ -101,7 +101,7 @@ const CalculateLoan = () => {
       type: "input",
       name: "additionalCharges",
       label: "Amount",
-      placeholder: "Enter if any additional charges paid",
+      placeholder: "Enter if any additional charges included in the amount paid",
       textType: "number",
     },
   ];
