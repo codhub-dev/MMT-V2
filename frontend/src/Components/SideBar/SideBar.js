@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { Menu, Button } from "antd";
 import {
     HomeOutlined,
@@ -15,6 +15,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMobile } from "../MobileContext/MobileContext";
 import GetHelpModal from "../GetHelpModal/GetHelpModal"; 
+import { UserContext } from "../../App";
 
 const SideBar = ({ isOpen = true, setIsOpen }) => {
     const [logoLoading, setLogoLoading] = useState(true);
@@ -23,7 +24,7 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
     const location = useLocation();
     const current = location.pathname.replace("/", "");
     const getHelpRef = useRef();
-    const user = JSON.parse(localStorage.getItem("user"));
+    const { user } = useContext(UserContext);
     const isAdmin = user?.isAdmin;
 
     const items = [
