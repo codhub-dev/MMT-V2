@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Axios } from "../../../Config/Axios/Axios";
 import { UserContext } from "../../../App";
-import { MailFilled, PhoneFilled } from "@ant-design/icons";
+import { MailFilled, PhoneFilled, EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useToast } from "../../../Components/ToastContext/ToastContext";
 import LoginLoaderOverlay from "../../../Components/LoginLoaderOverlay/LoginLoaderOverlay";
-import { Button } from "antd";
+import { Button, Input, Modal } from "antd";
 import { PasskeyFillIcon } from "@primer/octicons-react";
 
 const Login = ({ setauthenticated }) => {
@@ -16,6 +16,14 @@ const Login = ({ setauthenticated }) => {
   const [err, seterr] = useState("");
   const [loader, setLoader] = useState(true);
   const [googleIconLoaded, setGoogleIconLoaded] = useState(false);
+
+  // Email/Password modal states
+  const [passkeyModalVisible, setPasskeyModalVisible] = useState(false);
+  const [passkeyMode, setPasskeyMode] = useState(""); // "signup" or "login"
+  const [passkeyEmail, setPasskeyEmail] = useState("");
+  const [passkeyPassword, setPasskeyPassword] = useState("");
+  const [passkeyName, setPasskeyName] = useState("");
+  const [passkeyViewPassword, setPasskeyViewPassword] = useState(false);
 
   const { setUser } = useContext(UserContext);
   const toastMessage = useToast();
@@ -84,8 +92,93 @@ const Login = ({ setauthenticated }) => {
     }
   };
 
-  const passkeyLogin = async () => {
-    toastMessage("info", "Passkey login is currently unavailable.");
+  // Open email/password modal
+  const openPasskeyModal = (mode) => {
+    setPasskeyMode(mode);
+    setPasskeyModalVisible(true);
+    setPasskeyEmail("");
+    setPasskeyPassword("");
+    setPasskeyName("");
+    setPasskeyViewPassword(false);
+  };
+
+  // Handle email/password signup
+  const handleEmailPasswordSignup = async () => {
+    if (!passkeyEmail || !passkeyPassword || !passkeyName) {
+      toastMessage("error", "Please enter email, name, and password.");
+      return;
+    }
+
+    setLoader(true);
+    try {
+      const response = await Axios.post("/api/v1/app/auth/signUp", {
+        username: passkeyEmail,
+        password: passkeyPassword,
+        name: passkeyName,
+      });
+
+      if (response.data.code === 200) {
+        // Now log the user in
+        const loginResponse = await Axios.post("/api/v1/app/auth/logIn", {
+          username: passkeyEmail,
+          password: passkeyPassword,
+        });
+
+        const { token } = loginResponse.data;
+        const decoded = JSON.parse(atob(token.split('.')[1]));
+
+        setUser({
+          userId: decoded.username,
+          email: passkeyEmail,
+          name: passkeyName,
+          isSubscribed: false,
+          isAdmin: false
+        });
+        localStorage.setItem("token", token);
+        setPasskeyModalVisible(false);
+        toastMessage("success", "Account created successfully!");
+      }
+    } catch (error) {
+      console.error("Signup failed:", error);
+      toastMessage("error", error.response?.data?.message || "Signup failed. Please try again.");
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  // Handle email/password login
+  const handleEmailPasswordLogin = async () => {
+    if (!passkeyEmail || !passkeyPassword) {
+      toastMessage("error", "Please enter your email and password.");
+      return;
+    }
+
+    setLoader(true);
+    try {
+      const response = await Axios.post("/api/v1/app/auth/logIn", {
+        username: passkeyEmail,
+        password: passkeyPassword,
+      });
+
+      const { token } = response.data;
+      const decoded = JSON.parse(atob(token.split('.')[1]));
+
+      setUser({
+        userId: decoded.username,
+        email: passkeyEmail,
+        name: decoded.username,
+        isSubscribed: false,
+        isAdmin: false
+      });
+      localStorage.setItem("token", token);
+      setPasskeyModalVisible(false);
+      toastMessage("success", "Login successful!");
+    } catch (error) {
+      console.error("Login failed:", error);
+      toastMessage("error", error.response?.data?.message || "Login failed. Please check your credentials.");
+    } finally {
+      setLoader(false);
+    }
   };
 
   const handleKeyDown = (event) => {
@@ -162,7 +255,7 @@ const Login = ({ setauthenticated }) => {
                     </Button>
 
                     <Button
-                      onClick={() => passkeyLogin()}
+                      onClick={() => openPasskeyModal("choose")}
                       className="w-100"
                       style={{ padding: "18px 0" }}
                     >
@@ -196,6 +289,125 @@ const Login = ({ setauthenticated }) => {
           </div>
         </div>
       </section>
+
+      {/* Passkey Modal */}
+      <Modal
+        title={passkeyMode === "choose" ? "Passkey Authentication" : passkeyMode === "signup" ? "Register Passkey" : "Login with Passkey"}
+        open={passkeyModalVisible}
+        onCancel={() => setPasskeyModalVisible(false)}
+        footer={null}
+      >
+        {passkeyMode === "choose" ? (
+          <div className="d-flex flex-column gap-3">
+            <p>Choose an option to continue with passkey authentication:</p>
+            <Button
+              type="primary"
+              onClick={() => setPasskeyMode("signup")}
+              className="w-100"
+            >
+              Sign up with Passkey
+            </Button>
+            <Button
+              onClick={() => setPasskeyMode("login")}
+              className="w-100"
+            >
+              Login with Passkey
+            </Button>
+          </div>
+        ) : passkeyMode === "signup" ? (
+          <div className="d-flex flex-column gap-3">
+            <div>
+              <label className="form-label">Name</label>
+              <Input
+                type="text"
+                placeholder="Enter your name"
+                value={passkeyName}
+                onChange={(e) => setPasskeyName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="form-label">Email</label>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={passkeyEmail}
+                onChange={(e) => setPasskeyEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="form-label">Password</label>
+              <Input
+                type={passkeyViewPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={passkeyPassword}
+                onChange={(e) => setPasskeyPassword(e.target.value)}
+                suffix={
+                  passkeyViewPassword ? (
+                    <EyeOutlined onClick={() => setPasskeyViewPassword(false)} style={{ cursor: "pointer" }} />
+                  ) : (
+                    <EyeInvisibleOutlined onClick={() => setPasskeyViewPassword(true)} style={{ cursor: "pointer" }} />
+                  )
+                }
+              />
+            </div>
+            <Button
+              type="primary"
+              onClick={handleEmailPasswordSignup}
+              className="w-100"
+            >
+              Sign Up
+            </Button>
+            <Button
+              onClick={() => setPasskeyMode("choose")}
+              className="w-100"
+            >
+              Back
+            </Button>
+          </div>
+        ) : (
+          <div className="d-flex flex-column gap-3">
+            <div>
+              <label className="form-label">Email</label>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={passkeyEmail}
+                onChange={(e) => setPasskeyEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="form-label">Password</label>
+              <Input
+                type={passkeyViewPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={passkeyPassword}
+                onChange={(e) => setPasskeyPassword(e.target.value)}
+                suffix={
+                  passkeyViewPassword ? (
+                    <EyeOutlined onClick={() => setPasskeyViewPassword(false)} style={{ cursor: "pointer" }} />
+                  ) : (
+                    <EyeInvisibleOutlined onClick={() => setPasskeyViewPassword(true)} style={{ cursor: "pointer" }} />
+                  )
+                }
+              />
+            </div>
+            <Button
+              type="primary"
+              onClick={handleEmailPasswordLogin}
+              className="w-100"
+            >
+              Login
+            </Button>
+            <Button
+              onClick={() => setPasskeyMode("choose")}
+              className="w-100"
+            >
+              Back
+            </Button>
+          </div>
+        )}
+      </Modal>
+
       <LoginLoaderOverlay isVisible={loader} />
     </>
   );

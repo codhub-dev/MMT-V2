@@ -1,13 +1,25 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/user-model");
 const ErrorHandler = require("../middleware/errorHandlers");
 const { catchAsyncError } = require("../middleware/catchAsyncError");
 const logger = require("../utils/logger");
 const { getFullContext } = require("../utils/requestContext");
+const {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+  generateAuthenticationOptions,
+  verifyAuthenticationResponse,
+} = require("@simplewebauthn/server");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// WebAuthn configuration
+const rpName = process.env.RP_NAME || "Manage My Truck";
+const rpID = process.env.RP_ID || "localhost";
+const origin = process.env.ORIGIN || "http://localhost:3000";
 
 module.exports.signUpWithGoogle = async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -132,13 +144,18 @@ module.exports.logIn = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("username or password not passed", 400));
   }
 
-  const user = await userModel.findOne({
-    username: username,
+  const user = await User.findOne({
+    email: username,
   });
 
   if (!user) {
     logger.warn("Login failed: User not found", getFullContext(req, { username }));
     return next(new ErrorHandler("Invalid credentials or user not found", 401));
+  }
+
+  if (!user.password) {
+    logger.warn("Login failed: No password set for user", getFullContext(req, { username }));
+    return next(new ErrorHandler("Invalid credentials", 401));
   }
 
   const passwordMatch = await bcrypt.compare(password, user.password);
@@ -150,6 +167,9 @@ module.exports.logIn = catchAsyncError(async (req, res, next) => {
   const token = jwt.sign(
     {
       username: username,
+      userId: user._id.toString(),
+      name: user.name,
+      email: user.email,
     },
     process.env.SECRETKEY,
     {
@@ -177,28 +197,28 @@ module.exports.signUp = async (req, res, next) => {
     );
   }
 
-  const user = await userModel.findOne({
-    username: username,
+  const user = await User.findOne({
+    email: username,
   });
 
   if (user) {
-    logger.warn("Sign up failed: Username already exists", getFullContext(req, { username }));
+    logger.warn("Sign up failed: Email already exists", getFullContext(req, { username }));
     return res
       .status(409)
-      .json({ message: "username already exists", code: 409 });
+      .json({ message: "Email already exists", code: 409 });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const date = new Date();
-  const newUser = new userModel({
-    username: username,
+  // Generate a unique googleId for email/password users using email hash
+  const googleId = 'email_' + crypto.createHash('sha256').update(username).digest('hex').substring(0, 20);
+
+  const newUser = new User({
+    googleId: googleId,
+    email: username,
     password: hashedPassword,
     name: name,
-    createdAt: {
-      string: date.toLocaleString(),
-      timestamp: date.getTime(),
-    },
+    createdAt: new Date(),
   });
 
   const result = await newUser.save();
@@ -256,4 +276,275 @@ module.exports.changePassword = catchAsyncError(async (req, res, next) => {
     status: "success",
     user: user,
   });
+});
+
+// Passkey Registration - Generate Options
+module.exports.passkeyRegisterOptions = catchAsyncError(async (req, res, next) => {
+  const { email, name } = req.body;
+  logger.info("Passkey registration options request", getFullContext(req, { email, name }));
+
+  if (!email || !name) {
+    logger.warn("Passkey registration failed: Missing required fields", getFullContext(req, { email, name }));
+    return next(new ErrorHandler("Email and name are required", 400));
+  }
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Generate a unique googleId for passkey users
+      const googleId = 'passkey_' + crypto.createHash('sha256').update(email).digest('hex').substring(0, 20);
+
+      // Create new user for passkey registration
+      user = new User({
+        googleId,
+        email,
+        name,
+        isSubscribed: false,
+        isAdmin: false,
+        createdAt: new Date(),
+      });
+      await user.save();
+      logger.info("New user created for passkey registration", { email, name });
+    }
+
+    const options = await generateRegistrationOptions({
+      rpName,
+      rpID,
+      userID: user._id.toString(),
+      userName: email,
+      userDisplayName: name,
+      attestationType: "none",
+      authenticatorSelection: {
+        residentKey: "preferred",
+        userVerification: "preferred",
+      },
+    });
+
+    // Store challenge for verification
+    user.currentChallenge = options.challenge;
+    await user.save();
+
+    logger.info("Passkey registration options generated", { email, userId: user._id });
+
+    res.status(200).json(options);
+  } catch (error) {
+    logger.error("Failed to generate passkey registration options", {
+      error: error.message,
+      stack: error.stack,
+      email
+    });
+    return next(new ErrorHandler("Failed to generate registration options", 500));
+  }
+});
+
+// Passkey Registration - Verify Response
+module.exports.passkeyRegisterVerify = catchAsyncError(async (req, res, next) => {
+  const { email, credential } = req.body;
+  logger.info("Passkey registration verification attempt", getFullContext(req, { email }));
+
+  if (!email || !credential) {
+    logger.warn("Passkey verification failed: Missing required fields", getFullContext(req, { email }));
+    return next(new ErrorHandler("Email and credential are required", 400));
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || !user.currentChallenge) {
+      logger.warn("Passkey verification failed: User not found or no challenge", getFullContext(req, { email }));
+      return next(new ErrorHandler("Registration session not found", 400));
+    }
+
+    const verification = await verifyRegistrationResponse({
+      response: credential,
+      expectedChallenge: user.currentChallenge,
+      expectedOrigin: origin,
+      expectedRPID: rpID,
+    });
+
+    if (!verification.verified || !verification.registrationInfo) {
+      logger.warn("Passkey verification failed: Verification unsuccessful", getFullContext(req, { email }));
+      return next(new ErrorHandler("Passkey verification failed", 400));
+    }
+
+    const { credentialPublicKey, credentialID, counter } = verification.registrationInfo;
+
+    // Store passkey
+    user.passkeys.push({
+      credentialID: Buffer.from(credentialID),
+      credentialPublicKey: Buffer.from(credentialPublicKey),
+      counter,
+      transports: credential.response.transports || [],
+      createdAt: new Date(),
+    });
+
+    user.currentChallenge = undefined;
+    await user.save();
+
+    // Generate JWT token
+    const jwtToken = jwt.sign(
+      {
+        userId: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        isSubscribed: user.isSubscribed,
+        isAdmin: user.isAdmin
+      },
+      process.env.SECRETKEY,
+      { expiresIn: "7d" }
+    );
+
+    logger.info("Passkey registered successfully", { email, userId: user._id });
+
+    res.status(200).json({
+      verified: true,
+      user: {
+        userId: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        isSubscribed: user.isSubscribed,
+        isAdmin: user.isAdmin
+      },
+      token: jwtToken,
+    });
+  } catch (error) {
+    logger.error("Passkey registration verification failed", {
+      error: error.message,
+      stack: error.stack,
+      email
+    });
+    return next(new ErrorHandler("Failed to verify passkey registration", 500));
+  }
+});
+
+// Passkey Authentication - Generate Options
+module.exports.passkeyAuthOptions = catchAsyncError(async (req, res, next) => {
+  const { email } = req.body;
+  logger.info("Passkey authentication options request", getFullContext(req, { email }));
+
+  if (!email) {
+    logger.warn("Passkey auth failed: Missing email", getFullContext(req, { email }));
+    return next(new ErrorHandler("Email is required", 400));
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || !user.passkeys || user.passkeys.length === 0) {
+      logger.warn("Passkey auth failed: No passkeys registered", getFullContext(req, { email }));
+      return next(new ErrorHandler("No passkeys registered for this email", 404));
+    }
+
+    const options = await generateAuthenticationOptions({
+      rpID,
+      allowCredentials: user.passkeys.map(passkey => ({
+        id: passkey.credentialID,
+        type: 'public-key',
+        transports: passkey.transports,
+      })),
+      userVerification: "preferred",
+    });
+
+    // Store challenge for verification
+    user.currentChallenge = options.challenge;
+    await user.save();
+
+    logger.info("Passkey authentication options generated", { email, userId: user._id });
+
+    res.status(200).json(options);
+  } catch (error) {
+    logger.error("Failed to generate passkey authentication options", {
+      error: error.message,
+      stack: error.stack,
+      email
+    });
+    return next(new ErrorHandler("Failed to generate authentication options", 500));
+  }
+});
+
+// Passkey Authentication - Verify Response
+module.exports.passkeyAuthVerify = catchAsyncError(async (req, res, next) => {
+  const { email, credential } = req.body;
+  logger.info("Passkey authentication verification attempt", getFullContext(req, { email }));
+
+  if (!email || !credential) {
+    logger.warn("Passkey auth verification failed: Missing required fields", getFullContext(req, { email }));
+    return next(new ErrorHandler("Email and credential are required", 400));
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || !user.currentChallenge) {
+      logger.warn("Passkey auth verification failed: User not found or no challenge", getFullContext(req, { email }));
+      return next(new ErrorHandler("Authentication session not found", 400));
+    }
+
+    // Find the passkey being used
+    const passkey = user.passkeys.find(p =>
+      p.credentialID.toString('base64') === Buffer.from(credential.rawId, 'base64').toString('base64')
+    );
+
+    if (!passkey) {
+      logger.warn("Passkey auth verification failed: Passkey not found", getFullContext(req, { email }));
+      return next(new ErrorHandler("Passkey not found", 404));
+    }
+
+    const verification = await verifyAuthenticationResponse({
+      response: credential,
+      expectedChallenge: user.currentChallenge,
+      expectedOrigin: origin,
+      expectedRPID: rpID,
+      authenticator: {
+        credentialID: passkey.credentialID,
+        credentialPublicKey: passkey.credentialPublicKey,
+        counter: passkey.counter,
+      },
+    });
+
+    if (!verification.verified) {
+      logger.warn("Passkey auth verification failed: Verification unsuccessful", getFullContext(req, { email }));
+      return next(new ErrorHandler("Passkey authentication failed", 400));
+    }
+
+    // Update counter
+    passkey.counter = verification.authenticationInfo.newCounter;
+    user.currentChallenge = undefined;
+    await user.save();
+
+    // Generate JWT token
+    const jwtToken = jwt.sign(
+      {
+        userId: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        isSubscribed: user.isSubscribed,
+        isAdmin: user.isAdmin
+      },
+      process.env.SECRETKEY,
+      { expiresIn: "7d" }
+    );
+
+    logger.info("Passkey authentication successful", { email, userId: user._id });
+
+    res.status(200).json({
+      verified: true,
+      user: {
+        userId: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        isSubscribed: user.isSubscribed,
+        isAdmin: user.isAdmin
+      },
+      token: jwtToken,
+    });
+  } catch (error) {
+    logger.error("Passkey authentication verification failed", {
+      error: error.message,
+      stack: error.stack,
+      email
+    });
+    return next(new ErrorHandler("Failed to verify passkey authentication", 500));
+  }
 });
