@@ -338,7 +338,7 @@
   width: 100vw !important;
   height: 100vh !important;
   background: rgba(0, 0, 0, 0.5) !important;
-  z-index: 1500 !important; /* Higher z-index to ensure it appears above most content */
+  z-index: 1000 !important; /* Higher z-index to ensure it appears above most content */
   backdrop-filter: blur(2px) !important;
   pointer-events: auto !important;
   display: block !important;
