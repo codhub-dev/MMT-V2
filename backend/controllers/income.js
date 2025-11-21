@@ -84,7 +84,7 @@ const getAllIncomesByTruckId = async (req, res) => {
     });
 
     res.status(200).json({
-      incomes: formattedIncomes,
+      expenses: formattedIncomes,
       totalIncome,
     });
   } catch (error) {
@@ -158,7 +158,7 @@ const getAllIncomesByUserId = async (req, res) => {
     );
 
     res.status(200).json({
-      incomes: formattedIncomes,
+      expenses: formattedIncomes,
       totalIncome,
     });
   } catch (error) {
@@ -196,7 +196,7 @@ const updateIncomeById = async (req, res) => {
 
     res.status(200).json({
       message: "Income updated successfully",
-      income: updatedIncome,
+      expense: updatedIncome,
     });
   } catch (error) {
     console.error("Error updating income:", error);

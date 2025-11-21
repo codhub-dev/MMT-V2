@@ -31,7 +31,7 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                 { label: "Fuel Expense", key: "drivers", icon: <FireOutlined /> },
                 { label: "Def Expense", key: "calendar", icon: <WalletOutlined /> },
                 { label: "Other Expense", key: "analytics", icon: <BarChartOutlined /> },
-                { label: "Income", key: "team", icon: <BankOutlined /> }
+                { label: "Income", key: "incomeSummary/income", icon: <BankOutlined /> }
             ]
         },
         {

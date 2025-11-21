@@ -14,7 +14,7 @@ const router = express.Router();
 router.post('/addIncome', addIncome);
 router.get('/getAllIncomesByTruckId', getAllIncomesByTruckId);
 router.get('/getAllIncomesByUserId', getAllIncomesByUserId);
-router.put('/updateIncomeById/:id', updateIncomeById);
+router.put('/updateIncomeByTruckId/:id', updateIncomeById);
 router.delete('/deleteIncomeById/:id', deleteIncomeById);
 router.get('/downloadIncomesExcel', downloadIncomesExcel);
 router.get('/downloadAllIncomesExcel', downloadAllIncomesExcel);

@@ -6,13 +6,10 @@ import ExpenseModal from "../../Components/ExpenseModal/ExpenseModal";
 import { Axios } from "../../Config/Axios/Axios";
 import LoaderOverlay from "../../Components/LoaderOverlay/LoaderOverlay";
 import { DatePicker, Space } from "antd";
-// import moment from "moment";
 import dayjs from "dayjs";
 import ConfirmModal from "../../Components/ConfirmModal/ConfirmModal";
 import { ArrowRightIcon, DownloadIcon, PencilIcon, TrashIcon } from "@primer/octicons-react";
 import { UserContext } from "../../App";
-
-// dayjs.locale('en-gb');
 
 const { RangePicker } = DatePicker;
 
@@ -119,6 +116,22 @@ const formFields = {
     },
     { type: "input", name: "note", label: "Note", textType: "text" },
   ],
+  income: [
+    {
+      type: "date",
+      name: "date",
+      label: "Choose Date",
+      rules: [{ required: true, message: "Please choose the date" }],
+    },
+    {
+      type: "input",
+      name: "amount",
+      label: "Amount",
+      textType: "number",
+      rules: [{ required: true, message: "Please enter the amount" }],
+    },
+    { type: "input", name: "note", label: "Note", textType: "text" },
+  ],
 };
 
 const apis = {
@@ -148,6 +161,15 @@ const apis = {
     deleteAPI: "deleteOtherExpenseById",
     downloadAPI: "downloadOtherExpensesExcel",
     downloadAllAPI: "downloadAllOtherExpensesExcel",
+  },
+  income:{
+    addAPI: "addIncome",
+    getAllExpensesById: "getAllIncomesByTruckId",
+    getAllExpenses: "getAllIncomesByUserId",
+    updateAPI: "updateIncomeByTruckId",
+    deleteAPI: "deleteIncomeById",
+    downloadAPI: "downloadIncomeExcel",
+    downloadAllAPI: "downloadAllIncomeExcel",
   },
   totalExpenses: {
     getAllExpenses: "getAllTotalExpensesByUserId",
@@ -202,6 +224,7 @@ const ExpenseSummary = () => {
     fuelExpenses: "Fuel Expenses",
     defExpenses: "Def Expenses",
     otherExpenses: "Other Expenses",
+    income: "Income",
     totalExpenses: "Total Expenses",
     totalFuelExpenses: "Total Fuel Expenses",
     totalDefExpenses: "Total Def Expenses",
@@ -215,12 +238,30 @@ const ExpenseSummary = () => {
     dayjs().startOf("month").format("YYYY-MM-DD"),
     dayjs().format("YYYY-MM-DD"),
   ]);
+  const [vehicleRegistrationNo, setVehicleRegistrationNo] = useState("");
 
-  const location = useLocation();
   const expenseModalRef = useRef();
   const { user } = useContext(UserContext);
 
   const { catalog, vehicleId } = useParams();
+
+  // Fetch vehicle registration number when vehicleId is available
+  useEffect(() => {
+    if (vehicleId) {
+      Axios.get(`/api/v1/app/truck/getTruckById/${vehicleId}`, {
+        headers: {
+          authorization: `bearer ${localStorage.getItem('token')}`,
+        },
+      })
+        .then((res) => {
+          setVehicleRegistrationNo(res.data.registrationNo || "Truck");
+        })
+        .catch((err) => {
+          console.error("Failed to fetch vehicle details:", err);
+          setVehicleRegistrationNo("Truck");
+        });
+    }
+  }, [vehicleId]);
 
   useEffect(() => {
     setContentLoader(true);
@@ -267,7 +308,7 @@ const ExpenseSummary = () => {
           setContentLoader(false);
         });
     }
-  }, [selectedDates]);
+  }, [selectedDates, catalog, vehicleId, user.userId]);
 
   const refreshExpenses = () => {
     setContentLoader(true);
@@ -701,6 +742,75 @@ const ExpenseSummary = () => {
         ),
       },
     ],
+    income: [
+      {
+        title: "Date",
+        width: 70,
+        dataIndex: "date",
+        key: "date",
+        fixed: "left",
+      },
+      ...(!vehicleId
+        ? [
+          {
+            title: "Registration No.",
+            width: 100,
+            dataIndex: "registrationNo",
+            key: "registrationNo",
+          },
+        ]
+        : []),
+      {
+        title: "Amount",
+        width: 100,
+        dataIndex: "amount",
+        key: "amount",
+      },
+      {
+        title: "Note",
+        width: 100,
+        dataIndex: "note",
+        key: "note",
+      },
+      {
+        title: "Action",
+        key: "operation",
+        //   fixed: "right",
+        width: 40,
+        render: (text, record) => (
+          <div className="d-flex gap-2">
+            <ConfirmModal
+              title="Confirm Action"
+              content="Are you sure you want to update?"
+              onOk={() => callUpdateExpenseModal(record)}
+              key={`update-${record._id}`}  // Unique key for update modal
+              onCancel={() => { }}
+            >
+              <button
+                type="button"
+                className="btn btn-primary btn-rounded btn-floating"
+              >
+                <PencilIcon size={16} />
+              </button>
+            </ConfirmModal>
+            <ConfirmModal
+              title="Confirm Action"
+              content="Are you sure you want to delete?"
+              onOk={() => handleOk(record._id)}
+              key={record._id}
+              onCancel={() => { }}
+            >
+              <button
+                type="button"
+                className="btn btn-danger btn-rounded btn-floating"
+              >
+                <TrashIcon size={16} />
+              </button>
+            </ConfirmModal>
+          </div>
+        ),
+      },
+    ],
     totalExpenses: [
       {
         title: "Date",
@@ -739,11 +849,11 @@ const ExpenseSummary = () => {
   return (
     <div>
       <div className="d-flex flex-column">
-        <b style={{ fontSize: "26px" }}>{vehicleId ? `Expense Summary for ${vehicleId}` : "Expense Summary"}</b>
+        <b style={{ fontSize: "26px" }}>{vehicleId ? `${expenses[catalog]} for ${vehicleRegistrationNo}` : `${expenses[catalog]}`}</b>
         <span style={{ fontSize: "14px", color: "#939393" }}>
           {vehicleId
-            ? `View and manage expenses for vehicle ${vehicleId}`
-            : `Track all expenses across your fleet`}
+            ? `View and manage ${expenses[catalog]} for vehicle ${vehicleRegistrationNo}`
+            : `Track all ${expenses[catalog]} across your fleet`}
         </span>
       </div>
       <LoaderOverlay isVisible={contentLoader} />
@@ -807,7 +917,7 @@ const ExpenseSummary = () => {
               color: "white",
             }}
             onClick={handleReportDownload}
-            disabled={expensesList.length ? false : true}
+            disabled={expensesList?.length ? false : true}
             icon={<DownloadIcon size={20} />}
           />
           <FloatButton

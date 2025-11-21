@@ -72,6 +72,7 @@ app.use('/api/income', incomeRoutes);
 app.use("/api/v1/app/fuelExpenses", isAuthenticated, fuelExpensesRoutes);
 app.use("/api/v1/app/defExpenses", isAuthenticated, defExpensesRoutes);
 app.use("/api/v1/app/otherExpenses", isAuthenticated, otherExpensesRoutes);
+app.use("/api/v1/app/income", isAuthenticated, incomeRoutes);
 app.use("/api/v1/app/totalExpenses", isAuthenticated, totalExpensesRoutes);
 app.use("/api/v1/app/calculateLoan", isAuthenticated, calculateLoanRoutes);
 app.use("/api/v1/app/driverProfiles", isAuthenticated, driverProfilesRoutes);

@@ -24,6 +24,7 @@ const Home = () => {
                             <Route path="/admin" element={<AdminPortal />} />,
                             <Route path="/calculateLoan/:vehicleId?" element={<CalculateLoan />} />
                             <Route path="/expenseSummary/:catalog/:vehicleId?" element={<ExpenseSummary />} />
+                            <Route path="/incomeSummary/:catalog/:vehicleId?" element={<ExpenseSummary />} />
                             <Route path="/*" element={<Navigate to="/dashboard" replace />} />
                         </Switch>
                     </div>
