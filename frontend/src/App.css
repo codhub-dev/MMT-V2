@@ -233,9 +233,9 @@
   .sidebar-container {
     position: fixed !important;
     top: 0 !important;
-    left: -300px !important; /* Hide by default - slightly more than width for smooth animation */
+    left: -280px !important; /* Hide by default - slightly more than width for smooth animation */
     height: 100vh !important;
-    z-index: 1000 !important;
+    z-index: 1501 !important; /* Higher than overlay to appear above it */
     transition: left 0.3s ease-in-out !important;
     border-radius: 0 20px 20px 0 !important;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15) !important;
@@ -246,16 +246,7 @@
     left: 0 !important;
   }
 
-  /* Sidebar overlay for mobile */
-  .sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999 !important;
-  }
+
 
   /* Adjust main content when sidebar is hidden on mobile */
   .main-content {
@@ -267,6 +258,20 @@
   .main-content .container-fluid {
     padding: 0 !important;
   }
+}
+
+/* Universal overlay for both sidebar and profile drawer - works on ALL screen sizes */
+.sidebar-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  z-index: 1500 !important; /* Higher z-index to ensure it appears above most content */
+  backdrop-filter: blur(2px) !important;
+  pointer-events: auto !important;
+  display: block !important;
 }
 
 .custom-sidebar-menu {
@@ -417,30 +422,45 @@
 
 /* --------------------------profile drawer consistency--------------------------------- */
 
-/* Ensure ProfileDrawer matches SideBar styling */
-.ant-drawer-right .ant-drawer-content-wrapper {
-  width: 280px !important;
-}
+/* Profile drawer styling - now matches sidebar structure exactly */
 
-.ant-drawer .ant-drawer-body {
-  padding: 0 !important;
-}
-
-/* Ensure consistent drawer styling */
-.ant-drawer .sidebar-container {
-  padding: 20px 0;
-  border-radius: 0;
-  margin: 0;
+/* Profile drawer container - completely independent styles */
+.profile-drawer-container {
+  position: fixed !important;
+  top: 0 !important;
+  right: -320px !important; /* Hide by default */
+  height: 100vh !important;
+  width: 320px !important;
+  flex-shrink: 0 !important;
   background: #f6f6f6 !important;
+  padding: 20px 0;
+  overflow-y: auto !important;
+  border-radius: 20px 0 0 20px !important;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15) !important;
+  z-index: 1502 !important;
+  transition: right 0.3s ease-in-out !important;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-/* Ensure right side drawer animates correctly */
-.ant-drawer-right {
+/* Show profile drawer when open */
+.profile-drawer-container.profile-drawer-mobile {
   right: 0 !important;
 }
 
-.ant-drawer-right .ant-drawer-content-wrapper {
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15) !important;
+/* Profile drawer top section */
+.profile-drawer-top {
+  padding-left: 20px;
+  padding-right: 20px;
+  flex: 1;
+}
+
+/* Profile drawer bottom section */
+.profile-drawer-bottom {
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 /* Profile specific button styling to match sidebar aesthetic */
