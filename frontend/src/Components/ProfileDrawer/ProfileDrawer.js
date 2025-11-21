@@ -69,21 +69,21 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
   };
 
   const callGetHelpModal = () => {
-    if (getHelpRef.current) {
-      getHelpRef.current.showModal();
-    }
+    if (privacyPolicyRef.current) privacyPolicyRef.current.hideModal?.();
+    if (aboutUsRef.current) aboutUsRef.current.hideModal?.();
+    if (getHelpRef.current) getHelpRef.current.showModal();
   };
 
   const callPrivacyPolicyModal = () => {
-    if (privacyPolicyRef.current) {
-      privacyPolicyRef.current.showModal();
-    }
+    if (getHelpRef.current) getHelpRef.current.hideModal?.();
+    if (aboutUsRef.current) aboutUsRef.current.hideModal?.();
+    if (privacyPolicyRef.current) privacyPolicyRef.current.showModal();
   };
 
   const callAboutUsModal = () => {
-    if (aboutUsRef.current) {
-      aboutUsRef.current.showModal();
-    }
+    if (getHelpRef.current) getHelpRef.current.hideModal?.();
+    if (privacyPolicyRef.current) privacyPolicyRef.current.hideModal?.();
+    if (aboutUsRef.current) aboutUsRef.current.showModal();
   };
 
   return (
@@ -110,165 +110,167 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
             color: '#666'
           }}
         />
-          {loading ? (
+        {loading ? (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%'
+          }}>
             <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%'
-            }}>
-              <div style={{
-                width: "30px",
-                height: "30px",
-                border: "3px solid #f0f0f0",
-                borderTop: "3px solid #007bff",
-                borderRadius: "50%",
-                animation: "spin 1s linear infinite"
-              }}></div>
-            </div>
-          ) : (
-            <>
-              <div className="profile-drawer-top">
-                {/* Profile Section */}
-                <div className="text-center">
-                  <div className="mt-3 mb-4" style={{ position: "relative", display: "inline-block" }}>
-                    {profileImageLoading && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100px",
-                          height: "100px",
-                          backgroundColor: "#f0f0f0",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: "50%"
-                        }}
-                      >
-                        <div style={{
-                          width: "20px",
-                          height: "20px",
-                          border: "2px solid #ccc",
-                          borderTop: "2px solid #007bff",
-                          borderRadius: "50%",
-                          animation: "spin 1s linear infinite"
-                        }}></div>
-                      </div>
-                    )}
-                    <img
-                      key={user?.picture ? `user-${user.picture}-${Date.now()}` : 'default-avatar'}
-                      src={
-                        user?.picture
-                          ? user.picture
-                          : "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-                      }
-                      className="rounded-circle img-fluid"
+              width: "30px",
+              height: "30px",
+              border: "3px solid #f0f0f0",
+              borderTop: "3px solid #007bff",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite"
+            }}></div>
+          </div>
+        ) : (
+          <>
+            <div className="profile-drawer-top">
+              {/* Profile Section */}
+              <div className="text-center">
+                <div className="mt-3 mb-4" style={{ position: "relative", display: "inline-block" }}>
+                  {profileImageLoading && (
+                    <div
                       style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
                         width: "100px",
-                        opacity: profileImageLoading ? 0 : 1,
-                        transition: "opacity 0.3s ease"
+                        height: "100px",
+                        backgroundColor: "#f0f0f0",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "50%"
                       }}
-                      alt=""
-                      onLoad={() => {
-                        console.log("Image loaded successfully:", user?.picture);
-                        setProfileImageLoading(false);
-                      }}
-                      onError={(e) => {
-                        console.log("Image failed to load:", user?.picture);
-                        if (e.target.src !== "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp") {
-                          e.target.src = "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp";
-                        }
-                        setProfileImageLoading(false);
-                      }}
-                    />
-                  </div>
-                  <h4 className="mb-2">{user?.name}</h4>
-                  <p className="text-muted mb-4">
-                    {user?.email}
-                  </p>
+                    >
+                      <div style={{
+                        width: "20px",
+                        height: "20px",
+                        border: "2px solid #ccc",
+                        borderTop: "2px solid #007bff",
+                        borderRadius: "50%",
+                        animation: "spin 1s linear infinite"
+                      }}></div>
+                    </div>
+                  )}
+                  <img
+                    key={user?.picture ? `user-${user.picture}-${Date.now()}` : 'default-avatar'}
+                    src={
+                      user?.picture
+                        ? user.picture
+                        : "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                    }
+                    className="rounded-circle img-fluid"
+                    style={{
+                      width: "100px",
+                      opacity: profileImageLoading ? 0 : 1,
+                      transition: "opacity 0.3s ease"
+                    }}
+                    alt=""
+                    onLoad={() => {
+                      console.log("Image loaded successfully:", user?.picture);
+                      setProfileImageLoading(false);
+                    }}
+                    onError={(e) => {
+                      console.log("Image failed to load:", user?.picture);
+                      if (e.target.src !== "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp") {
+                        e.target.src = "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp";
+                      }
+                      setProfileImageLoading(false);
+                    }}
+                  />
+                </div>
+                <h4 className="mb-2">{user?.name}</h4>
+                <p className="text-muted mb-4">
+                  {user?.email}
+                </p>
 
-                  <div className="mb-4 pb-2 profile-btn-group">
+                <div className="mb-4 pb-2 profile-btn-group">
+                  {
+                    user?.isAdmin &&
                     <button
                       type="button"
                       className="btn"
                       onClick={() => {
                         navigate("/admin");
-                        // Always close drawer after navigation
                         setProfileOpen(false);
                       }}
                     >
                       Admin Portal
                     </button>
+                  }
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={callGetHelpModal}
+                  >
+                    Get Help
+                  </button>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={callPrivacyPolicyModal}
+                  >
+                    Privacy Policy
+                  </button>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={callAboutUsModal}
+                  >
+                    About Us
+                  </button>
+                  <ConfirmModal
+                    title="Confirm Action"
+                    content="Are you sure you want to signout?"
+                    onOk={handleOk}
+                    onCancel={() => { }}
+                  >
                     <button
                       type="button"
-                      className="btn"
-                      onClick={callGetHelpModal}
+                      className="btn btn-danger"
                     >
-                      Get Help
+                      Logout
                     </button>
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={callPrivacyPolicyModal}
-                    >
-                      Privacy Policy
-                    </button>
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={callAboutUsModal}
-                    >
-                      About Us
-                    </button>
-                    <ConfirmModal
-                      title="Confirm Action"
-                      content="Are you sure you want to signout?"
-                      onOk={handleOk}
-                      onCancel={() => { }}
-                    >
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                      >
-                        Logout
-                      </button>
-                    </ConfirmModal>
+                  </ConfirmModal>
+                </div>
+
+                <Divider />
+
+                <div className="d-flex justify-content-between text-center mt-3 mb-2">
+                  <div>
+                    <p className="mb-2 h5">{metadata.totalTrucks}</p>
+                    <p className="text-muted mb-0">Total Trucks</p>
                   </div>
-
-                  <Divider />
-
-                  <div className="d-flex justify-content-between text-center mt-3 mb-2">
-                    <div>
-                      <p className="mb-2 h5">{metadata.totalTrucks}</p>
-                      <p className="text-muted mb-0">Total Trucks</p>
-                    </div>
-                    <div className="px-3">
-                      <p className="mb-2 h5">{metadata.totalKM}</p>
-                      <p className="text-muted mb-0">Total KM</p>
-                    </div>
-                    <div>
-                      <p className="mb-2 h5">{metadata.totalDays}</p>
-                      <p className="text-muted mb-0">Total Days</p>
-                    </div>
+                  <div className="px-3">
+                    <p className="mb-2 h5">{metadata.totalKM}</p>
+                    <p className="text-muted mb-0">Total KM</p>
+                  </div>
+                  <div>
+                    <p className="mb-2 h5">{metadata.totalDays}</p>
+                    <p className="text-muted mb-0">Total Days</p>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="profile-drawer-bottom">
-                <div className="w-100 d-flex justify-content-center">
-                  <p style={{ color: "#808080", fontSize: 12 }}>Developed by codhub</p>
-                </div>
+            <div className="profile-drawer-bottom">
+              <div className="w-100 d-flex justify-content-center">
+                <p style={{ color: "#808080", fontSize: 12 }}>Developed by codhub</p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
+      </div>
 
-        <GetHelpModal ref={getHelpRef} />
-        <PrivacyPolicyModal ref={privacyPolicyRef} />
-        <AboutUsModal ref={aboutUsRef} />
-      </>
+      <GetHelpModal ref={getHelpRef} />
+      <PrivacyPolicyModal ref={privacyPolicyRef} />
+      <AboutUsModal ref={aboutUsRef} />
+    </>
   );
 };
 

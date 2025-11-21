@@ -267,7 +267,100 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
   }
 };
 
+const getAllTotalExpensesByTruckId = async (req, res) => {
+  try {
+    const { truckId, selectedDates } = req.query;
+
+    if (!truckId) {
+      return res.status(400).json({ message: "Truck ID is required" });
+    }
+
+    const startDate = selectedDates
+      ? moment.utc(selectedDates[0]).startOf("day").toDate()
+      : null;
+    const endDate = selectedDates
+      ? moment.utc(selectedDates[1]).endOf("day").toDate()
+      : null;
+
+    const query = { truckId };
+
+    if (startDate && endDate) {
+      if (startDate.toDateString() === endDate.toDateString()) {
+        query.date = { $eq: startDate };
+      } else {
+        query.date = { $gte: startDate, $lte: endDate };
+      }
+    }
+
+    const fuelExpenses = (await FuelExpense.find(query).sort({ date: 1 })).map(
+      (expense) => ({
+        ...expense.toObject(),
+        catalog: "Fuel Expense",
+      })
+    );
+
+    const defExpenses = (await DefExpense.find(query).sort({ date: 1 })).map(
+      (expense) => ({
+        ...expense.toObject(),
+        catalog: "Def Expense",
+      })
+    );
+
+    const otherExpenses = (
+      await OtherExpense.find(query).sort({ date: 1 })
+    ).map((expense) => ({
+      ...expense.toObject(),
+      catalog: "Other Expense",
+    }));
+
+    const allExpenses = [...fuelExpenses, ...defExpenses, ...otherExpenses];
+
+    if (allExpenses.length === 0) {
+      return res.status(404).json({
+        message: "No expenses found for this truck in the given date range",
+      });
+    }
+
+    const formattedExpenses = await Promise.all(
+      allExpenses.map(async (expense) => {
+        const truck = await TruckExpense.findById(expense.truckId);
+        const registrationNo = truck ? truck.registrationNo : "Unknown";
+
+        const date = new Date(expense.date);
+        const formattedDate = moment(date).format("DD-MM-YYYY");
+
+        return {
+          ...expense,
+          date: formattedDate,
+          registrationNo,
+        };
+      })
+    );
+
+    // Sort combined expenses by date
+    formattedExpenses.sort(
+      (a, b) =>
+        new Date(a.date.split("-").reverse().join("-")) -
+        new Date(b.date.split("-").reverse().join("-"))
+    );
+
+    const totalExpense = formattedExpenses.reduce(
+      (sum, expense) => sum + expense.cost,
+      0
+    );
+
+    res.status(200).json({
+      expenses: formattedExpenses,
+      totalExpense,
+    });
+  } catch (error) {
+    console.error("Error retrieving expenses:", error);
+    res.status(500).json({ message: "Failed to retrieve expenses" });
+  }
+};
+
 module.exports = {
   getAllTotalExpensesByUserId,
   downloadAllTotalExpensesExcel,
+  getAllTotalExpensesByTruckId,
 };
