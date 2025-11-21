@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Menu, Button } from "antd";
 import {
     HomeOutlined,
     BarChartOutlined,
-    QuestionCircleOutlined,
     TruckOutlined,
     CloseOutlined,
     BankOutlined,
@@ -15,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMobile } from "../MobileContext/MobileContext";
+import GetHelpModal from "../GetHelpModal/GetHelpModal"; 
 
 const SideBar = ({ isOpen = true, setIsOpen }) => {
     const [logoLoading, setLogoLoading] = useState(true);
@@ -22,6 +22,8 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
     const nav = useNavigate();
     const location = useLocation();
     const current = location.pathname.replace("/", "");
+    const getHelpRef = useRef();
+
 
     const items = [
         {
@@ -155,12 +157,22 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                             Reach out to us for customizations or tailored solutions.
                         </div>
 
-                        <button className="contact-btn">Contact Us</button>
+                        <button
+                            className="contact-btn"
+                            onClick={() => {
+                                if (getHelpRef.current) getHelpRef.current.showModal();
+                            }}
+                        >
+                            Contact Us
+                        </button>
+
                     </div>
                 </div>
             </div>
 
         </div>
+
+        <GetHelpModal ref={getHelpRef} />
         </>
     );
 };
