@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
   signUp,
@@ -12,11 +12,11 @@ const {
   passkeyAuthVerify
 } = require("../controllers/auth");
 
-router.post("/signUp", signUp);
-router.post("/logIn", logIn);
-router.post("/logOut", logOut);
+router.post("/signup", signUp);
+router.post("/login", logIn);
+router.post("/logout", logOut);
 router.post("/whoami", whoami);
-router.post("/signUpWithGoogle", signUpWithGoogle);
+router.post("/google", signUpWithGoogle);
 
 // Passkey routes
 router.post("/passkey/register/options", passkeyRegisterOptions);
