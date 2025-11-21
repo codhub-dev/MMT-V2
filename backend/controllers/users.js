@@ -2,12 +2,13 @@ const { catchAsyncError } = require('../middleware/catchAsyncError');
 const ErrorHandler = require('../middleware/errorHandlers');
 const userModel = require('../models/user-model');
 const logger = require('../utils/logger');
+const { getFullContext } = require('../utils/requestContext');
 
 module.exports.getMyProfile = catchAsyncError(async (req, res, next) => {
     const { decodedUser } = req.body;
 
     if (!decodedUser) {
-        logger.warn("Profile request attempted with invalid application id");
+        logger.warn("Profile request attempted with invalid application id", getFullContext(req));
         return next(new ErrorHandler("Application id not valid", 400));
     }
 
@@ -17,9 +18,10 @@ module.exports.getMyProfile = catchAsyncError(async (req, res, next) => {
     
     delete user.password;
 
-    logger.info(`Profile retrieved successfully for user ${decodedUser.username}`, {
-        username: decodedUser.username
-    });
+    logger.info("Profile retrieved successfully", getFullContext(req, {
+        username: decodedUser.username,
+        userId: user._id
+    }));
 
     res.json({
         code: 200,

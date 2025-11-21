@@ -1,20 +1,32 @@
 const winston = require('winston');
 
-// Console transport configuration
+// Console transport configuration with better formatting
 const consoleTransport = new winston.transports.Console({
   format: winston.format.combine(
     winston.format.colorize(),
-    winston.format.simple()
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.printf(({ timestamp, level, message, ...metadata }) => {
+      let msg = `${timestamp} [${level}] ${message}`;
+      if (Object.keys(metadata).length > 0) {
+        msg += ` ${JSON.stringify(metadata)}`;
+      }
+      return msg;
+    })
   )
 });
 
-// Create logger instance with console transport only
+// Create logger instance with JSON format for structured logging
 const logger = winston.createLogger({
-  level: 'info',
+  level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
     winston.format.json()
   ),
+  defaultMeta: {
+    service: 'mmt-backend',
+    environment: process.env.NODE_ENV || 'development'
+  },
   transports: [
     consoleTransport
   ]
