@@ -12,14 +12,15 @@ import {
     FireOutlined,
     WalletOutlined
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useMobile } from "../MobileContext/MobileContext";
 
 const SideBar = ({ isOpen = true, setIsOpen }) => {
-    const [current, setCurrent] = useState();
     const [logoLoading, setLogoLoading] = useState(true);
     const { isMobile } = useMobile();
     const nav = useNavigate();
+    const location = useLocation();
+    const current = location.pathname.replace("/", "");
 
     const items = [
         {
@@ -47,7 +48,6 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
 
     const onClick = (e) => {
         nav(`/${e.key}`);
-        setCurrent(e.key);
 
         // Close sidebar on mobile after navigation
         if (isMobile && setIsOpen) {
