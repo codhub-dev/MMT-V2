@@ -4,12 +4,13 @@ const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
 const logger = require("../utils/logger");
+const { getFullContext } = require("../utils/requestContext");
 
 // Controller to add a new fuel filling record
 const addFuelExpense = async (req, res) => {
   try {
     const { truckId, addedBy, date, currentKM, litres, cost, note } = req.body;
-    logger.info("Adding fuel expense", { truckId, addedBy, cost, litres });
+    logger.info("Adding fuel expense", getFullContext(req, { truckId, addedBy, cost, litres }));
 
     const newFuelExpense = new FuelExpense({
       truckId,
@@ -22,10 +23,10 @@ const addFuelExpense = async (req, res) => {
     });
 
     const savedFuelExpense = await newFuelExpense.save();
-    logger.info("Fuel expense added successfully", { expenseId: savedFuelExpense._id, truckId, cost });
+    logger.info("Fuel expense added successfully", getFullContext(req, { expenseId: savedFuelExpense._id, truckId, cost }));
     res.status(201).json(savedFuelExpense);
   } catch (error) {
-    logger.error("Error adding fuel expense", { error: error.message, truckId: req.body.truckId });
+    logger.error("Error adding fuel expense", getFullContext(req, { error: error.message, stack: error.stack }));
     res.status(500).json({ message: "Failed to add fuel filling" });
   }
 };

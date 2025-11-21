@@ -13,14 +13,25 @@ class PapertrailHTTPSTransport extends Transport {
     setImmediate(() => this.emit("logged", info));
 
     try {
+      // Extract all properties from the info object, excluding Winston internals
+      const { message, level, timestamp, ...metadata } = info;
+      
+      // Remove Winston-specific properties
+      delete metadata[Symbol.for('message')];
+      delete metadata[Symbol.for('splat')];
+      delete metadata[Symbol.for('level')];
+      
+      // Prepare the log entry with all context
+      const logEntry = {
+        message,
+        level,
+        timestamp: timestamp || new Date().toISOString(),
+        ...metadata  // Spread all additional context (username, ip, truckId, etc.)
+      };
+
       await axios.post(
         this.endpoint,
-        {
-          message: info.message,
-          level: info.level,
-          timestamp: new Date().toISOString(),
-          meta: info.meta || {}
-        },
+        logEntry,
         {
           headers: {
             "Content-Type": "application/json",
