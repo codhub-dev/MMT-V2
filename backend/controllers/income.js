@@ -3,6 +3,9 @@ const Income = require("../models/income-model");
 const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
+const FuelExpense = require("../models/fuelExpense-model");
+const DefExpense = require("../models/defExpense-model");
+const OtherExpense = require("../models/otherExpense-model");
 const logger = require("../utils/logger");
 const { getFullContext } = require("../utils/requestContext");
 
