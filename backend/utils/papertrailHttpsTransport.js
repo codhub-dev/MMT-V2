@@ -15,12 +15,12 @@ class PapertrailHTTPSTransport extends Transport {
     try {
       // Extract all properties from the info object, excluding Winston internals
       const { message, level, timestamp, ...metadata } = info;
-      
+
       // Remove Winston-specific properties
       delete metadata[Symbol.for('message')];
       delete metadata[Symbol.for('splat')];
       delete metadata[Symbol.for('level')];
-      
+
       // Prepare the log entry with all context
       const logEntry = {
         message,
