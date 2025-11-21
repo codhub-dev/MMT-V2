@@ -28,9 +28,9 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
             children: [
                 { label: "Dashboard", key: "dashboard", icon: <HomeOutlined /> },
                 { label: "Trucks", key: "trucks", icon: <TruckOutlined /> },
-                { label: "Fuel Expense", key: "drivers", icon: <FireOutlined /> },
-                { label: "Def Expense", key: "calendar", icon: <WalletOutlined /> },
-                { label: "Other Expense", key: "analytics", icon: <BarChartOutlined /> },
+                { label: "Fuel Expense", key: "expenseSummary/fuelExpenses", icon: <FireOutlined /> },
+                { label: "Def Expense", key: "expenseSummary/defExpenses", icon: <WalletOutlined /> },
+                { label: "Other Expense", key: "expenseSummary/otherExpenses", icon: <BarChartOutlined /> },
                 { label: "Income", key: "incomeSummary/income", icon: <BankOutlined /> }
             ]
         },
