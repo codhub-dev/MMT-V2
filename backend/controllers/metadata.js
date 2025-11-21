@@ -8,11 +8,15 @@ const { default: mongoose } = require('mongoose');
 
 const moment = require("moment");
 const logger = require("../utils/logger");
+const { getFullContext } = require("../utils/requestContext");
 
 const getMetadataByTruckId = async (req, res) => {
     const { truckId } = req.query;
 
+    logger.info("Fetching metadata by truck ID", getFullContext(req, { truckId }));
+
     if (!mongoose.Types.ObjectId.isValid(truckId)) {
+        logger.warn("Invalid truck ID in metadata request", getFullContext(req, { truckId }));
         return res.status(400).json({ error: 'Invalid truck ID' });
     }
 

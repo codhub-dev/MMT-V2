@@ -5,13 +5,14 @@ const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
 const logger = require("../utils/logger");
+const { getFullContext } = require("../utils/requestContext");
 
 // Controller to add a new def filling record
 const addDefExpense = async (req, res) => {
   try {
     const { truckId, addedBy, date, currentKM, litres, cost, note } = req.body;
 
-    logger.info("Adding new DEF expense", { truckId, addedBy, date, currentKM, litres, cost });
+    logger.info("Adding new DEF expense", getFullContext(req, { truckId, addedBy, date, currentKM, litres, cost }));
 
     const newDefExpense = new DefExpense({
       truckId,
@@ -24,10 +25,10 @@ const addDefExpense = async (req, res) => {
     });
 
     const savedDefExpense = await newDefExpense.save();
-    logger.info("DEF expense added successfully", { defExpenseId: savedDefExpense._id });
+    logger.info("DEF expense added successfully", getFullContext(req, { defExpenseId: savedDefExpense._id, truckId, cost }));
     res.status(201).json(savedDefExpense);
   } catch (error) {
-    logger.error("Error adding def expenses", { error: error.message, stack: error.stack });
+    logger.error("Error adding def expenses", getFullContext(req, { error: error.message, stack: error.stack }));
     console.error("Error adding def expenses:", error);
     res.status(500).json({ message: "Failed to add def expenses" });
   }
@@ -54,7 +55,7 @@ const updateDefExpenseByTruckId = async (req, res) => {
       logger.warn("Invalid DEF expense ID", { id });
       return res.status(400).json({ message: "Invalid def expense ID" });
     }
-    
+
 
     // Update the invoice URL if a new file is provided
     let invoiceURL = req.body.invoiceURL;

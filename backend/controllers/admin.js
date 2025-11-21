@@ -2,10 +2,11 @@ const { catchAsyncError } = require('../middleware/catchAsyncError');
 const ErrorHandler = require('../middleware/errorHandlers');
 const userModel = require('../models/user-model');
 const logger = require('../utils/logger');
+const { getFullContext } = require('../utils/requestContext');
 
 module.exports.getAlluser = catchAsyncError(async (req, res, next) => {
-    logger.info('Admin fetching all users', { admin: req.user?.username || 'unknown' });
-    
+    logger.info('Admin fetching all users', getFullContext(req, { admin: req.user?.username || req.username || 'unknown' }));
+
     const users = await userModel.find({})
 
     if(!users){
@@ -14,7 +15,7 @@ module.exports.getAlluser = catchAsyncError(async (req, res, next) => {
     }
 
     logger.info(`Successfully fetched ${users.length} users`);
-    
+
     res.status(200).json({
         message: "All user",
         users: users
@@ -22,22 +23,22 @@ module.exports.getAlluser = catchAsyncError(async (req, res, next) => {
 });
 
 module.exports.getOneUserByUsername = catchAsyncError(async (req, res, next) => {
-    logger.info('Admin fetching user by username', { 
-        admin: req.user?.username || 'unknown',
-        targetUsername: req.params.username 
-    });
-    
-    const user = await userModel.findOne({ 
-        username: req.params.username 
+    logger.info('Admin fetching user by username', getFullContext(req, {
+        admin: req.user?.username || req.username || 'unknown',
+        targetUsername: req.params.username
+    }));
+
+    const user = await userModel.findOne({
+        username: req.params.username
     })
-        
+
     if(!user){
         logger.error('User not found', { username: req.params.username });
         return next(new ErrorHandler("Failed to create user", 500));
     }
 
     logger.info('User found successfully', { username: req.params.username });
-    
+
     res.status(200).json({
         message: "User found",
         user: user
@@ -45,25 +46,25 @@ module.exports.getOneUserByUsername = catchAsyncError(async (req, res, next) => 
 });
 
 module.exports.deleteOneUserByUsername = catchAsyncError(async (req, res, next) => {
-    logger.info('Admin attempting to delete user', { 
-        admin: req.user?.username || 'unknown',
-        targetUsername: req.params.username 
-    });
-    
-    const user = await userModel.findOneAndDelete({ 
-        username: req.params.username 
+    logger.info('Admin attempting to delete user', getFullContext(req, {
+        admin: req.user?.username || req.username || 'unknown',
+        targetUsername: req.params.username
+    }));
+
+    const user = await userModel.findOneAndDelete({
+        username: req.params.username
     })
-        
+
     if(!user){
         logger.error('Failed to delete user - user not found', { username: req.params.username });
         return next(new ErrorHandler("Failed to create user", 500));
     }
 
-    logger.info('User deleted successfully', { 
+    logger.info('User deleted successfully', {
         username: req.params.username,
         deletedBy: req.user?.username || 'unknown'
     });
-    
+
     res.status(200).json({
         message: "User found",
         user: user
@@ -72,12 +73,12 @@ module.exports.deleteOneUserByUsername = catchAsyncError(async (req, res, next) 
 
 module.exports.manageSubscription = catchAsyncError(async (req, res, next) => {
     const { userId } = req.body;
-    
-    logger.info('Admin managing subscription', { 
-        admin: req.user?.username || 'unknown',
-        userId 
-    });
-    
+
+    logger.info('Admin managing subscription', getFullContext(req, {
+        admin: req.user?.username || req.username || 'unknown',
+        userId
+    }));
+
     const user = await userModel.findById(userId);
 
     if (!user) {
@@ -88,7 +89,7 @@ module.exports.manageSubscription = catchAsyncError(async (req, res, next) => {
     user.isSubscribed = !user.isSubscribed;
     await user.save();
 
-    logger.info('Subscription status updated', { 
+    logger.info('Subscription status updated', {
         userId,
         username: user.username,
         newStatus: user.isSubscribed ? 'subscribed' : 'unsubscribed',

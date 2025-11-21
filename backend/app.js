@@ -16,6 +16,7 @@ const appLogger = require("./utils/logger");
 const { error } = require("./utils/error");
 const isAuthenticated = require("./middleware/isAuthenticated");
 const isAdmin = require("./middleware/isAdmin");
+const requestLogger = require("./middleware/requestLogger");
 
 // routers
 const indexRouter = require("./routes/index");
@@ -39,9 +40,9 @@ const app = express();
 
 const allowedOrigins = process.env.CORS_URLS ? process.env.CORS_URLS : [];
 
-appLogger.info("Application starting...", { 
+appLogger.info("Application starting...", {
   nodeEnv: process.env.NODE_ENV,
-  allowedOrigins: allowedOrigins.length 
+  allowedOrigins: allowedOrigins.length
 });
 
 // middlewares
@@ -61,24 +62,8 @@ app.use(
   })
 );
 
-// HTTP request logging middleware
-app.use((req, res, next) => {
-  const startTime = Date.now();
-  
-  res.on('finish', () => {
-    const duration = Date.now() - startTime;
-    appLogger.info("HTTP Request", {
-      method: req.method,
-      path: req.path,
-      statusCode: res.statusCode,
-      duration: `${duration}ms`,
-      ip: req.ip,
-      userAgent: req.get('user-agent')
-    });
-  });
-  
-  next();
-});
+// Use comprehensive request logging middleware
+app.use(requestLogger);
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -121,7 +106,7 @@ app.use((err, req, res, next) => {
     method: req.method,
     statusCode: err.statusCode || 500
   });
-  
+
   error(err, req, res, next);
 });
 

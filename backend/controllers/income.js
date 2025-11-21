@@ -4,11 +4,14 @@ const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
 const logger = require("../utils/logger");
+const { getFullContext } = require("../utils/requestContext");
 
 // Controller to add a new income record
 const addIncome = async (req, res) => {
   try {
     const { truckId, addedBy, date, amount, note } = req.body;
+
+    logger.info("Adding new income", getFullContext(req, { truckId, addedBy, amount, date }));
 
     const newIncome = new Income({
       truckId,
@@ -20,22 +23,21 @@ const addIncome = async (req, res) => {
 
     const savedIncome = await newIncome.save();
 
-    logger.info(`Income added successfully`, {
+    logger.info("Income added successfully", getFullContext(req, {
       incomeId: savedIncome._id,
       truckId,
       addedBy,
       amount,
       date,
-    });
+    }));
 
     res.status(201).json(savedIncome);
   } catch (error) {
     console.error("Error adding income:", error);
-    logger.error(`Failed to add income`, {
+    logger.error("Failed to add income", getFullContext(req, {
       error: error.message,
-      stack: error.stack,
-      body: req.body,
-    });
+      stack: error.stack
+    }));
     res.status(500).json({ message: "Failed to add income" });
   }
 };
@@ -44,7 +46,10 @@ const getAllIncomesByTruckId = async (req, res) => {
   try {
     const { truckId, selectedDates } = req.query;
 
+    logger.info("Fetching incomes by truck ID", getFullContext(req, { truckId, selectedDates }));
+
     if (!truckId) {
+      logger.warn("Truck ID missing in income fetch request", getFullContext(req));
       return res.status(400).json({ message: "Truck ID is required" });
     }
 

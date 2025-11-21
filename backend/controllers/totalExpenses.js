@@ -6,13 +6,16 @@ const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
 const logger = require("../utils/logger");
+const { getFullContext } = require("../utils/requestContext");
 
 const getAllTotalExpensesByUserId = async (req, res) => {
   try {
     const { userId, selectedDates } = req.query;
 
+    logger.info("Fetching total expenses by user ID", getFullContext(req, { userId, selectedDates }));
+
     if (!userId) {
-      logger.warn("Get total expenses attempted without user ID");
+      logger.warn("Get total expenses attempted without user ID", getFullContext(req));
       return res.status(400).json({ message: "User ID is required" });
     }
 
