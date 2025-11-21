@@ -319,20 +319,184 @@ components:
           type: string
           example: Monthly loan payment
 
+    # Income Schema
+    Income:
+      type: object
+      required:
+        - truckId
+        - addedBy
+        - date
+        - amount
+      properties:
+        _id:
+          type: string
+          example: 507f1f77bcf86cd799439017
+        truckId:
+          type: string
+          example: 507f1f77bcf86cd799439012
+        addedBy:
+          type: string
+          example: 507f1f77bcf86cd799439011
+        date:
+          type: string
+          format: date
+          example: "2025-11-06"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-11-06T10:30:00Z"
+        amount:
+          type: number
+          format: float
+          description: Income amount
+          example: 2500.00
+        note:
+          type: string
+          example: Payment received for delivery
+
+    # Alert Schema
+    Alert:
+      type: object
+      required:
+        - addedBy
+        - title
+        - alertDate
+        - type
+        - priority
+      properties:
+        _id:
+          type: string
+          example: 507f1f77bcf86cd799439018
+        addedBy:
+          type: string
+          description: User ID who created the alert
+          example: 507f1f77bcf86cd799439011
+        title:
+          type: string
+          maxLength: 100
+          example: Vehicle inspection due
+        description:
+          type: string
+          maxLength: 500
+          example: Annual vehicle inspection needs to be completed
+        alertDate:
+          type: string
+          format: date-time
+          description: When the alert is scheduled for
+          example: "2025-12-15T10:00:00Z"
+        type:
+          type: string
+          enum: [maintenance, delivery, license, insurance, inspection, fuel, payment, other]
+          example: inspection
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+          example: high
+        isRead:
+          type: boolean
+          default: false
+          example: false
+        isActive:
+          type: boolean
+          default: true
+          example: true
+        truckId:
+          type: string
+          description: Associated truck ID (optional)
+          example: 507f1f77bcf86cd799439012
+        driverId:
+          type: string
+          description: Associated driver ID (optional)
+          example: 507f1f77bcf86cd799439019
+        reminderSent:
+          type: boolean
+          default: false
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-11-06T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-11-06T10:30:00Z"
+
+    # Driver Profile Schema
+    DriverProfile:
+      type: object
+      required:
+        - addedBy
+        - name
+        - contact
+        - age
+        - experience
+        - license
+        - gender
+      properties:
+        _id:
+          type: string
+          example: 507f1f77bcf86cd799439019
+        addedBy:
+          type: string
+          description: User ID who added this driver
+          example: 507f1f77bcf86cd799439011
+        name:
+          type: string
+          example: John Smith
+        contact:
+          type: string
+          example: "+1-555-0123"
+        age:
+          type: integer
+          minimum: 18
+          maximum: 70
+          example: 35
+        experience:
+          type: string
+          example: 10 years
+        license:
+          type: string
+          description: Driver's license number (unique)
+          example: DL123456789
+        gender:
+          type: string
+          enum: [Male, Female, Other]
+          example: Male
+        photo:
+          type: string
+          default: /driver.png
+          example: /driver.png
+        isActive:
+          type: boolean
+          default: true
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-11-06T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-11-06T10:30:00Z"
+
 security:
   - bearerAuth: []
 
 tags:
   - name: Auth
     description: User authentication and authorization
-  - name: User Profile
-    description: User profile management
   - name: Admin
     description: Administrative operations
   - name: Truck Management - GraphQL
     description: GraphQL API for truck operations (queries and mutations)
   - name: Truck Management - REST
     description: REST API for truck CRUD operations (legacy endpoints)
+  - name: Income
+    description: Income tracking and management
+  - name: Alerts
+    description: Alert and notification management
+  - name: Driver Profiles
+    description: Driver profile management
   - name: Loan Calculations
     description: Loan payment tracking and calculations
   - name: Fuel Expenses
@@ -521,33 +685,6 @@ paths:
                     $ref: '#/components/schemas/User'
         400:
           description: Invalid Google token
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  ###########################################
-  # USER PROFILE
-  ###########################################
-  /users/getMyProfile:
-    get:
-      tags: [User Profile]
-      summary: Get current user's profile
-      description: Retrieves the authenticated user's profile information
-      responses:
-        200:
-          description: User profile retrieved successfully
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/User'
-        401:
-          description: Unauthorized - invalid or missing token
           content:
             application/json:
               schema:
@@ -1255,7 +1392,7 @@ paths:
   ###########################################
   # TRUCK MANAGEMENT - REST API (LEGACY)
   ###########################################
-  /trucks/addTruck:
+  /truck/addTruck:
     post:
       tags: [Truck Management - REST]
       summary: Add a new truck
@@ -1325,7 +1462,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /trucks/getAllTrucks:
+  /truck/getAllTrucks:
     get:
       tags: [Truck Management - REST]
       summary: Get all trucks
@@ -1345,7 +1482,7 @@ paths:
                         items:
                           $ref: '#/components/schemas/Truck'
 
-  /trucks/getTruckById/{id}:
+  /truck/getTruckById/{id}:
     get:
       tags: [Truck Management - REST]
       summary: Get truck by ID
@@ -1377,7 +1514,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /trucks/getAllTrucksByUser/{addedBy}:
+  /truck/getAllTrucksByUser/{addedBy}:
     get:
       tags: [Truck Management - REST]
       summary: Get all trucks by user ID
@@ -1405,7 +1542,7 @@ paths:
                         items:
                           $ref: '#/components/schemas/Truck'
 
-  /trucks/updateTruckById/{id}:
+  /truck/updateTruckById/{id}:
     put:
       tags: [Truck Management - REST]
       summary: Update truck by ID
@@ -1464,7 +1601,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /trucks/deleteTruckById/{id}:
+  /truck/deleteTruckById/{id}:
     delete:
       tags: [Truck Management - REST]
       summary: Delete truck by ID
@@ -2438,4 +2575,847 @@ paths:
                           trucksCount:
                             type: integer
                           recentActivity:
+                            type: object
+
+  ###########################################
+  # INCOME
+  ###########################################
+  /income/addIncome:
+    post:
+      tags: [Income]
+      summary: Add a new income record
+      description: Records a new income entry for a truck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [truckId, addedBy, date, amount]
+              properties:
+                truckId:
+                  type: string
+                  example: 507f1f77bcf86cd799439012
+                addedBy:
+                  type: string
+                  example: 507f1f77bcf86cd799439011
+                date:
+                  type: string
+                  format: date
+                  example: "2025-11-06"
+                amount:
+                  type: number
+                  format: float
+                  example: 2500.00
+                note:
+                  type: string
+                  example: Payment received for delivery
+      responses:
+        201:
+          description: Income added successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Income'
+        400:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /income/getAllIncomesByTruckId:
+    get:
+      tags: [Income]
+      summary: Get all income records by truck ID
+      description: Retrieves all income records for a specific truck
+      parameters:
+        - in: query
+          name: truckId
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439012
+      responses:
+        200:
+          description: Income records retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Income'
+
+  /income/getAllIncomesByUserId:
+    get:
+      tags: [Income]
+      summary: Get all income records by user ID
+      description: Retrieves all income records for a specific user
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+      responses:
+        200:
+          description: Income records retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Income'
+
+  /income/updateIncomeByTruckId/{id}:
+    put:
+      tags: [Income]
+      summary: Update income record by ID
+      description: Updates an existing income record
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439017
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                amount:
+                  type: number
+                  format: float
+                note:
+                  type: string
+      responses:
+        200:
+          description: Income record updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Income'
+        404:
+          description: Income record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /income/deleteIncomeById/{id}:
+    delete:
+      tags: [Income]
+      summary: Delete income record by ID
+      description: Removes an income record
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439017
+      responses:
+        200:
+          description: Income record deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        404:
+          description: Income record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /income/downloadIncomesExcel:
+    get:
+      tags: [Income]
+      summary: Download income records as Excel
+      description: Exports filtered income data to Excel format
+      parameters:
+        - in: query
+          name: truckId
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439012
+        - in: query
+          name: userId
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+      responses:
+        200:
+          description: Excel file generated successfully
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  /income/downloadAllIncomesExcel:
+    get:
+      tags: [Income]
+      summary: Download all income records as Excel (Admin)
+      description: Exports all income data to Excel format
+      responses:
+        200:
+          description: Excel file generated successfully
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  ###########################################
+  # ALERTS
+  ###########################################
+  /alerts/addAlert:
+    post:
+      tags: [Alerts]
+      summary: Create a new alert
+      description: Creates a new alert/notification in the system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [addedBy, title, alertDate, type, priority]
+              properties:
+                addedBy:
+                  type: string
+                  example: 507f1f77bcf86cd799439011
+                title:
+                  type: string
+                  maxLength: 100
+                  example: Vehicle inspection due
+                description:
+                  type: string
+                  maxLength: 500
+                  example: Annual vehicle inspection needs to be completed
+                alertDate:
+                  type: string
+                  format: date-time
+                  example: "2025-12-15T10:00:00Z"
+                type:
+                  type: string
+                  enum: [maintenance, delivery, license, insurance, inspection, fuel, payment, other]
+                  example: inspection
+                priority:
+                  type: string
+                  enum: [low, medium, high, urgent]
+                  example: high
+                truckId:
+                  type: string
+                  example: 507f1f77bcf86cd799439012
+                driverId:
+                  type: string
+                  example: 507f1f77bcf86cd799439019
+      responses:
+        201:
+          description: Alert created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Alert'
+        400:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /alerts/getAlertById/{id}:
+    get:
+      tags: [Alerts]
+      summary: Get alert by ID
+      description: Retrieves detailed information about a specific alert
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439018
+      responses:
+        200:
+          description: Alert retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Alert'
+        404:
+          description: Alert not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /alerts/getAllAlertsByUser/{addedBy}:
+    get:
+      tags: [Alerts]
+      summary: Get all alerts by user
+      description: Retrieves all alerts created by a specific user
+      parameters:
+        - in: path
+          name: addedBy
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+      responses:
+        200:
+          description: Alerts retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Alert'
+
+  /alerts/getAllAlerts:
+    get:
+      tags: [Alerts]
+      summary: Get all alerts (Admin)
+      description: Retrieves all alerts in the system
+      responses:
+        200:
+          description: Alerts retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Alert'
+
+  /alerts/updateAlertById/{id}:
+    put:
+      tags: [Alerts]
+      summary: Update alert by ID
+      description: Updates an existing alert
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439018
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                alertDate:
+                  type: string
+                  format: date-time
+                type:
+                  type: string
+                  enum: [maintenance, delivery, license, insurance, inspection, fuel, payment, other]
+                priority:
+                  type: string
+                  enum: [low, medium, high, urgent]
+                truckId:
+                  type: string
+                driverId:
+                  type: string
+      responses:
+        200:
+          description: Alert updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Alert'
+        404:
+          description: Alert not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /alerts/markAlertAsRead/{id}:
+    put:
+      tags: [Alerts]
+      summary: Mark alert as read
+      description: Marks an alert as read by the user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439018
+      responses:
+        200:
+          description: Alert marked as read successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Alert'
+
+  /alerts/deleteAlertById/{id}:
+    delete:
+      tags: [Alerts]
+      summary: Soft delete alert by ID
+      description: Soft deletes an alert (sets isActive to false)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439018
+      responses:
+        200:
+          description: Alert soft deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /alerts/permanentDeleteAlertById/{id}:
+    delete:
+      tags: [Alerts]
+      summary: Permanently delete alert by ID (Admin)
+      description: Permanently removes an alert from the system
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439018
+      responses:
+        200:
+          description: Alert permanently deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /alerts/restoreAlertById/{id}:
+    put:
+      tags: [Alerts]
+      summary: Restore soft-deleted alert (Admin)
+      description: Restores a soft-deleted alert (sets isActive to true)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439018
+      responses:
+        200:
+          description: Alert restored successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Alert'
+
+  /alerts/getAlertsSummary/{addedBy}:
+    get:
+      tags: [Alerts]
+      summary: Get alerts summary by user
+      description: Retrieves summary statistics of alerts for a specific user
+      parameters:
+        - in: path
+          name: addedBy
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+      responses:
+        200:
+          description: Alert summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          totalAlerts:
+                            type: integer
+                          unreadAlerts:
+                            type: integer
+                          overdueAlerts:
+                            type: integer
+                          alertsByPriority:
+                            type: object
+                            properties:
+                              low:
+                                type: integer
+                              medium:
+                                type: integer
+                              high:
+                                type: integer
+                              urgent:
+                                type: integer
+                          alertsByType:
+                            type: object
+
+  ###########################################
+  # DRIVER PROFILES
+  ###########################################
+  /driverProfiles/addDriverProfile:
+    post:
+      tags: [Driver Profiles]
+      summary: Add a new driver profile
+      description: Creates a new driver profile in the system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [addedBy, name, contact, age, experience, license, gender]
+              properties:
+                addedBy:
+                  type: string
+                  example: 507f1f77bcf86cd799439011
+                name:
+                  type: string
+                  example: John Smith
+                contact:
+                  type: string
+                  example: "+1-555-0123"
+                age:
+                  type: integer
+                  minimum: 18
+                  maximum: 70
+                  example: 35
+                experience:
+                  type: string
+                  example: 10 years
+                license:
+                  type: string
+                  example: DL123456789
+                gender:
+                  type: string
+                  enum: [Male, Female, Other]
+                  example: Male
+                photo:
+                  type: string
+                  example: /driver.png
+      responses:
+        201:
+          description: Driver profile created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DriverProfile'
+        400:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /driverProfiles/getDriverProfileById/{id}:
+    get:
+      tags: [Driver Profiles]
+      summary: Get driver profile by ID
+      description: Retrieves detailed information about a specific driver
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439019
+      responses:
+        200:
+          description: Driver profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DriverProfile'
+        404:
+          description: Driver profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /driverProfiles/getAllDriverProfilesByUser/{addedBy}:
+    get:
+      tags: [Driver Profiles]
+      summary: Get all driver profiles by user
+      description: Retrieves all driver profiles added by a specific user
+      parameters:
+        - in: path
+          name: addedBy
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+      responses:
+        200:
+          description: Driver profiles retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DriverProfile'
+
+  /driverProfiles/getAllDriverProfiles:
+    get:
+      tags: [Driver Profiles]
+      summary: Get all driver profiles (Admin)
+      description: Retrieves all driver profiles in the system
+      responses:
+        200:
+          description: Driver profiles retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DriverProfile'
+
+  /driverProfiles/updateDriverProfileById/{id}:
+    put:
+      tags: [Driver Profiles]
+      summary: Update driver profile by ID
+      description: Updates an existing driver profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439019
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                contact:
+                  type: string
+                age:
+                  type: integer
+                experience:
+                  type: string
+                license:
+                  type: string
+                gender:
+                  type: string
+                  enum: [Male, Female, Other]
+                photo:
+                  type: string
+      responses:
+        200:
+          description: Driver profile updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DriverProfile'
+        404:
+          description: Driver profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /driverProfiles/deleteDriverProfileById/{id}:
+    delete:
+      tags: [Driver Profiles]
+      summary: Soft delete driver profile by ID
+      description: Soft deletes a driver profile (sets isActive to false)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439019
+      responses:
+        200:
+          description: Driver profile soft deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /driverProfiles/permanentDeleteDriverProfileById/{id}:
+    delete:
+      tags: [Driver Profiles]
+      summary: Permanently delete driver profile (Admin)
+      description: Permanently removes a driver profile from the system
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439019
+      responses:
+        200:
+          description: Driver profile permanently deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /driverProfiles/restoreDriverProfileById/{id}:
+    put:
+      tags: [Driver Profiles]
+      summary: Restore soft-deleted driver profile (Admin)
+      description: Restores a soft-deleted driver profile (sets isActive to true)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439019
+      responses:
+        200:
+          description: Driver profile restored successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DriverProfile'
+
+  /driverProfiles/getDriverStatsByUser/{addedBy}:
+    get:
+      tags: [Driver Profiles]
+      summary: Get driver statistics by user
+      description: Retrieves summary statistics of drivers for a specific user
+      parameters:
+        - in: path
+          name: addedBy
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+      responses:
+        200:
+          description: Driver statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          totalDrivers:
+                            type: integer
+                          activeDrivers:
+                            type: integer
+                          averageAge:
+                            type: number
+                          averageExperience:
+                            type: number
+                          genderDistribution:
                             type: object
