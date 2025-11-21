@@ -55,10 +55,23 @@ const getMetadataByTruckId = async (req, res) => {
 
         const otherTotal = otherResult.length > 0 ? otherResult[0].totalCost : 0;
 
+        const incomeResult = await Income.aggregate([
+            {
+                $match: {
+                    truckId: truckId,
+                    date: { $gte: startOfMonth, $lte: endOfMonth }
+                }
+            },
+            { $group: { _id: null, totalAmount: { $sum: "$amount" } } }
+        ]);
+
+        const incomeTotal = incomeResult.length > 0 ? incomeResult[0].totalAmount : 0;
+
         const totalExpenses = {
             fuelTotal,
             defTotal,
             otherTotal,
+            incomeTotal,
             grandTotal: fuelTotal + defTotal + otherTotal
         };
 
@@ -72,7 +85,7 @@ const getMetadataByTruckId = async (req, res) => {
 
 const getMetadataByUserId = async (req, res) => {
     const { userId } = req.query;
-    
+
 
     // if (!mongoose.Types.ObjectId.isValid(userId)) {
         if (!userId) {
@@ -148,18 +161,36 @@ const getMetadataByUserId = async (req, res) => {
 
         const fuelUsedMonthlyTotal = fuelUsedMonthlyResult.length > 0 ? fuelUsedMonthlyResult[0].totalCost : 0;
 
+        // Total income
+        const incomeResult = await Income.aggregate([
+            { $match: { addedBy: userId } },
+            { $group: { _id: null, totalAmount: { $sum: "$amount" } } }
+        ]);
+
+        const incomeTotal = incomeResult.length > 0 ? incomeResult[0].totalAmount : 0;
+
+        // Monthly income
+        const incomeMonthlyResult = await Income.aggregate([
+            { $match: { addedBy: userId, date: { $gte: startOfMonth, $lte: endOfMonth } } },
+            { $group: { _id: null, totalAmount: { $sum: "$amount" } } }
+        ]);
+
+        const incomeMonthlyTotal = incomeMonthlyResult.length > 0 ? incomeMonthlyResult[0].totalAmount : 0;
+
         // Combine results
         const totalExpenses = {
             fuelTotal,
             defTotal,
             otherTotal,
             fuelUsedTotal,
+            incomeTotal,
             grandTotal: fuelTotal + defTotal + otherTotal,
             monthlyExpenses: {
                 fuel: fuelMonthlyTotal,
                 def: defMonthlyTotal,
                 other: otherMonthlyTotal,
                 fuelUsed: fuelUsedMonthlyTotal,
+                income: incomeMonthlyTotal,
                 monthlyGrandTotal: fuelMonthlyTotal + defMonthlyTotal + otherMonthlyTotal
             }
         };
@@ -210,7 +241,7 @@ const getProfileMetadataByUserId = async (req, res) => {
 
         // Step 2: Calculate total number of trucks from Truck collection
         const truckCount = await Truck.countDocuments({ addedBy: userId });
-        
+
         // Find the user and calculate the number of days since the user was created
         const user = await User.findOne({ googleId: userId });
         if (!user) {
@@ -249,7 +280,7 @@ const getSixMonthsDataByUserId = async (req, res) => {
             const monthStart = moment().subtract(i, 'months').startOf('month').toDate();
             const monthEnd = moment().subtract(i, 'months').endOf('month').toDate();
             const monthName = moment().subtract(i, 'months').format('MMM');
-            
+
             months.push({
                 name: monthName,
                 start: monthStart,

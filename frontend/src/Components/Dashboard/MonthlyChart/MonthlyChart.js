@@ -53,6 +53,7 @@ const MonthlyChart = () => {
                         domain: ['Fuel', 'Def', 'Other'],
                         range: ['#13452d', '#5fbd92', '#227d53'],
                     },
+                    y: { key: 'key1', independent: false }
                 },
                 interaction: { elementHighlight: { background: true } },
             },

@@ -162,7 +162,7 @@ const apis = {
     downloadAPI: "downloadOtherExpensesExcel",
     downloadAllAPI: "downloadAllOtherExpensesExcel",
   },
-  income:{
+  income: {
     addAPI: "addIncome",
     getAllExpensesById: "getAllIncomesByTruckId",
     getAllExpenses: "getAllIncomesByUserId",
@@ -233,6 +233,7 @@ const ExpenseSummary = () => {
   const [contentLoader, setContentLoader] = useState(true);
   const [expensesList, setExpensesList] = useState([]);
   const [totalExpense, setTotalExpense] = useState(0);
+  const [totalProfit, setTotalProfit] = useState(0);
   const [isError, setIsError] = useState(false);
   const [selectedDates, setSelectedDates] = useState([
     dayjs().startOf("month").format("YYYY-MM-DD"),
@@ -278,11 +279,13 @@ const ExpenseSummary = () => {
         .then((res) => {
           setExpensesList(res.data.expenses);
           setTotalExpense(res.data.totalExpense || 0);
+          setTotalProfit(res.data.totalProfit || 0);
           setContentLoader(false);
         })
         .catch((err) => {
           setExpensesList([]);
           setTotalExpense(0);
+          setTotalProfit(0);
           setIsError(true);
           setContentLoader(false);
         });
@@ -299,11 +302,13 @@ const ExpenseSummary = () => {
         .then((res) => {
           setExpensesList(res.data.expenses);
           setTotalExpense(res.data.totalExpense || 0);
+          setTotalProfit(res.data.totalProfit || 0);
           setContentLoader(false);
         })
         .catch((err) => {
           setExpensesList([]);
           setTotalExpense(0);
+          setTotalProfit(0);
           setIsError(true);
           setContentLoader(false);
         });
@@ -325,11 +330,13 @@ const ExpenseSummary = () => {
         .then((res) => {
           setExpensesList(res.data.expenses);
           setTotalExpense(res.data.totalExpense || 0);
+          setTotalProfit(res.data.totalProfit || 0);
           setContentLoader(false);
         })
         .catch((err) => {
           setExpensesList([]);
           setTotalExpense(0);
+          setTotalProfit(0);
           setIsError(true);
           setContentLoader(false);
         });
@@ -346,11 +353,13 @@ const ExpenseSummary = () => {
         .then((res) => {
           setExpensesList(res.data.expenses);
           setTotalExpense(res.data.totalExpense || 0);
+          setTotalProfit(res.data.totalProfit || 0);
           setContentLoader(false);
         })
         .catch((err) => {
           setExpensesList([]);
           setTotalExpense(0);
+          setTotalProfit(0);
           setIsError(true);
           setContentLoader(false);
         });
@@ -885,15 +894,28 @@ const ExpenseSummary = () => {
             value={selectedDates[1]}
           />
         </div>
-
-        <div
-          className="d-flex border align-items-center p-2 ps-3 rounded gap-3 justify-content-between"
-          style={{ background: "#fafafa" }}
-        >
-          <b>Total Expense</b>
-          <div className="p-2 border bg-white rounded fw-bold text-danger">
-            {totalExpense.toFixed(2)}
+        <div className="d-flex flex-column flex-md-row gap-2">
+          <div
+            className="w-100 d-flex border align-items-center p-2 ps-3 rounded gap-3 justify-content-between"
+            style={{ background: "#fafafa" }}
+          >
+            <b className="text-nowrap">Total {catalog === "income" ? "Income" : "Expense"}</b>
+            <div className="p-2 border bg-white rounded fw-bold text-danger">
+              {totalExpense.toFixed(2)}
+            </div>
           </div>
+          {
+            catalog === "income" &&
+            <div
+              className="w-100 d-flex border align-items-center p-2 ps-3 rounded gap-3 justify-content-between"
+              style={{ background: "#fafafa" }}
+            >
+              <b className="text-nowrap">Total Profit</b>
+              <div className="p-2 border bg-white rounded fw-bold text-danger">
+                {totalProfit.toFixed(2)}
+              </div>
+            </div>
+          }
         </div>
       </div>
       <hr></hr>

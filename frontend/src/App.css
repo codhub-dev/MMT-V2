@@ -5,6 +5,22 @@
   /* height: 100vh; */
 }
 
+/* Global button styles - Green gradient for all primary buttons */
+.ant-btn-primary {
+  background: linear-gradient(135deg, #0a3d2f, #1aa54b) !important;
+  border: none !important;
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #0c4a39, #1ec157) !important;
+  box-shadow: 0 2px 8px rgba(26, 165, 75, 0.3) !important;
+}
+
+.ant-btn-primary:active,
+.ant-btn-primary:focus {
+  background: linear-gradient(135deg, #083327, #149440) !important;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
