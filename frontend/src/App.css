@@ -21,6 +21,60 @@
   background: linear-gradient(135deg, #083327, #149440) !important;
 }
 
+/* Red gradient button for unsubscribe action */
+.btn-red-gradient.ant-btn-primary {
+  background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%) !important;
+  border: none !important;
+}
+
+.btn-red-gradient.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #ff7875 0%, #f5222d 100%) !important;
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3) !important;
+}
+
+.btn-red-gradient.ant-btn-primary:active,
+.btn-red-gradient.ant-btn-primary:focus {
+  background: linear-gradient(135deg, #d9363e 0%, #a8071a 100%) !important;
+}
+
+/* Red gradient for all Ant Design danger buttons */
+.ant-btn-dangerous.ant-btn-primary,
+.ant-btn-primary[danger] {
+  background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%) !important;
+  border: none !important;
+}
+
+.ant-btn-dangerous.ant-btn-primary:hover,
+.ant-btn-primary[danger]:hover {
+  background: linear-gradient(135deg, #ff7875 0%, #f5222d 100%) !important;
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3) !important;
+}
+
+.ant-btn-dangerous.ant-btn-primary:active,
+.ant-btn-dangerous.ant-btn-primary:focus,
+.ant-btn-primary[danger]:active,
+.ant-btn-primary[danger]:focus {
+  background: linear-gradient(135deg, #d9363e 0%, #a8071a 100%) !important;
+}
+
+/* Red gradient for bootstrap danger buttons */
+.btn-danger {
+  background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #ff7875 0%, #f5222d 100%) !important;
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3) !important;
+}
+
+.btn-danger:active,
+.btn-danger:focus {
+  background: linear-gradient(135deg, #d9363e 0%, #a8071a 100%) !important;
+}
+
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -500,12 +554,12 @@
 }
 
 .profile-btn-group .btn-danger {
-  background: #ff4d4f;
-  border-color: #ff4d4f;
-  color: #fff;
+  background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%) !important;
+  border: none !important;
+  color: #fff !important;
 }
 
 .profile-btn-group .btn-danger:hover {
-  background: #ff7875;
-  border-color: #ff7875;
+  background: linear-gradient(135deg, #ff7875 0%, #f5222d 100%) !important;
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3) !important;
 }
