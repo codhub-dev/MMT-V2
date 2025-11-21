@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import LoaderOverlay from '../../Components/LoaderOverlay/LoaderOverlay'
-import { Button } from 'antd'
+import { Button, Empty } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import VehicleCard from "../../Components/VehicleCard/VehicleCard";
 import VehicleModal from "../../Components/VehicleModal/VehicleModal";
@@ -59,19 +59,26 @@ const Trucks = () => {
                 </div>
             </div>
             <LoaderOverlay isVisible={contentLoader} />
-            <div className="dashboard-grid-container vehicleCard pb-5">
-                {trucks?.map((truck) => {
-                    return <VehicleCard key={truck._id} data={truck} />;
-                })}
-
-                {/* <button
-          className="bg-light rounded d-flex align-items-center justify-content-center"
-          style={{ border: "2px dashed #cbcbcb", minHeight: 150 }}
-          onClick={callVehicleModal}
-        >
-          <PlusCircleFilled style={{ fontSize: 76, color: "#d6d6d6" }} />
-        </button> */}
-            </div>
+            {(!contentLoader && trucks.length === 0) ? (
+                <div
+                    style={{
+                        width: "100%",
+                        minHeight: "40vh",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    <Empty description="No trucks added yet" />
+                </div>
+            ) : (
+                <div className="dashboard-grid-container vehicleCard pb-5">
+                    {trucks?.map((truck) => (
+                        <VehicleCard key={truck._id} data={truck} />
+                    ))}
+                </div>
+            )}
             <VehicleModal
                 ref={vehicleModalRef}
                 setTrucks={setTrucks}
