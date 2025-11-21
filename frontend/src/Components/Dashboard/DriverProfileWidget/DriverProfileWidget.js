@@ -509,14 +509,12 @@ const DriverProfileWidget = () => {
           <Form.Item
             label="Age"
             name="age"
-            rules={[{ required: true, message: 'Please enter age' }]}
           >
             <Input type="number" />
           </Form.Item>
           <Form.Item
             label="Experience"
             name="experience"
-            rules={[{ required: true, message: 'Please enter experience' }]}
           >
             <Input />
           </Form.Item>

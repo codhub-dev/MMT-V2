@@ -17,13 +17,11 @@ const DriverProfileSchema = new mongoose.Schema({
     },
     age: {
         type: Number,
-        required: [true, "Age is required"],
         min: [18, "Driver must be at least 18 years old"],
         max: [70, "Driver cannot be older than 70 years"]
     },
     experience: {
         type: String,
-        required: [true, "Experience is required"],
     },
     license: {
         type: String,
