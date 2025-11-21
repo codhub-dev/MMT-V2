@@ -4,11 +4,14 @@ const DefExpense = require("../models/defExpense-model");
 const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
+const logger = require("../utils/logger");
 
 // Controller to add a new def filling record
 const addDefExpense = async (req, res) => {
   try {
     const { truckId, addedBy, date, currentKM, litres, cost, note } = req.body;
+
+    logger.info("Adding new DEF expense", { truckId, addedBy, date, currentKM, litres, cost });
 
     const newDefExpense = new DefExpense({
       truckId,
@@ -21,8 +24,10 @@ const addDefExpense = async (req, res) => {
     });
 
     const savedDefExpense = await newDefExpense.save();
+    logger.info("DEF expense added successfully", { defExpenseId: savedDefExpense._id });
     res.status(201).json(savedDefExpense);
   } catch (error) {
+    logger.error("Error adding def expenses", { error: error.message, stack: error.stack });
     console.error("Error adding def expenses:", error);
     res.status(500).json({ message: "Failed to add def expenses" });
   }
@@ -42,8 +47,11 @@ const updateDefExpenseByTruckId = async (req, res) => {
     } = req.body;
     const file = req.file;
 
+    logger.info("Updating DEF expense", { id, truckId, addedBy });
+
     // Validate the fuel ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      logger.warn("Invalid DEF expense ID", { id });
       return res.status(400).json({ message: "Invalid def expense ID" });
     }
     
@@ -70,18 +78,21 @@ const updateDefExpenseByTruckId = async (req, res) => {
     );
 
     if (!updatedDef) {
+      logger.warn("DEF expense not found for update", { id });
       return res.status(404).json({ message: "Def expense not found" });
     }
 
     // Fetch all defExpenses for the user after the update
     // const defExpenses = await getAllDefByTruckHelper(addedBy);
 
+    logger.info("DEF expense updated successfully", { id });
     // Send the response with all defExpenses (including the updated one)
     res.status(200).json({
       message: "Def expense updated successfully",
       defExpense:updatedDef,
     });
   } catch (error) {
+    logger.error("Error updating def expense", { error: error.message, stack: error.stack });
     console.error("Error updating def expense:", error);
     res
       .status(500)
@@ -93,7 +104,10 @@ const getAllDefExpensesByTruckId = async (req, res) => {
   try {
     const { truckId, selectedDates } = req.query;
 
+    logger.info("Fetching DEF expenses by truck ID", { truckId, selectedDates });
+
     if (!truckId) {
+      logger.warn("Truck ID is missing in request");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
@@ -124,6 +138,7 @@ const getAllDefExpensesByTruckId = async (req, res) => {
     const defExpenses = await DefExpense.find(query).sort({ date: 1 });
 
     if (defExpenses.length === 0) {
+      logger.info("No DEF expenses found for truck", { truckId, selectedDates });
       return res.status(404).json({
         message: "No def expenses found for this truck in the given date range",
       });
@@ -156,11 +171,13 @@ const getAllDefExpensesByTruckId = async (req, res) => {
         key: index,
       };
     });
+    logger.info("DEF expenses retrieved successfully", { truckId, count: defExpenses.length, totalExpense });
     res.status(200).json({
       expenses: formattedDefExpenses,
       totalExpense,
     });
   } catch (error) {
+    logger.error("Error retrieving def expenses", { error: error.message, stack: error.stack });
     console.error("Error retrieving def expenses:", error);
     res.status(500).json({ message: "Failed to retrieve def expenses" });
   }
@@ -170,7 +187,10 @@ const getAllDefExpensesByUserId = async (req, res) => {
   try {
     const { userId, selectedDates } = req.query;
 
+    logger.info("Fetching DEF expenses by user ID", { userId, selectedDates });
+
     if (!userId) {
+      logger.warn("User ID is missing in request");
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -199,6 +219,7 @@ const getAllDefExpensesByUserId = async (req, res) => {
     const defExpenses = await DefExpense.find(query).sort({ date: 1 });
 
     if (defExpenses.length === 0) {
+      logger.info("No DEF expenses found for user", { userId, selectedDates });
       return res.status(404).json({
         message: "No DEF expenses found for this user in the given date range",
       });
@@ -230,11 +251,13 @@ const getAllDefExpensesByUserId = async (req, res) => {
       })
     );
 
+    logger.info("DEF expenses retrieved successfully by user ID", { userId, count: defExpenses.length, totalExpense });
     res.status(200).json({
       expenses: formattedDefExpenses,
       totalExpense,
     });
   } catch (error) {
+    logger.error("Error retrieving DEF expenses", { error: error.message, stack: error.stack });
     console.error("Error retrieving DEF expenses:", error);
     res.status(500).json({ message: "Failed to retrieve DEF expenses" });
   }
@@ -245,18 +268,24 @@ const deleteDefExpenseById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    logger.info("Deleting DEF expense", { id });
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      logger.warn("Invalid DEF expense ID for deletion", { id });
       return res.status(400).json({ message: "Invalid Expense ID" });
     }
 
     const deletedTruck = await DefExpense.findByIdAndDelete(id);
 
     if (!deletedTruck) {
+      logger.warn("DEF expense not found for deletion", { id });
       return res.status(404).json({ message: "Expense not found" });
     }
 
+    logger.info("DEF expense deleted successfully", { id });
     res.status(200).json({ message: "Expense deleted" });
   } catch (error) {
+    logger.error("Error deleting DEF expense", { error: error.message, stack: error.stack });
     console.error("Error deleting truck:", error);
     res
       .status(500)
@@ -268,7 +297,11 @@ const downloadDefExpensesExcel = async (req, res) => {
   try {
     const { truckId, selectedDates } = req.query;
 
+    logger.info("Downloading DEF expenses Excel", { truckId, selectedDates });
+
     if (!truckId) {
+      logger.warn("Truck ID is missing for Excel download");
+      console.log("Truck ID is missing");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
@@ -292,6 +325,8 @@ const downloadDefExpensesExcel = async (req, res) => {
     const truck = await TruckExpense.findById(truckId);
 
     if (defExpenses.length === 0) {
+      logger.info("No DEF expenses found for Excel download", { truckId, selectedDates });
+      console.log("No expenses found for the given query");
       return res.status(404).json({
         message: "No DEF expenses found for this truck in the given date range",
       });
@@ -389,8 +424,10 @@ const downloadDefExpensesExcel = async (req, res) => {
     });
 
     // Write the workbook to a buffer
+
     const buffer = await workbook.xlsx.writeBuffer();
 
+    logger.info("DEF expenses Excel generated successfully", { truckId, recordCount: defExpenses.length });
     // Set headers for the response
     res.setHeader(
       "Content-Disposition",
@@ -402,6 +439,7 @@ const downloadDefExpensesExcel = async (req, res) => {
     );
     res.send(buffer);
   } catch (error) {
+    logger.error("Error generating Excel file", { error: error.message, stack: error.stack });
     console.error("Error generating Excel file:", error);
     res
       .status(500)
@@ -413,7 +451,11 @@ const downloadAllDefExpensesExcel = async (req, res) => {
   try {
     const { userId, selectedDates } = req.query;
 
+    logger.info("Downloading all DEF expenses Excel by user ID", { userId, selectedDates });
+
     if (!userId) {
+      logger.warn("User ID is missing for Excel download");
+      console.log("User ID is missing");
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -436,6 +478,8 @@ const downloadAllDefExpensesExcel = async (req, res) => {
     const defExpenses = await DefExpense.find(query).sort({ date: 1 });
 
     if (defExpenses.length === 0) {
+      logger.info("No DEF expenses found for Excel download", { userId, selectedDates });
+      console.log("No expenses found for the given query");
       return res.status(404).json({
         message: "No DEF expenses found for this user in the given date range",
       });
@@ -537,8 +581,10 @@ const downloadAllDefExpensesExcel = async (req, res) => {
     });
 
     // Write the workbook to a buffer
+
     const buffer = await workbook.xlsx.writeBuffer();
 
+    logger.info("All DEF expenses Excel generated successfully", { userId, recordCount: defExpenses.length });
     // Set headers for the response
     res.setHeader(
       "Content-Disposition",
@@ -550,6 +596,7 @@ const downloadAllDefExpensesExcel = async (req, res) => {
     );
     res.send(buffer);
   } catch (error) {
+    logger.error("Error generating Excel file", { error: error.message, stack: error.stack });
     console.error("Error generating Excel file:", error);
     res.status(500).json({ message: "Failed to generate Excel file", error: error.message });
   }

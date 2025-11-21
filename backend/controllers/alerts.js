@@ -2,11 +2,21 @@ const { default: mongoose } = require('mongoose');
 const Alert = require('../models/alert-model');
 const { catchAsyncError } = require('../middleware/catchAsyncError');
 const ErrorHandler = require('../middleware/errorHandlers');
+const logger = require('../utils/logger');
 
 // Add a new alert
 const addAlert = catchAsyncError(async (req, res, next) => {
     try {
         const { addedBy, title, description, alertDate, type, priority, truckId, driverId } = req.body;
+
+        logger.info('Creating new alert', {
+            addedBy,
+            title,
+            type,
+            priority,
+            truckId,
+            driverId
+        });
 
         const newAlert = new Alert({
             addedBy,
@@ -21,6 +31,14 @@ const addAlert = catchAsyncError(async (req, res, next) => {
 
         const savedAlert = await newAlert.save();
 
+        logger.info('Alert created successfully', {
+            alertId: savedAlert._id,
+            addedBy,
+            title: savedAlert.title,
+            type: savedAlert.type,
+            priority: savedAlert.priority
+        });
+
         res.status(201).json({
             success: true,
             message: 'Alert created successfully',
@@ -28,6 +46,11 @@ const addAlert = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error adding alert:', error);
+        logger.error('Failed to create alert', {
+            error: error.message,
+            stack: error.stack,
+            requestBody: req.body
+        });
         if (error.name === 'ValidationError') {
             return next(new ErrorHandler(Object.values(error.errors)[0].message, 400));
         }
@@ -41,6 +64,7 @@ const getAlertById = catchAsyncError(async (req, res, next) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            logger.warn('Invalid alert ID provided', { alertId: id });
             return next(new ErrorHandler('Invalid alert ID', 400));
         }
 
@@ -49,8 +73,15 @@ const getAlertById = catchAsyncError(async (req, res, next) => {
             .populate('driverId', 'name license');
 
         if (!alert) {
+            logger.warn('Alert not found', { alertId: id });
             return next(new ErrorHandler('Alert not found', 404));
         }
+
+        logger.info('Alert retrieved successfully', {
+            alertId: id,
+            title: alert.title,
+            type: alert.type
+        });
 
         res.status(200).json({
             success: true,
@@ -59,6 +90,10 @@ const getAlertById = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error fetching alert by ID:', error);
+        logger.error('Failed to fetch alert by ID', {
+            error: error.message,
+            alertId: req.params.id
+        });
         return next(new ErrorHandler('Failed to fetch alert', 500));
     }
 });
@@ -77,6 +112,13 @@ const getAllAlertsByUser = catchAsyncError(async (req, res, next) => {
             sortOrder = 'asc',
             dateFilter
         } = req.query;
+
+        logger.info('Fetching alerts by user', {
+            addedBy,
+            filters: { isRead, type, priority, dateFilter },
+            page,
+            limit
+        });
 
         // Build query
         let query = { addedBy, isActive: true };
@@ -172,6 +214,13 @@ const getAllAlertsByUser = catchAsyncError(async (req, res, next) => {
             }
         ]);
 
+        logger.info('Alerts fetched successfully', {
+            addedBy,
+            count: alerts.length,
+            total,
+            page
+        });
+
         res.status(200).json({
             success: true,
             message: `Found ${alerts.length} alerts`,
@@ -193,6 +242,10 @@ const getAllAlertsByUser = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error fetching alerts by user:', error);
+        logger.error('Failed to fetch alerts by user', {
+            error: error.message,
+            addedBy: req.params.addedBy
+        });
         return next(new ErrorHandler('Failed to fetch alerts', 500));
     }
 });
@@ -201,6 +254,12 @@ const getAllAlertsByUser = catchAsyncError(async (req, res, next) => {
 const getAllAlerts = catchAsyncError(async (req, res, next) => {
     try {
         const { page = 1, limit = 20, search = '', type, priority } = req.query;
+
+        logger.info('Fetching all alerts (admin)', {
+            filters: { search, type, priority },
+            page,
+            limit
+        });
 
         let query = { isActive: true };
 
@@ -229,6 +288,12 @@ const getAllAlerts = catchAsyncError(async (req, res, next) => {
 
         const total = await Alert.countDocuments(query);
 
+        logger.info('All alerts fetched successfully', {
+            count: alerts.length,
+            total,
+            page
+        });
+
         res.status(200).json({
             success: true,
             message: 'Alerts retrieved successfully',
@@ -243,6 +308,9 @@ const getAllAlerts = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error fetching all alerts:', error);
+        logger.error('Failed to fetch all alerts', {
+            error: error.message
+        });
         return next(new ErrorHandler('Failed to fetch alerts', 500));
     }
 });
@@ -254,14 +322,24 @@ const updateAlertById = catchAsyncError(async (req, res, next) => {
         const { title, description, alertDate, type, priority, truckId, driverId } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            logger.warn('Invalid alert ID for update', { alertId: id });
             return next(new ErrorHandler('Invalid alert ID', 400));
         }
+
+        logger.info('Updating alert', {
+            alertId: id,
+            updates: { title, type, priority, truckId, driverId }
+        });
 
         const updateData = { title, description, type, priority, truckId, driverId };
 
         if (alertDate) {
             const newAlertDate = new Date(alertDate);
             if (newAlertDate < new Date()) {
+                logger.warn('Attempt to set past alert date', {
+                    alertId: id,
+                    alertDate: newAlertDate
+                });
                 return next(new ErrorHandler('Alert date cannot be in the past', 400));
             }
             updateData.alertDate = newAlertDate;
@@ -275,8 +353,16 @@ const updateAlertById = catchAsyncError(async (req, res, next) => {
          .populate('driverId', 'name license');
 
         if (!updatedAlert) {
+            logger.warn('Alert not found for update', { alertId: id });
             return next(new ErrorHandler('Alert not found', 404));
         }
+
+        logger.info('Alert updated successfully', {
+            alertId: id,
+            title: updatedAlert.title,
+            type: updatedAlert.type,
+            priority: updatedAlert.priority
+        });
 
         res.status(200).json({
             success: true,
@@ -285,6 +371,11 @@ const updateAlertById = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error updating alert:', error);
+        logger.error('Failed to update alert', {
+            error: error.message,
+            alertId: req.params.id,
+            updates: req.body
+        });
         if (error.name === 'ValidationError') {
             return next(new ErrorHandler(Object.values(error.errors)[0].message, 400));
         }
@@ -299,8 +390,14 @@ const markAlertAsRead = catchAsyncError(async (req, res, next) => {
         const { isRead = true } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            logger.warn('Invalid alert ID for read status update', { alertId: id });
             return next(new ErrorHandler('Invalid alert ID', 400));
         }
+
+        logger.info('Marking alert as read/unread', {
+            alertId: id,
+            isRead
+        });
 
         const updatedAlert = await Alert.findByIdAndUpdate(
             id,
@@ -309,8 +406,15 @@ const markAlertAsRead = catchAsyncError(async (req, res, next) => {
         );
 
         if (!updatedAlert) {
+            logger.warn('Alert not found for read status update', { alertId: id });
             return next(new ErrorHandler('Alert not found', 404));
         }
+
+        logger.info('Alert read status updated successfully', {
+            alertId: id,
+            isRead,
+            title: updatedAlert.title
+        });
 
         res.status(200).json({
             success: true,
@@ -319,6 +423,10 @@ const markAlertAsRead = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error marking alert:', error);
+        logger.error('Failed to update alert read status', {
+            error: error.message,
+            alertId: req.params.id
+        });
         return next(new ErrorHandler('Failed to update alert status', 500));
     }
 });
@@ -329,8 +437,11 @@ const deleteAlertById = catchAsyncError(async (req, res, next) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            logger.warn('Invalid alert ID for deletion', { alertId: id });
             return next(new ErrorHandler('Invalid alert ID', 400));
         }
+
+        logger.info('Soft deleting alert', { alertId: id });
 
         const deletedAlert = await Alert.findByIdAndUpdate(
             id,
@@ -339,8 +450,15 @@ const deleteAlertById = catchAsyncError(async (req, res, next) => {
         );
 
         if (!deletedAlert) {
+            logger.warn('Alert not found for deletion', { alertId: id });
             return next(new ErrorHandler('Alert not found', 404));
         }
+
+        logger.info('Alert soft deleted successfully', {
+            alertId: id,
+            title: deletedAlert.title,
+            type: deletedAlert.type
+        });
 
         res.status(200).json({
             success: true,
@@ -349,6 +467,10 @@ const deleteAlertById = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error deleting alert:', error);
+        logger.error('Failed to delete alert', {
+            error: error.message,
+            alertId: req.params.id
+        });
         return next(new ErrorHandler('Failed to delete alert', 500));
     }
 });
@@ -359,14 +481,25 @@ const permanentDeleteAlertById = catchAsyncError(async (req, res, next) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            logger.warn('Invalid alert ID for permanent deletion', { alertId: id });
             return next(new ErrorHandler('Invalid alert ID', 400));
         }
+
+        logger.warn('Permanently deleting alert', { alertId: id });
 
         const deletedAlert = await Alert.findByIdAndDelete(id);
 
         if (!deletedAlert) {
+            logger.warn('Alert not found for permanent deletion', { alertId: id });
             return next(new ErrorHandler('Alert not found', 404));
         }
+
+        logger.warn('Alert permanently deleted', {
+            alertId: id,
+            title: deletedAlert.title,
+            type: deletedAlert.type,
+            addedBy: deletedAlert.addedBy
+        });
 
         res.status(200).json({
             success: true,
@@ -375,6 +508,10 @@ const permanentDeleteAlertById = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error permanently deleting alert:', error);
+        logger.error('Failed to permanently delete alert', {
+            error: error.message,
+            alertId: req.params.id
+        });
         return next(new ErrorHandler('Failed to permanently delete alert', 500));
     }
 });
@@ -385,8 +522,11 @@ const restoreAlertById = catchAsyncError(async (req, res, next) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            logger.warn('Invalid alert ID for restoration', { alertId: id });
             return next(new ErrorHandler('Invalid alert ID', 400));
         }
+
+        logger.info('Restoring alert', { alertId: id });
 
         const restoredAlert = await Alert.findByIdAndUpdate(
             id,
@@ -395,8 +535,15 @@ const restoreAlertById = catchAsyncError(async (req, res, next) => {
         );
 
         if (!restoredAlert) {
+            logger.warn('Alert not found for restoration', { alertId: id });
             return next(new ErrorHandler('Alert not found', 404));
         }
+
+        logger.info('Alert restored successfully', {
+            alertId: id,
+            title: restoredAlert.title,
+            type: restoredAlert.type
+        });
 
         res.status(200).json({
             success: true,
@@ -405,6 +552,10 @@ const restoreAlertById = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error restoring alert:', error);
+        logger.error('Failed to restore alert', {
+            error: error.message,
+            alertId: req.params.id
+        });
         return next(new ErrorHandler('Failed to restore alert', 500));
     }
 });
@@ -414,6 +565,8 @@ const getAlertsSummary = catchAsyncError(async (req, res, next) => {
     try {
         const { addedBy } = req.params;
         const now = new Date();
+
+        logger.info('Fetching alerts summary', { addedBy });
 
         const summary = await Alert.aggregate([
             { $match: { addedBy, isActive: true } },
@@ -491,6 +644,13 @@ const getAlertsSummary = catchAsyncError(async (req, res, next) => {
 
         const result = summary[0];
 
+        logger.info('Alerts summary fetched successfully', {
+            addedBy,
+            total: result.counts[0]?.total || 0,
+            unread: result.counts[0]?.unread || 0,
+            overdue: result.counts[0]?.overdue || 0
+        });
+
         res.status(200).json({
             success: true,
             message: 'Alerts summary retrieved successfully',
@@ -503,6 +663,10 @@ const getAlertsSummary = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error fetching alerts summary:', error);
+        logger.error('Failed to fetch alerts summary', {
+            error: error.message,
+            addedBy: req.params.addedBy
+        });
         return next(new ErrorHandler('Failed to fetch alerts summary', 500));
     }
 });

@@ -9,6 +9,9 @@ const cors = require("cors");
 
 require("dotenv").config();
 
+// Import centralized logger
+const appLogger = require("./utils/logger");
+
 // middleware handlers
 const { error } = require("./utils/error");
 const isAuthenticated = require("./middleware/isAuthenticated");
@@ -36,6 +39,11 @@ const app = express();
 
 const allowedOrigins = process.env.CORS_URLS ? process.env.CORS_URLS : [];
 
+appLogger.info("Application starting...", { 
+  nodeEnv: process.env.NODE_ENV,
+  allowedOrigins: allowedOrigins.length 
+});
+
 // middlewares
 app.use(
   cors({
@@ -43,14 +51,35 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
           callback(null, origin);
       } else {
+          appLogger.warn("CORS blocked request", { origin });
           callback(new Error("Not allowed by CORS"));
       }
-  }, // Allow specified domains
+  },
     methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"], // Allow specified headers
-    credentials: true, // Allow credentials
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
+
+// HTTP request logging middleware
+app.use((req, res, next) => {
+  const startTime = Date.now();
+  
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    appLogger.info("HTTP Request", {
+      method: req.method,
+      path: req.path,
+      statusCode: res.statusCode,
+      duration: `${duration}ms`,
+      ip: req.ip,
+      userAgent: req.get('user-agent')
+    });
+  });
+  
+  next();
+});
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -60,6 +89,8 @@ app.use(express.static(path.join(__dirname, "public")));
 // Swagger setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get('/api-docs.json', (req, res) => res.json(swaggerSpec));
+
+appLogger.info("Middleware configured successfully");
 
 // routes
 app.use("/api/v1/app/health", healthRouter);
@@ -79,7 +110,21 @@ app.use("/api/v1/app/driverProfiles", isAuthenticated, driverProfilesRoutes);
 app.use("/api/v1/app/alerts", isAuthenticated, alertsRoutes);
 app.use("/api/v1/app/metadata", isAuthenticated, metadata);
 
+appLogger.info("Routes configured successfully");
+
 // error handler
-app.use(error);
+app.use((err, req, res, next) => {
+  appLogger.error("Application error", {
+    error: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    statusCode: err.statusCode || 500
+  });
+  
+  error(err, req, res, next);
+});
+
+appLogger.info("Application initialized successfully");
 
 module.exports = app;

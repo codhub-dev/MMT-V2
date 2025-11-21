@@ -3,13 +3,13 @@ const FuelExpense = require("../models/fuelExpense-model");
 const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
-const fs = require("fs");
-const path = require("path");
+const logger = require("../utils/logger");
 
 // Controller to add a new fuel filling record
 const addFuelExpense = async (req, res) => {
   try {
     const { truckId, addedBy, date, currentKM, litres, cost, note } = req.body;
+    logger.info("Adding fuel expense", { truckId, addedBy, cost, litres });
 
     const newFuelExpense = new FuelExpense({
       truckId,
@@ -22,9 +22,10 @@ const addFuelExpense = async (req, res) => {
     });
 
     const savedFuelExpense = await newFuelExpense.save();
+    logger.info("Fuel expense added successfully", { expenseId: savedFuelExpense._id, truckId, cost });
     res.status(201).json(savedFuelExpense);
   } catch (error) {
-    console.error("Error adding fuel filling:", error);
+    logger.error("Error adding fuel expense", { error: error.message, truckId: req.body.truckId });
     res.status(500).json({ message: "Failed to add fuel filling" });
   }
 };
@@ -32,8 +33,10 @@ const addFuelExpense = async (req, res) => {
 const getAllFuelExpensesByTruckId = async (req, res) => {
   try {
     const { truckId, selectedDates } = req.query;
+    logger.info("Fetching fuel expenses by truck", { truckId, dateRange: selectedDates });
 
     if (!truckId) {
+      logger.warn("Truck ID missing in fuel expenses request");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
@@ -64,6 +67,7 @@ const getAllFuelExpensesByTruckId = async (req, res) => {
     const fuelExpenses = await FuelExpense.find(query).sort({ date: 1 });
 
     if (fuelExpenses.length === 0) {
+      logger.warn("No fuel expenses found", { truckId, dateRange: selectedDates });
       return res.status(404).json({
         message:
           "No fuel expenses found for this truck in the given date range",
@@ -77,10 +81,6 @@ const getAllFuelExpensesByTruckId = async (req, res) => {
 
     // Calculate mileage and range, and format the date
     const formattedFuelExpenses = fuelExpenses.map((expense, index) => {
-      // Format the date to 'YYYY-MM-DD'
-      // const date = new Date(expense.date);
-      // const formattedDate = date.toISOString().split("T")[0];
-
       const date = new Date(expense.date);
       const day = String(date.getDate()).padStart(2, "0");
       const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
@@ -90,9 +90,7 @@ const getAllFuelExpensesByTruckId = async (req, res) => {
       const range =
         index > 0 ? expense.currentKM - fuelExpenses[index - 1].currentKM : 0;
 
-      // Calculate range - Assuming range is not given and not calculated here
-      // If you have a formula for range, apply it here. For now, I set it as the mileage.
-      const mileage = range > 0 ? (range / expense.litres).toFixed(2) : 0; // Adjust this if you have a specific formula for range
+      const mileage = range > 0 ? (range / expense.litres).toFixed(2) : 0;
 
       return {
         ...expense.toObject(),
@@ -103,12 +101,13 @@ const getAllFuelExpensesByTruckId = async (req, res) => {
       };
     });
 
+    logger.info("Fuel expenses fetched successfully", { truckId, count: fuelExpenses.length, totalExpense });
     res.status(200).json({
       expenses: formattedFuelExpenses,
       totalExpense,
     });
   } catch (error) {
-    console.error("Error retrieving fuel expenses:", error);
+    logger.error("Error retrieving fuel expenses", { error: error.message, truckId: req.query.truckId });
     res.status(500).json({ message: "Failed to retrieve fuel expenses" });
   }
 };
@@ -116,8 +115,10 @@ const getAllFuelExpensesByTruckId = async (req, res) => {
 const getAllFuelExpensesByUserId = async (req, res) => {
   try {
     const { userId, selectedDates } = req.query;
+    logger.info("Fetching fuel expenses by user", { userId, dateRange: selectedDates });
 
     if (!userId) {
+      logger.warn("User ID missing in fuel expenses request");
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -148,6 +149,7 @@ const getAllFuelExpensesByUserId = async (req, res) => {
     const fuelExpenses = await FuelExpense.find(query).sort({ date: 1 });
 
     if (fuelExpenses.length === 0) {
+      logger.warn("No fuel expenses found for user", { userId, dateRange: selectedDates });
       return res.status(404).json({
         message: "No fuel expenses found for this user in the given date range",
       });
@@ -179,19 +181,19 @@ const getAllFuelExpensesByUserId = async (req, res) => {
       0
     );
 
+    logger.info("Fuel expenses by user fetched successfully", { userId, count: fuelExpenses.length, totalExpense });
     res.status(200).json({
       expenses: formattedFuelExpenses,
       totalExpense,
     });
   } catch (error) {
-    console.error("Error retrieving fuel expenses:", error);
+    logger.error("Error retrieving fuel expenses by user", { error: error.message, userId: req.query.userId });
     res.status(500).json({ message: "Failed to retrieve fuel expenses" });
   }
 };
 
 const getAllFuelByTruckHelper = async (truckId) => {
   try {
-
     // Ensure the dates are in UTC and set the time to 00:00:00 to avoid time zone issues
     const startDate = selectedDates
       ? moment.utc(selectedDates[0]).startOf("day").toDate()
@@ -219,7 +221,7 @@ const getAllFuelByTruckHelper = async (truckId) => {
     const fuelExpenses = await FuelExpense.find(query).sort({ date: 1 });
 
     if (fuelExpenses.length === 0) {
-      return []
+      return [];
     }
 
     const totalExpense = fuelExpenses.reduce(
@@ -229,10 +231,6 @@ const getAllFuelByTruckHelper = async (truckId) => {
 
     // Calculate mileage and range, and format the date
     const formattedFuelExpenses = fuelExpenses.map((expense, index) => {
-      // Format the date to 'YYYY-MM-DD'
-      // const date = new Date(expense.date);
-      // const formattedDate = date.toISOString().split("T")[0];
-
       const date = new Date(expense.date);
       const day = String(date.getDate()).padStart(2, "0");
       const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
@@ -242,9 +240,7 @@ const getAllFuelByTruckHelper = async (truckId) => {
       const range =
         index > 0 ? expense.currentKM - fuelExpenses[index - 1].currentKM : 0;
 
-      // Calculate range - Assuming range is not given and not calculated here
-      // If you have a formula for range, apply it here. For now, I set it as the mileage.
-      const mileage = range > 0 ? (range / expense.litres).toFixed(2) : 0; // Adjust this if you have a specific formula for range
+      const mileage = range > 0 ? (range / expense.litres).toFixed(2) : 0;
 
       return {
         ...expense.toObject(),
@@ -255,38 +251,30 @@ const getAllFuelByTruckHelper = async (truckId) => {
       };
     });
 
-    return({
+    return {
       expenses: formattedFuelExpenses,
       totalExpense,
-    })
+    };
   } catch (error) {
     console.error("Error retrieving fuel expenses:", error);
-    return []
+    return [];
   }
-}
+};
 
 const updateFuelExpenseByTruckId = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      truckId,
-      addedBy,
-      date,
-      currentKM,
-      litres,
-      cost,
-      note,
-    } = req.body;
-    const file = req.file;
+    const { truckId, addedBy, date, currentKM, litres, cost, note } = req.body;
+    logger.info("Updating fuel expense", { expenseId: id, truckId });
 
-    // Validate the fuel ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      logger.warn("Invalid fuel expense ID for update", { expenseId: id });
       return res.status(400).json({ message: "Invalid fuel expense ID" });
     }
-    
 
     // Update the invoice URL if a new file is provided
     let invoiceURL = req.body.invoiceURL;
+    const file = req.file;
     if (file) {
       invoiceURL = await uploadInvoice(file);
     }
@@ -294,67 +282,58 @@ const updateFuelExpenseByTruckId = async (req, res) => {
     // Update the fuel
     const updatedFuel = await FuelExpense.findByIdAndUpdate(
       { _id: id },
-      {
-        truckId,
-        addedBy,
-        date,
-        currentKM,
-        litres,
-        cost,
-        note,
-      },
-      { new: true } // Return the updated document
+      { truckId, addedBy, date, currentKM, litres, cost, note },
+      { new: true }
     );
 
     if (!updatedFuel) {
+      logger.warn("Fuel expense not found for update", { expenseId: id });
       return res.status(404).json({ message: "Fuel expense not found" });
     }
 
-    // Fetch all fuelExpenses for the user after the update
-    // const fuelExpenses = await getAllFuelByTruckHelper(addedBy);
-
-    // Send the response with all fuelExpenses (including the updated one)
+    logger.info("Fuel expense updated successfully", { expenseId: id, truckId });
     res.status(200).json({
       message: "Fuel expense updated successfully",
-      fuelExpense:updatedFuel,
+      fuelExpense: updatedFuel,
     });
   } catch (error) {
-    console.error("Error updating fuel expense:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to update fuel expense", error: error.message });
+    logger.error("Error updating fuel expense", { error: error.message, expenseId: req.params.id });
+    res.status(500).json({ message: "Failed to update fuel expense", error: error.message });
   }
 };
-
 
 const deleteFuelExpenseById = async (req, res) => {
   try {
     const { id } = req.params;
+    logger.info("Deleting fuel expense", { expenseId: id });
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      logger.warn("Invalid fuel expense ID for deletion", { expenseId: id });
       return res.status(400).json({ message: "Invalid Expense ID" });
     }
 
     const deletedTruck = await FuelExpense.findByIdAndDelete(id);
 
     if (!deletedTruck) {
+      logger.warn("Fuel expense not found for deletion", { expenseId: id });
       return res.status(404).json({ message: "Expense not found" });
     }
 
+    logger.info("Fuel expense deleted successfully", { expenseId: id });
     res.status(200).json({ message: "Expense deleted" });
   } catch (error) {
-    console.error("Error deleting truck:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to delete Expense", error: error.message });
+    logger.error("Error deleting fuel expense", { error: error.message, expenseId: req.params.id });
+    res.status(500).json({ message: "Failed to delete Expense", error: error.message });
   }
 };
 
 const downloadFuelExpensesExcel = async (req, res) => {
   try {
     const { truckId, selectedDates } = req.query;
+    logger.info("Generating fuel expenses Excel", { truckId, dateRange: selectedDates });
 
     if (!truckId) {
+      logger.warn("Truck ID missing for Excel download");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
@@ -378,6 +357,7 @@ const downloadFuelExpensesExcel = async (req, res) => {
     const truck = await TruckExpense.findById(truckId);
 
     if (fuelExpenses.length === 0) {
+      logger.warn("No fuel expenses for Excel generation", { truckId, dateRange: selectedDates });
       return res.status(404).json({
         message: "No fuel expenses found for this truck in the given date range",
       });
@@ -489,6 +469,7 @@ const downloadFuelExpensesExcel = async (req, res) => {
     // Write the workbook to a buffer
     const buffer = await workbook.xlsx.writeBuffer();
 
+    logger.info("Fuel expenses Excel generated successfully", { truckId, count: fuelExpenses.length });
     // Set headers for the response
     res.setHeader(
       "Content-Disposition",
@@ -500,7 +481,7 @@ const downloadFuelExpensesExcel = async (req, res) => {
     );
     res.send(buffer);
   } catch (error) {
-    console.error("Error generating Excel file:", error);
+    logger.error("Error generating fuel expenses Excel", { error: error.message, truckId: req.query.truckId });
     res
       .status(500)
       .json({ message: "Failed to generate Excel file", error: error.message });
@@ -510,8 +491,10 @@ const downloadFuelExpensesExcel = async (req, res) => {
 const downloadAllFuelExpensesExcel = async (req, res) => {
   try {
     const { userId, selectedDates } = req.query;
+    logger.info("Generating all fuel expenses Excel", { userId, dateRange: selectedDates });
 
     if (!userId) {
+      logger.warn("User ID missing for Excel download");
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -534,6 +517,7 @@ const downloadAllFuelExpensesExcel = async (req, res) => {
     const fuelExpenses = await FuelExpense.find(query).sort({ date: 1 });
 
     if (fuelExpenses.length === 0) {
+      logger.warn("No fuel expenses for user Excel generation", { userId, dateRange: selectedDates });
       return res.status(404).json({
         message: "No fuel expenses found for this user in the given date range",
       });
@@ -645,6 +629,7 @@ const downloadAllFuelExpensesExcel = async (req, res) => {
     // Write the workbook to a buffer
     const buffer = await workbook.xlsx.writeBuffer();
 
+    logger.info("All fuel expenses Excel generated successfully", { userId, count: fuelExpenses.length });
     // Set headers for the response
     res.setHeader(
       "Content-Disposition",
@@ -656,7 +641,7 @@ const downloadAllFuelExpensesExcel = async (req, res) => {
     );
     res.send(buffer);
   } catch (error) {
-    console.error("Error generating Excel file:", error);
+    logger.error("Error generating all fuel expenses Excel", { error: error.message, userId: req.query.userId });
     res.status(500).json({ message: "Failed to generate Excel file", error: error.message });
   }
 };

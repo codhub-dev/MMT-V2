@@ -169,8 +169,8 @@ const apis = {
     getAllExpenses: "getAllIncomesByUserId",
     updateAPI: "updateIncomeByTruckId",
     deleteAPI: "deleteIncomeById",
-    downloadAPI: "downloadIncomeExcel",
-    downloadAllAPI: "downloadAllIncomeExcel",
+    downloadAPI: "downloadIncomesExcel",
+    downloadAllAPI: "downloadAllIncomesExcel",
   },
   totalExpenses: {
     getAllExpensesById: "getAllTotalExpensesByTruckId",
@@ -979,7 +979,7 @@ const ExpenseSummary = () => {
       />
       <div style={{ height: "100px" }}>
        {
-          expensesList?.length &&
+          expensesList?.length > 0 &&
           <FloatButton
             shape="circle"
             type="default"
@@ -987,7 +987,7 @@ const ExpenseSummary = () => {
               height: 80,
               width: 80,
               color: "white",
-              insetInlineEnd: activeTruckId && expensesList?.length ? "calc(6% + 90px)" : "6%",
+              insetInlineEnd: activeTruckId && expensesList?.length > 0 ? "calc(6% + 90px)" : "6%",
             }}
             onClick={handleReportDownload}
             icon={<DownloadIcon size={20} />}
