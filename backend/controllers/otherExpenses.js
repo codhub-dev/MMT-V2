@@ -3,6 +3,7 @@ const OtherExpense = require("../models/otherExpense-model"); // Adjust the path
 const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
+const logger = require("../utils/logger");
 
 const otherNameConversions = {
   toll: "Toll",
@@ -29,9 +30,19 @@ const addOtherExpense = async (req, res) => {
     });
 
     const savedOtherExpense = await newOtherExpense.save();
+    logger.info(`Other expense added successfully for truck ${truckId} by user ${addedBy}`, {
+      userId: addedBy,
+      truckId,
+      category,
+      cost
+    });
     res.status(201).json(savedOtherExpense);
   } catch (error) {
     console.error("Error adding other filling:", error);
+    logger.error(`Failed to add other expense: ${error.message}`, {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ message: "Failed to add other filling" });
   }
 };
@@ -52,9 +63,9 @@ const updateOtherExpenseByTruckId = async (req, res) => {
 
     // Validate the fuel ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      logger.warn(`Invalid other expense ID attempted: ${id}`);
       return res.status(400).json({ message: "Invalid other expense ID" });
     }
-
 
     // Update the invoice URL if a new file is provided
     let invoiceURL = req.body.invoiceURL;
@@ -78,19 +89,26 @@ const updateOtherExpenseByTruckId = async (req, res) => {
     );
 
     if (!updatedOtherExpense) {
+      logger.warn(`Other expense not found for ID: ${id}`);
       return res.status(404).json({ message: "Other expense not found" });
     }
 
-    // Fetch all otherExpenses for the user after the update
-    // const otherExpenses = await getAllOtherByTruckHelper(addedBy);
-
-    // Send the response with all otherExpenses (including the updated one)
+    logger.info(`Other expense updated successfully: ${id}`, {
+      userId: addedBy,
+      truckId,
+      category
+    });
     res.status(200).json({
       message: "Other expense updated successfully",
       otherExpense: updatedOtherExpense,
     });
   } catch (error) {
     console.error("Error updating other expense:", error);
+    logger.error(`Failed to update other expense: ${error.message}`, {
+      expenseId: req.params.id,
+      error: error.message,
+      stack: error.stack
+    });
     res
       .status(500)
       .json({ message: "Failed to update other expense", error: error.message });
@@ -102,6 +120,7 @@ const getAllOtherExpensesByTruckId = async (req, res) => {
     const { truckId, selectedDates } = req.query;
 
     if (!truckId) {
+      logger.warn("Get other expenses attempted without truck ID");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
@@ -131,6 +150,10 @@ const getAllOtherExpensesByTruckId = async (req, res) => {
     const otherExpenses = await OtherExpense.find(query).sort({ date: 1 });
 
     if (otherExpenses.length === 0) {
+      logger.info(`No other expenses found for truck ${truckId}`, {
+        truckId,
+        dateRange: selectedDates
+      });
       return res.status(404).json({
         message:
           "No other expenses found for this truck in the given date range",
@@ -143,10 +166,6 @@ const getAllOtherExpensesByTruckId = async (req, res) => {
     );
 
     const formattedOtherExpenses = otherExpenses.map((expense, index) => {
-      // Format the date to 'YYYY-MM-DD'
-      // const date = new Date(expense.date);
-      // const formattedDate = date.toISOString().split("T")[0];
-
       const date = new Date(expense.date);
       const day = String(date.getDate()).padStart(2, "0");
       const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
@@ -164,12 +183,23 @@ const getAllOtherExpensesByTruckId = async (req, res) => {
         key: index,
       };
     });
+
+    logger.info(`Retrieved ${otherExpenses.length} other expenses for truck ${truckId}`, {
+      truckId,
+      count: otherExpenses.length,
+      totalExpense
+    });
     res.status(200).json({
       expenses: formattedOtherExpenses,
       totalExpense,
     });
   } catch (error) {
     console.error("Error retrieving other expenses:", error);
+    logger.error(`Failed to retrieve other expenses: ${error.message}`, {
+      truckId: req.query.truckId,
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ message: "Failed to retrieve other expenses" });
   }
 };
@@ -179,6 +209,7 @@ const getAllOtherExpensesByUserId = async (req, res) => {
     const { userId, selectedDates } = req.query;
 
     if (!userId) {
+      logger.warn("Get other expenses attempted without user ID");
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -206,6 +237,10 @@ const getAllOtherExpensesByUserId = async (req, res) => {
     const otherExpenses = await OtherExpense.find(query).sort({ date: 1 });
 
     if (otherExpenses.length === 0) {
+      logger.info(`No other expenses found for user ${userId}`, {
+        userId,
+        dateRange: selectedDates
+      });
       return res.status(404).json({
         message:
           "No other expenses found for this user in the given date range",
@@ -242,12 +277,22 @@ const getAllOtherExpensesByUserId = async (req, res) => {
       0
     );
 
+    logger.info(`Retrieved ${formattedOtherExpenses.length} other expenses for user ${userId}`, {
+      userId,
+      count: formattedOtherExpenses.length,
+      totalExpense
+    });
     res.status(200).json({
       expenses: formattedOtherExpenses,
       totalExpense,
     });
   } catch (error) {
     console.error("Error retrieving other expenses:", error);
+    logger.error(`Failed to retrieve other expenses for user: ${error.message}`, {
+      userId: req.query.userId,
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ message: "Failed to retrieve other expenses" });
   }
 };
@@ -257,18 +302,28 @@ const deleteOtherExpenseById = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      logger.warn(`Invalid expense ID attempted for deletion: ${id}`);
       return res.status(400).json({ message: "Invalid Expense ID" });
     }
 
     const deletedTruck = await OtherExpense.findByIdAndDelete(id);
 
     if (!deletedTruck) {
+      logger.warn(`Other expense not found for deletion: ${id}`);
       return res.status(404).json({ message: "Expense not found" });
     }
 
+    logger.info(`Other expense deleted successfully: ${id}`, {
+      expenseId: id
+    });
     res.status(200).json({ message: "Expense deleted" });
   } catch (error) {
     console.error("Error deleting truck:", error);
+    logger.error(`Failed to delete other expense: ${error.message}`, {
+      expenseId: req.params.id,
+      error: error.message,
+      stack: error.stack
+    });
     res
       .status(500)
       .json({ message: "Failed to delete Expense", error: error.message });
@@ -281,6 +336,7 @@ const downloadOtherExpensesExcel = async (req, res) => {
 
     if (!truckId) {
       console.log("Truck ID is missing");
+      logger.warn("Excel download attempted without truck ID");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
@@ -313,6 +369,10 @@ const downloadOtherExpensesExcel = async (req, res) => {
 
     if (otherExpenses.length === 0) {
       console.log("No expenses found for the given query");
+      logger.info(`No other expenses found for Excel download - truck ${truckId}`, {
+        truckId,
+        dateRange: selectedDates
+      });
       return res.status(404).json({
         message:
           "No other expenses found for this truck in the given date range",
@@ -365,6 +425,11 @@ const downloadOtherExpensesExcel = async (req, res) => {
     const buffer = await workbook.xlsx.writeBuffer();
 
     // Set headers for the response
+    logger.info(`Other expenses Excel downloaded for truck ${truckId}`, {
+      truckId,
+      count: otherExpenses.length,
+      dateRange: selectedDates
+    });
     res.setHeader(
       "Content-Disposition",
       "attachment; filename=otherExpenses.xlsx"
@@ -376,6 +441,11 @@ const downloadOtherExpensesExcel = async (req, res) => {
     res.send(buffer);
   } catch (error) {
     console.error("Error generating Excel file:", error);
+    logger.error(`Failed to generate other expenses Excel: ${error.message}`, {
+      truckId: req.query.truckId,
+      error: error.message,
+      stack: error.stack
+    });
     res
       .status(500)
       .json({ message: "Failed to generate Excel file", error: error.message });
@@ -388,6 +458,7 @@ const downloadAllOtherExpensesExcel = async (req, res) => {
 
     if (!userId) {
       console.log("User ID is missing");
+      logger.warn("Excel download attempted without user ID");
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -417,6 +488,10 @@ const downloadAllOtherExpensesExcel = async (req, res) => {
 
     if (otherExpenses.length === 0) {
       console.log("No expenses found for the given query");
+      logger.info(`No other expenses found for Excel download - user ${userId}`, {
+        userId,
+        dateRange: selectedDates
+      });
       return res.status(404).json({
         message:
           "No other expenses found for this user in the given date range",
@@ -479,6 +554,11 @@ const downloadAllOtherExpensesExcel = async (req, res) => {
     const buffer = await workbook.xlsx.writeBuffer();
 
     // Set headers for the response
+    logger.info(`All other expenses Excel downloaded for user ${userId}`, {
+      userId,
+      count: otherExpenses.length,
+      dateRange: selectedDates
+    });
     res.setHeader(
       "Content-Disposition",
       "attachment; filename=otherExpenses.xlsx"
@@ -490,6 +570,11 @@ const downloadAllOtherExpensesExcel = async (req, res) => {
     res.send(buffer);
   } catch (error) {
     console.error("Error generating Excel file:", error);
+    logger.error(`Failed to generate all other expenses Excel: ${error.message}`, {
+      userId: req.query.userId,
+      error: error.message,
+      stack: error.stack
+    });
     res
       .status(500)
       .json({ message: "Failed to generate Excel file", error: error.message });

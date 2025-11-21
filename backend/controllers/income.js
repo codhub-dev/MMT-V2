@@ -3,6 +3,7 @@ const Income = require("../models/income-model");
 const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
+const logger = require("../utils/logger");
 
 // Controller to add a new income record
 const addIncome = async (req, res) => {
@@ -18,9 +19,23 @@ const addIncome = async (req, res) => {
     });
 
     const savedIncome = await newIncome.save();
+
+    logger.info(`Income added successfully`, {
+      incomeId: savedIncome._id,
+      truckId,
+      addedBy,
+      amount,
+      date,
+    });
+
     res.status(201).json(savedIncome);
   } catch (error) {
     console.error("Error adding income:", error);
+    logger.error(`Failed to add income`, {
+      error: error.message,
+      stack: error.stack,
+      body: req.body,
+    });
     res.status(500).json({ message: "Failed to add income" });
   }
 };
@@ -194,12 +209,24 @@ const updateIncomeById = async (req, res) => {
       return res.status(404).json({ message: "Income not found" });
     }
 
+    logger.info(`Income updated successfully`, {
+      incomeId: id,
+      truckId,
+      addedBy,
+      amount,
+    });
+
     res.status(200).json({
       message: "Income updated successfully",
       expense: updatedIncome,
     });
   } catch (error) {
     console.error("Error updating income:", error);
+    logger.error(`Failed to update income`, {
+      incomeId: req.params.id,
+      error: error.message,
+      stack: error.stack,
+    });
     res
       .status(500)
       .json({ message: "Failed to update income", error: error.message });
@@ -220,9 +247,20 @@ const deleteIncomeById = async (req, res) => {
       return res.status(404).json({ message: "Income not found" });
     }
 
+    logger.info(`Income deleted successfully`, {
+      incomeId: id,
+      truckId: deletedIncome.truckId,
+      amount: deletedIncome.amount,
+    });
+
     res.status(200).json({ message: "Income deleted successfully" });
   } catch (error) {
     console.error("Error deleting income:", error);
+    logger.error(`Failed to delete income`, {
+      incomeId: req.params.id,
+      error: error.message,
+      stack: error.stack,
+    });
     res
       .status(500)
       .json({ message: "Failed to delete income", error: error.message });
@@ -298,15 +336,17 @@ const downloadIncomesExcel = async (req, res) => {
 
     // Add the data
     data.forEach((row) => {
-      worksheet.addRow([
-        row.Date,
-        row.Amount,
-        row.Note,
-      ]);
+      worksheet.addRow([row.Date, row.Amount, row.Note]);
     });
 
     // Write the workbook to a buffer
     const buffer = await workbook.xlsx.writeBuffer();
+
+    logger.info(`Income Excel downloaded`, {
+      truckId,
+      dateRange: selectedDates,
+      recordCount: incomes.length,
+    });
 
     // Set headers for the response
     res.setHeader("Content-Disposition", "attachment; filename=incomes.xlsx");
@@ -317,6 +357,11 @@ const downloadIncomesExcel = async (req, res) => {
     res.send(buffer);
   } catch (error) {
     console.error("Error generating Excel file:", error);
+    logger.error(`Failed to generate income Excel`, {
+      truckId: req.query.truckId,
+      error: error.message,
+      stack: error.stack,
+    });
     res
       .status(500)
       .json({ message: "Failed to generate Excel file", error: error.message });
@@ -391,12 +436,7 @@ const downloadAllIncomesExcel = async (req, res) => {
     worksheet.getCell("A1").alignment = { horizontal: "center" };
 
     // Add the headings
-    const headings = [
-      "Date",
-      "Registration No",
-      "Amount",
-      "Note",
-    ];
+    const headings = ["Date", "Registration No", "Amount", "Note"];
     worksheet.addRow(headings).font = { bold: true };
 
     // Add the data
@@ -412,6 +452,12 @@ const downloadAllIncomesExcel = async (req, res) => {
     // Write the workbook to a buffer
     const buffer = await workbook.xlsx.writeBuffer();
 
+    logger.info(`All incomes Excel downloaded`, {
+      userId,
+      dateRange: selectedDates,
+      recordCount: incomes.length,
+    });
+
     // Set headers for the response
     res.setHeader("Content-Disposition", "attachment; filename=incomes.xlsx");
     res.setHeader(
@@ -421,6 +467,11 @@ const downloadAllIncomesExcel = async (req, res) => {
     res.send(buffer);
   } catch (error) {
     console.error("Error generating Excel file:", error);
+    logger.error(`Failed to generate all incomes Excel`, {
+      userId: req.query.userId,
+      error: error.message,
+      stack: error.stack,
+    });
     res
       .status(500)
       .json({ message: "Failed to generate Excel file", error: error.message });

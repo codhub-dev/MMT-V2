@@ -5,12 +5,14 @@ const OtherExpense = require("../models/otherExpense-model");
 const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
+const logger = require("../utils/logger");
 
 const getAllTotalExpensesByUserId = async (req, res) => {
   try {
     const { userId, selectedDates } = req.query;
 
     if (!userId) {
+      logger.warn("Get total expenses attempted without user ID");
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -55,6 +57,10 @@ const getAllTotalExpensesByUserId = async (req, res) => {
     const allExpenses = [...fuelExpenses, ...defExpenses, ...otherExpenses];
 
     if (allExpenses.length === 0) {
+      logger.info(`No total expenses found for user ${userId}`, {
+        userId,
+        dateRange: selectedDates,
+      });
       return res.status(404).json({
         message: "No expenses found for this user in the given date range",
       });
@@ -88,12 +94,24 @@ const getAllTotalExpensesByUserId = async (req, res) => {
       0
     );
 
+    logger.info(`Retrieved ${formattedExpenses.length} total expenses for user ${userId}`, {
+      userId,
+      count: formattedExpenses.length,
+      totalExpense,
+      dateRange: selectedDates,
+    });
+
     res.status(200).json({
       expenses: formattedExpenses,
       totalExpense,
     });
   } catch (error) {
     console.error("Error retrieving expenses:", error);
+    logger.error(`Failed to retrieve total expenses: ${error.message}`, {
+      userId: req.query.userId,
+      error: error.message,
+      stack: error.stack,
+    });
     res.status(500).json({ message: "Failed to retrieve expenses" });
   }
 };
@@ -104,6 +122,7 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
 
     if (!userId) {
       console.log("User ID is missing");
+      logger.warn("Total expenses Excel download attempted without user ID");
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -149,6 +168,10 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
 
     if (allExpenses.length === 0) {
       console.log("No expenses found for the given query");
+      logger.info(`No total expenses found for Excel download - user ${userId}`, {
+        userId,
+        dateRange: selectedDates,
+      });
       return res.status(404).json({
         message: "No expenses found for this user in the given date range",
       });
@@ -216,6 +239,12 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
 
     const buffer = await workbook.xlsx.writeBuffer();
 
+    logger.info(`Total expenses Excel downloaded for user ${userId}`, {
+      userId,
+      count: allExpenses.length,
+      dateRange: selectedDates,
+    });
+
     res.setHeader(
       "Content-Disposition",
       "attachment; filename=totalExpenses.xlsx"
@@ -227,6 +256,11 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
     res.send(buffer);
   } catch (error) {
     console.error("Error generating Excel file:", error);
+    logger.error(`Failed to generate total expenses Excel: ${error.message}`, {
+      userId: req.query.userId,
+      error: error.message,
+      stack: error.stack,
+    });
     res
       .status(500)
       .json({ message: "Failed to generate Excel file", error: error.message });

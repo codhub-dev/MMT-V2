@@ -6,7 +6,8 @@ const OtherExpense = require('../models/otherExpense-model');
 const Income = require('../models/income-model');
 const { default: mongoose } = require('mongoose');
 
-const moment = require("moment")
+const moment = require("moment");
+const logger = require("../utils/logger");
 
 const getMetadataByTruckId = async (req, res) => {
     const { truckId } = req.query;
@@ -62,9 +63,19 @@ const getMetadataByTruckId = async (req, res) => {
             grandTotal: fuelTotal + defTotal + otherTotal
         };
 
+        logger.info(`Metadata retrieved for truck`, {
+            truckId,
+            grandTotal: totalExpenses.grandTotal
+        });
+
         return res.json(totalExpenses);
     } catch (error) {
         console.error("Error calculating total expenses:", error);
+        logger.error(`Failed to get metadata by truck ID`, {
+            truckId,
+            error: error.message,
+            stack: error.stack
+        });
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -164,9 +175,20 @@ const getMetadataByUserId = async (req, res) => {
             }
         };
 
+        logger.info(`Metadata retrieved for user`, {
+            userId,
+            grandTotal: totalExpenses.grandTotal,
+            monthlyGrandTotal: totalExpenses.monthlyExpenses.monthlyGrandTotal
+        });
+
         return res.json(totalExpenses);
     } catch (error) {
         console.error("Error calculating total expenses:", error);
+        logger.error(`Failed to get metadata by user ID`, {
+            userId,
+            error: error.message,
+            stack: error.stack
+        });
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -228,9 +250,20 @@ const getProfileMetadataByUserId = async (req, res) => {
             totalDays: daysSinceCreation + 1
         };
 
+        logger.info(`Profile metadata retrieved`, {
+            userId,
+            totalKM,
+            totalTrucks: truckCount
+        });
+
         res.json(result);
     } catch (error) {
         console.error('Error retrieving total kilometers and total trucks:', error);
+        logger.error(`Failed to get profile metadata`, {
+            userId: req.query.userId,
+            error: error.message,
+            stack: error.stack
+        });
         res.status(500).json({ error: 'An error occurred while retrieving total kilometers and total trucks.' });
     }
 };
@@ -329,9 +362,21 @@ const getSixMonthsDataByUserId = async (req, res) => {
             incomeData
         };
 
+        logger.info(`Six months data retrieved`, {
+            userId,
+            monthsCount: months.length,
+            expenseRecords: expensesData.length,
+            incomeRecords: incomeData.length
+        });
+
         return res.json(result);
     } catch (error) {
         console.error("Error calculating six months data:", error);
+        logger.error(`Failed to get six months data`, {
+            userId,
+            error: error.message,
+            stack: error.stack
+        });
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
