@@ -4,7 +4,15 @@
   "bin": "cli.js",
   "scripts": {
     "start": "nodemon ./bin/www",
-    "generate:swagger": "node -e \"console.log(JSON.stringify(require('./docs/swagger')));\" > swagger.json"
+    "generate:swagger": "node -e \"console.log(JSON.stringify(require('./docs/swagger')));\" > swagger.json",
+    "seed:test-users": "node seed-test-users.js",
+    "artillery:test": "artillery run test.yml",
+    "artillery:test:record": "npm run seed:test-users && artillery run test.yml --record --key a9_je5rl38330pw43a4lisr7hwl4g9ztxqi",
+    "artillery:load": "artillery run artillery-load-test.yml",
+    "artillery:load:record": "npm run seed:test-users && artillery run artillery-load-test.yml --record --key a9_je5rl38330pw43a4lisr7hwl4g9ztxqi",
+    "artillery:spike": "artillery run artillery-spike-test.yml",
+    "artillery:spike:record": "npm run seed:test-users && artillery run artillery-spike-test.yml --record --key a9_je5rl38330pw43a4lisr7hwl4g9ztxqi",
+    "artillery:report": "artillery report report.json"
   },
   "dependencies": {
     "@apollo/server": "^5.1.0",

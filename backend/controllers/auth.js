@@ -7,6 +7,7 @@ const ErrorHandler = require("../middleware/errorHandlers");
 const { catchAsyncError } = require("../middleware/catchAsyncError");
 const logger = require("../utils/logger");
 const { getFullContext } = require("../utils/requestContext");
+
 const {
   generateRegistrationOptions,
   verifyRegistrationResponse,
@@ -16,7 +17,6 @@ const {
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// WebAuthn configuration
 const rpName = process.env.RP_NAME || "Manage My Truck";
 const rpID = process.env.RP_ID || "localhost";
 const origin = process.env.ORIGIN || "http://localhost:3000";
@@ -326,7 +326,6 @@ module.exports.passkeyRegisterOptions = catchAsyncError(async (req, res, next) =
     await user.save();
 
     logger.info("Passkey registration options generated", { email, userId: user._id });
-
     res.status(200).json(options);
   } catch (error) {
     logger.error("Failed to generate passkey registration options", {
@@ -451,7 +450,6 @@ module.exports.passkeyAuthOptions = catchAsyncError(async (req, res, next) => {
     await user.save();
 
     logger.info("Passkey authentication options generated", { email, userId: user._id });
-
     res.status(200).json(options);
   } catch (error) {
     logger.error("Failed to generate passkey authentication options", {
