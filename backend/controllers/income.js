@@ -83,6 +83,27 @@ const getAllIncomesByTruckId = async (req, res) => {
       0
     );
 
+    // Fetch all expenses for the same truck and date range
+    const expenseQuery = { truckId };
+    if (startDate && endDate) {
+      if (startDate.toDateString() === endDate.toDateString()) {
+        expenseQuery.date = { $eq: startDate };
+      } else {
+        expenseQuery.date = { $gte: startDate, $lte: endDate };
+      }
+    }
+
+    const fuelExpenses = await FuelExpense.find(expenseQuery);
+    const defExpenses = await DefExpense.find(expenseQuery);
+    const otherExpenses = await OtherExpense.find(expenseQuery);
+
+    const totalExpenses =
+      fuelExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
+      defExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
+      otherExpenses.reduce((sum, expense) => sum + expense.cost, 0);
+
+    const totalProfit = totalIncome - totalExpenses;
+
     // Format the date
     const formattedIncomes = incomes.map((income, index) => {
       const date = new Date(income.date);
@@ -100,7 +121,8 @@ const getAllIncomesByTruckId = async (req, res) => {
 
     res.status(200).json({
       expenses: formattedIncomes,
-      totalIncome,
+      totalExpense: totalIncome,
+      totalProfit: totalProfit,
     });
   } catch (error) {
     console.error("Error retrieving incomes:", error);
@@ -172,9 +194,31 @@ const getAllIncomesByUserId = async (req, res) => {
       0
     );
 
+    // Fetch all expenses for the same user and date range
+    const expenseQuery = { addedBy: userId };
+    if (startDate && endDate) {
+      if (startDate.toDateString() === endDate.toDateString()) {
+        expenseQuery.date = { $eq: startDate };
+      } else {
+        expenseQuery.date = { $gte: startDate, $lte: endDate };
+      }
+    }
+
+    const fuelExpenses = await FuelExpense.find(expenseQuery);
+    const defExpenses = await DefExpense.find(expenseQuery);
+    const otherExpenses = await OtherExpense.find(expenseQuery);
+
+    const totalExpenses =
+      fuelExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
+      defExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
+      otherExpenses.reduce((sum, expense) => sum + expense.cost, 0);
+
+    const totalProfit = totalIncome - totalExpenses;
+
     res.status(200).json({
       expenses: formattedIncomes,
-      totalIncome,
+      totalExpense: totalIncome,
+      totalProfit: totalProfit,
     });
   } catch (error) {
     console.error("Error retrieving incomes:", error);

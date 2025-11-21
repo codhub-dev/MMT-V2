@@ -1,25 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { Menu, Button } from "antd";
 import {
     HomeOutlined,
     BarChartOutlined,
-    SettingOutlined,
-    QuestionCircleOutlined,
-    LogoutOutlined,
     TruckOutlined,
     CloseOutlined,
     BankOutlined,
     FireOutlined,
-    WalletOutlined
+    WalletOutlined,
+    UserOutlined,
+    LineChartOutlined,
+    FileExclamationOutlined
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useMobile } from "../MobileContext/MobileContext";
+import GetHelpModal from "../GetHelpModal/GetHelpModal"; 
+import { UserContext } from "../../App";
 
 const SideBar = ({ isOpen = true, setIsOpen }) => {
-    const [current, setCurrent] = useState();
     const [logoLoading, setLogoLoading] = useState(true);
     const { isMobile } = useMobile();
     const nav = useNavigate();
+    const location = useLocation();
+    const current = location.pathname.replace("/", "");
+    const getHelpRef = useRef();
+    const { user } = useContext(UserContext);
+    const isAdmin = user?.isAdmin;
 
     const items = [
         {
@@ -34,20 +40,23 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                 { label: "Income", key: "incomeSummary/income", icon: <BankOutlined /> }
             ]
         },
-        {
-            type: "group",
-            label: "GENERAL",
-            children: [
-                { label: "Settings", key: "settings", icon: <SettingOutlined /> },
-                { label: "Help", key: "help", icon: <QuestionCircleOutlined /> },
-                { label: "Logout", key: "logout", icon: <LogoutOutlined /> }
-            ]
-        }
+        ...(isAdmin
+            ? [
+                  {
+                      type: "group",
+                      label: "ADMIN",
+                      children: [
+                          { label: "Admin Portal", key: "admin", icon: <UserOutlined /> },
+                          { label: "Logging", key: "log", icon: <FileExclamationOutlined /> },
+                          { label: "Artillery", key: "artillery", icon: <LineChartOutlined /> }
+                      ]
+                  }
+              ]
+            : [])
     ];
 
     const onClick = (e) => {
         nav(`/${e.key}`);
-        setCurrent(e.key);
 
         // Close sidebar on mobile after navigation
         if (isMobile && setIsOpen) {
@@ -154,12 +163,22 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                             Reach out to us for customizations or tailored solutions.
                         </div>
 
-                        <button className="contact-btn">Contact Us</button>
+                        <button
+                            className="contact-btn"
+                            onClick={() => {
+                                if (getHelpRef.current) getHelpRef.current.showModal();
+                            }}
+                        >
+                            Contact Us
+                        </button>
+
                     </div>
                 </div>
             </div>
 
         </div>
+
+        <GetHelpModal ref={getHelpRef} />
         </>
     );
 };

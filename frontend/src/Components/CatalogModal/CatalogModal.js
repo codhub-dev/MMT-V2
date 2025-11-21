@@ -3,6 +3,7 @@ import { Button, Divider, Modal } from "antd";
 import {
   AppsIcon,
   BriefcaseIcon,
+  FiscalHostIcon,
   FlameIcon,
   LogIcon,
 } from "@primer/octicons-react";
@@ -148,6 +149,39 @@ const CatalogModal = forwardRef(({ vehicleId, regNo, isFinanced }, ref) => {
             </div>
             <div className="bg-white p-1 rounded text-black w-50">
               <span className="fw-bold">{metadata.otherTotal?.toFixed(2)}</span>
+            </div>
+          </Button>
+          <Divider
+            style={{
+              borderColor: "#000",
+              margin: "25px 0px",
+            }}
+          ></Divider>
+          <Button
+            type="primary"
+            size={"large"}
+            className="my-2"
+            style={{
+              width: "100%",
+              height: "60px",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+            onClick={() =>
+              navigate(`/incomeSummary/income/${vehicleId}`)
+            }
+          >
+            <div className="d-flex align-items-center p-2">
+              <FiscalHostIcon size={22} />
+              <div
+                className="d-flex flex-column ms-3"
+                style={{ alignItems: "flex-start" }}
+              >
+                <span className="fw-bold m-0 p-0">Manage Income</span>
+              </div>
+            </div>
+            <div className="bg-white p-1 rounded text-black w-50">
+              <span className="fw-bold">{metadata.incomeTotal?.toFixed(2)}</span>
             </div>
           </Button>
         </div>

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Button, ConfigProvider, FloatButton, Table } from "antd";
+import { Button, ConfigProvider, FloatButton, Table, Select } from "antd";
 import { useLocation, useParams } from "react-router-dom";
 import { PlusOutlined, FileExcelOutlined } from "@ant-design/icons";
 import ExpenseModal from "../../Components/ExpenseModal/ExpenseModal";
@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import ConfirmModal from "../../Components/ConfirmModal/ConfirmModal";
 import { ArrowRightIcon, DownloadIcon, PencilIcon, TrashIcon } from "@primer/octicons-react";
 import { UserContext } from "../../App";
+import { add } from "date-fns";
 
 const { RangePicker } = DatePicker;
 
@@ -162,16 +163,17 @@ const apis = {
     downloadAPI: "downloadOtherExpensesExcel",
     downloadAllAPI: "downloadAllOtherExpensesExcel",
   },
-  income:{
+  income: {
     addAPI: "addIncome",
     getAllExpensesById: "getAllIncomesByTruckId",
     getAllExpenses: "getAllIncomesByUserId",
     updateAPI: "updateIncomeByTruckId",
     deleteAPI: "deleteIncomeById",
-    downloadAPI: "downloadIncomeExcel",
-    downloadAllAPI: "downloadAllIncomeExcel",
+    downloadAPI: "downloadIncomesExcel",
+    downloadAllAPI: "downloadAllIncomesExcel",
   },
   totalExpenses: {
+    getAllExpensesById: "getAllTotalExpensesByTruckId",
     getAllExpenses: "getAllTotalExpensesByUserId",
     downloadAllAPI: "downloadAllTotalExpensesExcel",
   },
@@ -233,22 +235,49 @@ const ExpenseSummary = () => {
   const [contentLoader, setContentLoader] = useState(true);
   const [expensesList, setExpensesList] = useState([]);
   const [totalExpense, setTotalExpense] = useState(0);
+  const [totalProfit, setTotalProfit] = useState(0);
   const [isError, setIsError] = useState(false);
   const [selectedDates, setSelectedDates] = useState([
     dayjs().startOf("month").format("YYYY-MM-DD"),
     dayjs().format("YYYY-MM-DD"),
   ]);
   const [vehicleRegistrationNo, setVehicleRegistrationNo] = useState("");
+  const [trucks, setTrucks] = useState([]);
+  const [selectedTruckId, setSelectedTruckId] = useState(null);
 
   const expenseModalRef = useRef();
   const { user } = useContext(UserContext);
 
   const { catalog, vehicleId } = useParams();
 
-  // Fetch vehicle registration number when vehicleId is available
+  // Fetch all trucks for the user
   useEffect(() => {
-    if (vehicleId) {
-      Axios.get(`/api/v1/app/truck/getTruckById/${vehicleId}`, {
+    if (!vehicleId) {
+      Axios.get(`/api/v1/app/truck/getAllTrucksByUser/${user.userId}`, {
+        params: {
+          addedBy: user.userId,
+        },
+        headers: {
+          authorization: `bearer ${localStorage.getItem('token')}`,
+        },
+      })
+        .then((res) => {
+          setTrucks(res.data || []);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch trucks:", err);
+          setTrucks([]);
+        });
+    }
+  }, [vehicleId, user.userId]);
+
+  // Determine which truck ID to use (from params or dropdown)
+  const activeTruckId = vehicleId || selectedTruckId;
+
+  // Fetch vehicle registration number when activeTruckId is available
+  useEffect(() => {
+    if (activeTruckId) {
+      Axios.get(`/api/v1/app/truck/getTruckById/${activeTruckId}`, {
         headers: {
           authorization: `bearer ${localStorage.getItem('token')}`,
         },
@@ -261,14 +290,14 @@ const ExpenseSummary = () => {
           setVehicleRegistrationNo("Truck");
         });
     }
-  }, [vehicleId]);
+  }, [activeTruckId]);
 
   useEffect(() => {
     setContentLoader(true);
-    if (vehicleId) {
+    if (activeTruckId) {
       Axios.get(`/api/v1/app/${catalog}/${getAllByIdApiEndpoints(catalog)}`, {
         params: {
-          truckId: vehicleId,
+          truckId: activeTruckId,
           selectedDates,
         },
         headers: {
@@ -278,11 +307,13 @@ const ExpenseSummary = () => {
         .then((res) => {
           setExpensesList(res.data.expenses);
           setTotalExpense(res.data.totalExpense || 0);
+          setTotalProfit(res.data.totalProfit || 0);
           setContentLoader(false);
         })
         .catch((err) => {
           setExpensesList([]);
           setTotalExpense(0);
+          setTotalProfit(0);
           setIsError(true);
           setContentLoader(false);
         });
@@ -299,23 +330,25 @@ const ExpenseSummary = () => {
         .then((res) => {
           setExpensesList(res.data.expenses);
           setTotalExpense(res.data.totalExpense || 0);
+          setTotalProfit(res.data.totalProfit || 0);
           setContentLoader(false);
         })
         .catch((err) => {
           setExpensesList([]);
           setTotalExpense(0);
+          setTotalProfit(0);
           setIsError(true);
           setContentLoader(false);
         });
     }
-  }, [selectedDates, catalog, vehicleId, user.userId]);
+  }, [selectedDates, catalog, activeTruckId, user.userId]);
 
   const refreshExpenses = () => {
     setContentLoader(true);
-    if (vehicleId) {
+    if (activeTruckId) {
       Axios.get(`/api/v1/app/${catalog}/${getAllByIdApiEndpoints(catalog)}`, {
         params: {
-          truckId: vehicleId,
+          truckId: activeTruckId,
           selectedDates,
         },
         headers: {
@@ -325,11 +358,13 @@ const ExpenseSummary = () => {
         .then((res) => {
           setExpensesList(res.data.expenses);
           setTotalExpense(res.data.totalExpense || 0);
+          setTotalProfit(res.data.totalProfit || 0);
           setContentLoader(false);
         })
         .catch((err) => {
           setExpensesList([]);
           setTotalExpense(0);
+          setTotalProfit(0);
           setIsError(true);
           setContentLoader(false);
         });
@@ -346,11 +381,13 @@ const ExpenseSummary = () => {
         .then((res) => {
           setExpensesList(res.data.expenses);
           setTotalExpense(res.data.totalExpense || 0);
+          setTotalProfit(res.data.totalProfit || 0);
           setContentLoader(false);
         })
         .catch((err) => {
           setExpensesList([]);
           setTotalExpense(0);
+          setTotalProfit(0);
           setIsError(true);
           setContentLoader(false);
         });
@@ -425,12 +462,12 @@ const ExpenseSummary = () => {
     try {
       let response;
 
-      if (vehicleId) {
+      if (activeTruckId) {
         response = await Axios.get(
           `/api/v1/app/${catalog}/${getDownloadApiEndpoints(catalog)}`,
           {
             params: {
-              truckId: vehicleId,
+              truckId: activeTruckId,
               selectedDates,
             },
             responseType: "blob", // Important to receive response as Blob
@@ -500,7 +537,7 @@ const ExpenseSummary = () => {
         key: "date",
         fixed: "left",
       },
-      ...(!vehicleId
+      ...(!activeTruckId
         ? [
           {
             title: "Registration No.",
@@ -528,7 +565,7 @@ const ExpenseSummary = () => {
         dataIndex: "cost",
         key: "cost",
       },
-      ...(vehicleId
+      ...(activeTruckId
         ? [
           {
             title: "Range",
@@ -590,7 +627,7 @@ const ExpenseSummary = () => {
         key: "date",
         fixed: "left",
       },
-      ...(!vehicleId
+      ...(!activeTruckId
         ? [
           {
             title: "Registration No.",
@@ -612,7 +649,7 @@ const ExpenseSummary = () => {
         dataIndex: "litres",
         key: "litres",
       },
-      ...(vehicleId
+      ...(activeTruckId
         ? [
           {
             title: "Range",
@@ -675,7 +712,7 @@ const ExpenseSummary = () => {
         key: "date",
         fixed: "left",
       },
-      ...(!vehicleId
+      ...(!activeTruckId
         ? [
           {
             title: "Registration No.",
@@ -750,7 +787,7 @@ const ExpenseSummary = () => {
         key: "date",
         fixed: "left",
       },
-      ...(!vehicleId
+      ...(!activeTruckId
         ? [
           {
             title: "Registration No.",
@@ -848,15 +885,37 @@ const ExpenseSummary = () => {
 
   return (
     <div>
-      <div className="d-flex flex-column">
-        <b style={{ fontSize: "26px" }}>{vehicleId ? `${expenses[catalog]} for ${vehicleRegistrationNo}` : `Overall ${expenses[catalog]}`}</b>
-        <span style={{ fontSize: "14px", color: "#939393" }}>
-          {vehicleId
-            ? `View and manage ${expenses[catalog]} for vehicle ${vehicleRegistrationNo}`
-            : `Track all ${expenses[catalog]} across your fleet`}
-        </span>
-      </div>
       <LoaderOverlay isVisible={contentLoader} />
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
+        <div className="d-flex flex-column">
+          <b style={{ fontSize: "26px" }}>{activeTruckId ? `${expenses[catalog]} for ${vehicleRegistrationNo}` : `Overall ${expenses[catalog]}`}</b>
+          <span style={{ fontSize: "14px", color: "#939393" }}>
+            {activeTruckId
+              ? `View and manage ${expenses[catalog]} for vehicle ${vehicleRegistrationNo}`
+              : `Track all ${expenses[catalog]} across your fleet`}
+          </span>
+        </div>
+        {!vehicleId && trucks.length > 0 && (
+          <div style={{ width: "100%", maxWidth: "300px" }}>
+            <Select
+              style={{ width: "100%" }}
+              placeholder="Select a truck to view details"
+              allowClear
+              value={selectedTruckId}
+              onChange={(value) => setSelectedTruckId(value)}
+              options={[
+                { value: null, label: "All Trucks" },
+                ...trucks.map((truck) => ({
+                  value: truck._id,
+                  label: truck.registrationNo,
+                })),
+              ]}
+              size="large"
+            />
+          </div>
+        )}
+      </div>
+
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
         <div className="d-flex flex-column flex-md-row gap-3 align-items-center mb-3 mb-md-0">
           <input
@@ -885,15 +944,28 @@ const ExpenseSummary = () => {
             value={selectedDates[1]}
           />
         </div>
-
-        <div
-          className="d-flex border align-items-center p-2 ps-3 rounded gap-3 justify-content-between"
-          style={{ background: "#fafafa" }}
-        >
-          <b>Total Expense</b>
-          <div className="p-2 border bg-white rounded fw-bold text-danger">
-            {totalExpense.toFixed(2)}
+        <div className="d-flex flex-column flex-md-row gap-2">
+          <div
+            className="w-100 d-flex border align-items-center p-2 ps-3 rounded gap-3 justify-content-between"
+            style={{ background: "#fafafa" }}
+          >
+            <b className="text-nowrap">Total {catalog === "income" ? "Income" : "Expense"}</b>
+            <div className="p-2 border bg-white rounded fw-bold text-danger">
+              {totalExpense.toFixed(2)}
+            </div>
           </div>
+          {
+            catalog === "income" &&
+            <div
+              className="w-100 d-flex border align-items-center p-2 ps-3 rounded gap-3 justify-content-between"
+              style={{ background: "#fafafa" }}
+            >
+              <b className="text-nowrap">Total Profit</b>
+              <div className="p-2 border bg-white rounded fw-bold text-danger">
+                {totalProfit.toFixed(2)}
+              </div>
+            </div>
+          }
         </div>
       </div>
       <hr></hr>
@@ -905,38 +977,41 @@ const ExpenseSummary = () => {
           y: 500,
         }}
       />
-      {vehicleId && (
-        <>
+      <div style={{ height: "100px" }}>
+       {
+          expensesList?.length &&
           <FloatButton
             shape="circle"
             type="default"
             style={{
-              insetInlineEnd: "calc(6% + 100px)",
               height: 80,
               width: 80,
               color: "white",
+              insetInlineEnd: activeTruckId && expensesList?.length ? "calc(6% + 90px)" : "6%",
             }}
             onClick={handleReportDownload}
-            disabled={expensesList?.length ? false : true}
             icon={<DownloadIcon size={20} />}
           />
+        }
+        {
+          activeTruckId &&
           <FloatButton
             shape="circle"
             type="primary"
             style={{
-              insetInlineEnd: "6%",
               height: 80,
               width: 80,
               padding: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              insetInlineEnd: "6%",
             }}
             onClick={callExpenseModal}
             icon={<PlusOutlined style={{ fontSize: 20 }} />}
           />
-        </>
-      )}
+        }
+      </div>
       <ExpenseModal
         ref={expenseModalRef}
         setExpensesList={setExpensesList}

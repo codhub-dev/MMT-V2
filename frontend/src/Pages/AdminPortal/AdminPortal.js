@@ -132,7 +132,12 @@ export default function AdminPortal() {
             onConfirm={() => confirmAction(record.id, "unsubscribe")}
             placement="topRight"
           >
-            <Button type="primary" danger style={{ width: "100%" }} icon={<CloseCircleOutlined />}>
+            <Button
+              type="primary"
+              className="btn-red-gradient"
+              style={{ width: "100%" }}
+              icon={<CloseCircleOutlined />}
+            >
               Unsubscribe
             </Button>
           </Popconfirm>
