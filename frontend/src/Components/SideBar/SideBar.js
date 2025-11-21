@@ -47,7 +47,14 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                       label: "ADMIN",
                       children: [
                           { label: "Admin Portal", key: "admin", icon: <UserOutlined /> },
-                          { label: "Logging", key: "log", icon: <FileExclamationOutlined /> },
+                          {
+                            label: "Logging",
+                            key: "log",
+                            icon: <FileExclamationOutlined />,
+                            onClick: () => {
+                                window.open("https://my.ap-01.cloud.solarwinds.com/261721688348511232/logs", "_blank");
+                            }
+                          },
                           { label: "Artillery", key: "artillery", icon: <LineChartOutlined /> }
                       ]
                   }
@@ -56,6 +63,7 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
     ];
 
     const onClick = (e) => {
+        if (e.key === "log") return;
         nav(`/${e.key}`);
 
         // Close sidebar on mobile after navigation
