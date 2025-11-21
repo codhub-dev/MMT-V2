@@ -280,11 +280,9 @@ const downloadOtherExpensesExcel = async (req, res) => {
     const { truckId, selectedDates } = req.query;
 
     if (!truckId) {
-      console.log("Truck ID is missing");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
-    // Ensure the dates are in UTC and set the time to 00:00:00 to avoid time zone issues
     const startDate = selectedDates
       ? moment.utc(selectedDates[0]).startOf("day").toDate()
       : null;
@@ -292,30 +290,21 @@ const downloadOtherExpensesExcel = async (req, res) => {
       ? moment.utc(selectedDates[1]).endOf("day").toDate()
       : null;
 
-    // Build the query filter
     const query = { truckId };
-
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
-        // If startDate and endDate are the same, match that specific date
         query.date = { $eq: startDate };
       } else {
-        // Match the range between startDate and endDate
         query.date = { $gte: startDate, $lte: endDate };
       }
     }
 
-    console.log("Query:", query);
-
-    // Fetch all other expenses for the given truckId and date range
     const otherExpenses = await OtherExpense.find(query).sort({ date: 1 });
     const truck = await TruckExpense.findById(truckId);
 
     if (otherExpenses.length === 0) {
-      console.log("No expenses found for the given query");
       return res.status(404).json({
-        message:
-          "No other expenses found for this truck in the given date range",
+        message: "No other expenses found for this truck in the given date range",
       });
     }
 
@@ -326,39 +315,76 @@ const downloadOtherExpensesExcel = async (req, res) => {
 
       return {
         Date: formattedDate,
-        Category:
-          expense.category === "other" ? expense.other : expense.category,
+        Category: expense.category === "other" ? expense.other : expense.category,
         Cost: expense.cost,
         Note: expense.note || "",
       };
     });
 
-    console.log("Data for Excel:", data);
-
     // Create a new workbook and worksheet
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Other Expenses");
 
-    // Add the merged header row
+    // Main Title
     worksheet.mergeCells("A1:D1");
-    worksheet.getCell(
-      "A1"
-    ).value = `${truck.registrationNo} - Other Expenses ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true, color: { argb: "FFFFFF" } }; // White font color
+    worksheet.getCell("A1").value = "Manage My Truck - Other Expenses";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" }, // Black background
+      fgColor: { argb: "FF0C4736" },
     };
-    worksheet.getCell("A1").alignment = { horizontal: "center" };
+    worksheet.getRow(1).height = 36;
 
-    // Add the headings
+    // Subtitle (Truck and Date Range)
+    worksheet.mergeCells("A2:D2");
+    worksheet.getCell("A2").value = `${truck.registrationNo} | ${selectedDates[0]} to ${selectedDates[1]}`;
+    worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
+
+    // Column Headings
     const headings = ["Date", "Category", "Cost", "Note"];
-    worksheet.addRow(headings).font = { bold: true };
+    const headerRow = worksheet.addRow(headings);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF57A773" }
+      };
+    });
+    headerRow.alignment = { horizontal: "center" };
+    headerRow.height = 24;
 
-    // Add the data
+    // Add Data Rows
     data.forEach((row) => {
       worksheet.addRow([row.Date, row.Category, row.Cost, row.Note]);
+    });
+
+    // Set column widths
+    worksheet.columns = [
+      { width: 15 },
+      { width: 20 },
+      { width: 10 },
+      { width: 25 },
+    ];
+
+    // Add borders and center alignment to all cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        const existingFill = cell.fill;
+        cell.border = {
+          top: { style: "thin", color: { argb: "CCCCCC" } },
+          left: { style: "thin", color: { argb: "CCCCCC" } },
+          bottom: { style: "thin", color: { argb: "CCCCCC" } },
+          right: { style: "thin", color: { argb: "CCCCCC" } },
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        if (existingFill) {
+          cell.fill = existingFill;
+        }
+      });
     });
 
     // Write the workbook to a buffer
@@ -387,11 +413,9 @@ const downloadAllOtherExpensesExcel = async (req, res) => {
     const { userId, selectedDates } = req.query;
 
     if (!userId) {
-      console.log("User ID is missing");
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    // Ensure the dates are in UTC and set the time to 00:00:00 to avoid time zone issues
     const startDate = selectedDates
       ? moment.utc(selectedDates[0]).startOf("day").toDate()
       : null;
@@ -399,27 +423,20 @@ const downloadAllOtherExpensesExcel = async (req, res) => {
       ? moment.utc(selectedDates[1]).endOf("day").toDate()
       : null;
 
-    // Build the query filter
     const query = { addedBy: userId };
-
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
-        // If startDate and endDate are the same, match that specific date
         query.date = { $eq: startDate };
       } else {
-        // Match the range between startDate and endDate
         query.date = { $gte: startDate, $lte: endDate };
       }
     }
 
-    // Fetch all other expenses for the given userId and date range
     const otherExpenses = await OtherExpense.find(query).sort({ date: 1 });
 
     if (otherExpenses.length === 0) {
-      console.log("No expenses found for the given query");
       return res.status(404).json({
-        message:
-          "No other expenses found for this user in the given date range",
+        message: "No other expenses found for this user in the given date range",
       });
     }
 
@@ -435,8 +452,7 @@ const downloadAllOtherExpensesExcel = async (req, res) => {
         return {
           Date: formattedDate,
           "Registration No": registrationNo,
-          Category:
-            expense.category === "other" ? expense.other : expense.category,
+          Category: expense.category === "other" ? expense.other : expense.category,
           Cost: expense.cost,
           Note: expense.note || "",
         };
@@ -447,24 +463,39 @@ const downloadAllOtherExpensesExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Other Expenses");
 
-    // Add the merged header row
+    // Main Title
     worksheet.mergeCells("A1:E1");
-    worksheet.getCell(
-      "A1"
-    ).value = `Other Expenses ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true, color: { argb: "FFFFFF" } }; // White font color
+    worksheet.getCell("A1").value = "Manage My Truck - All Other Expenses";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" }, // Black background
+      fgColor: { argb: "FF0C4736" },
     };
-    worksheet.getCell("A1").alignment = { horizontal: "center" };
+    worksheet.getRow(1).height = 36;
 
-    // Add the headings
+    // Subtitle (Date Range)
+    worksheet.mergeCells("A2:E2");
+    worksheet.getCell("A2").value = `Date Range: ${selectedDates[0]} to ${selectedDates[1]}`;
+    worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
+
+    // Column Headings
     const headings = ["Date", "Registration No", "Category", "Cost", "Note"];
-    worksheet.addRow(headings).font = { bold: true };
+    const headerRow = worksheet.addRow(headings);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF57A773" }
+      };
+    });
+    headerRow.alignment = { horizontal: "center" };
+    headerRow.height = 24;
 
-    // Add the data
+    // Add Data Rows
     data.forEach((row) => {
       worksheet.addRow([
         row.Date,
@@ -475,7 +506,34 @@ const downloadAllOtherExpensesExcel = async (req, res) => {
       ]);
     });
 
+    // Set column widths
+    worksheet.columns = [
+      { width: 15 },
+      { width: 20 },
+      { width: 20 },
+      { width: 10 },
+      { width: 25 },
+    ];
+
+    // Add borders and center alignment to all cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        const existingFill = cell.fill;
+        cell.border = {
+          top: { style: "thin", color: { argb: "CCCCCC" } },
+          left: { style: "thin", color: { argb: "CCCCCC" } },
+          bottom: { style: "thin", color: { argb: "CCCCCC" } },
+          right: { style: "thin", color: { argb: "CCCCCC" } },
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        if (existingFill) {
+          cell.fill = existingFill;
+        }
+      });
+    });
+
     // Write the workbook to a buffer
+
     const buffer = await workbook.xlsx.writeBuffer();
 
     // Set headers for the response

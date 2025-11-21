@@ -281,7 +281,6 @@ const downloadIncomesExcel = async (req, res) => {
     const { truckId, selectedDates } = req.query;
 
     if (!truckId) {
-      console.log("Truck ID is missing");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
@@ -293,7 +292,6 @@ const downloadIncomesExcel = async (req, res) => {
       : null;
 
     const query = { truckId };
-
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
         query.date = { $eq: startDate };
@@ -327,29 +325,65 @@ const downloadIncomesExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Incomes");
 
-    // Add the merged header row
+    // Main Title
     worksheet.mergeCells("A1:C1");
-    worksheet.getCell("A1").value = `${truck.registrationNo} - Incomes ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true };
+    worksheet.getCell("A1").value = "Manage My Truck - Incomes";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" },
+      fgColor: { argb: "FF0C4736" },
     };
-    worksheet.getCell("A1").font.color = { argb: "FFFFFF" };
-    worksheet.getCell("A1").alignment = { horizontal: "center" };
+    worksheet.getRow(1).height = 36;
 
-    // Add the headings
+    // Subtitle (Truck and Date Range)
+    worksheet.mergeCells("A2:C2");
+    worksheet.getCell("A2").value = `${truck.registrationNo} | ${selectedDates[0]} to ${selectedDates[1]}`;
+    worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
+
+    // Column Headings
     const headings = ["Date", "Amount", "Note"];
-    worksheet.addRow(headings).font = { bold: true };
+    const headerRow = worksheet.addRow(headings);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF57A773" }
+      };
+    });
+    headerRow.alignment = { horizontal: "center" };
+    headerRow.height = 24;
 
-    // Add the data
+    // Add Data Rows
     data.forEach((row) => {
-      worksheet.addRow([
-        row.Date,
-        row.Amount,
-        row.Note,
-      ]);
+      worksheet.addRow([row.Date, row.Amount, row.Note]);
+    });
+
+    // Set column widths
+    worksheet.columns = [
+      { width: 15 },
+      { width: 15 },
+      { width: 30 },
+    ];
+
+    // Add borders and center alignment to all cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        const existingFill = cell.fill;
+        cell.border = {
+          top: { style: "thin", color: { argb: "CCCCCC" } },
+          left: { style: "thin", color: { argb: "CCCCCC" } },
+          bottom: { style: "thin", color: { argb: "CCCCCC" } },
+          right: { style: "thin", color: { argb: "CCCCCC" } },
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        if (existingFill) {
+          cell.fill = existingFill;
+        }
+      });
     });
 
     // Write the workbook to a buffer
@@ -386,7 +420,6 @@ const downloadAllIncomesExcel = async (req, res) => {
       : null;
 
     const query = { addedBy: userId };
-
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
         query.date = { $eq: startDate };
@@ -425,28 +458,39 @@ const downloadAllIncomesExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Incomes");
 
-    // Add the merged header row
+    // Main Title
     worksheet.mergeCells("A1:D1");
-    worksheet.getCell("A1").value = `Incomes ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true };
+    worksheet.getCell("A1").value = "Manage My Truck - All Incomes";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" },
+      fgColor: { argb: "FF0C4736" },
     };
-    worksheet.getCell("A1").font.color = { argb: "FFFFFF" };
-    worksheet.getCell("A1").alignment = { horizontal: "center" };
+    worksheet.getRow(1).height = 36;
 
-    // Add the headings
-    const headings = [
-      "Date",
-      "Registration No",
-      "Amount",
-      "Note",
-    ];
-    worksheet.addRow(headings).font = { bold: true };
+    // Subtitle (Date Range)
+    worksheet.mergeCells("A2:D2");
+    worksheet.getCell("A2").value = `Date Range: ${selectedDates[0]} to ${selectedDates[1]}`;
+    worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
 
-    // Add the data
+    // Column Headings
+    const headings = ["Date", "Registration No", "Amount", "Note"];
+    const headerRow = worksheet.addRow(headings);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF57A773" }
+      };
+    });
+    headerRow.alignment = { horizontal: "center" };
+    headerRow.height = 24;
+
+    // Add Data Rows
     data.forEach((row) => {
       worksheet.addRow([
         row.Date,
@@ -454,6 +498,31 @@ const downloadAllIncomesExcel = async (req, res) => {
         row.Amount,
         row.Note,
       ]);
+    });
+
+    // Set column widths
+    worksheet.columns = [
+      { width: 15 },
+      { width: 20 },
+      { width: 15 },
+      { width: 30 },
+    ];
+
+    // Add borders and center alignment to all cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        const existingFill = cell.fill;
+        cell.border = {
+          top: { style: "thin", color: { argb: "CCCCCC" } },
+          left: { style: "thin", color: { argb: "CCCCCC" } },
+          bottom: { style: "thin", color: { argb: "CCCCCC" } },
+          right: { style: "thin", color: { argb: "CCCCCC" } },
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        if (existingFill) {
+          cell.fill = existingFill;
+        }
+      });
     });
 
     // Write the workbook to a buffer
