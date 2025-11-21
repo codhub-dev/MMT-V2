@@ -31,8 +31,9 @@ const VehicleCard = ({ data }) => {
         hoverable
         bordered
         style={{border: "1px solid #cbcbcb"}}
-        cover={<img alt="truck image" height={180} style={{objectFit: 'cover'}} src={data && data.imgURL && data.imgURL.length > 0
+        cover={<img alt="truck" height={180} style={{objectFit: 'cover'}} src={data && data.imgURL && data.imgURL.length > 0
           ? data.imgURL[0]?.thumbUrl:'./truck.jpg'} />}
+          onClick={callCatalogModal}
         actions={[
           <EditFilled
             key="edit"
