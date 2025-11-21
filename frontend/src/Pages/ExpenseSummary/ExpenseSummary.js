@@ -849,7 +849,7 @@ const ExpenseSummary = () => {
   return (
     <div>
       <div className="d-flex flex-column">
-        <b style={{ fontSize: "26px" }}>{vehicleId ? `${expenses[catalog]} for ${vehicleRegistrationNo}` : `${expenses[catalog]}`}</b>
+        <b style={{ fontSize: "26px" }}>{vehicleId ? `${expenses[catalog]} for ${vehicleRegistrationNo}` : `Overall ${expenses[catalog]}`}</b>
         <span style={{ fontSize: "14px", color: "#939393" }}>
           {vehicleId
             ? `View and manage ${expenses[catalog]} for vehicle ${vehicleRegistrationNo}`
