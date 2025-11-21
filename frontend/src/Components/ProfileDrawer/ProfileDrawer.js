@@ -69,21 +69,21 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
   };
 
   const callGetHelpModal = () => {
-    if (getHelpRef.current) {
-      getHelpRef.current.showModal();
-    }
+    if (privacyPolicyRef.current) privacyPolicyRef.current.hideModal?.();
+    if (aboutUsRef.current) aboutUsRef.current.hideModal?.();
+    if (getHelpRef.current) getHelpRef.current.showModal();
   };
 
   const callPrivacyPolicyModal = () => {
-    if (privacyPolicyRef.current) {
-      privacyPolicyRef.current.showModal();
-    }
+    if (getHelpRef.current) getHelpRef.current.hideModal?.();
+    if (aboutUsRef.current) aboutUsRef.current.hideModal?.();
+    if (privacyPolicyRef.current) privacyPolicyRef.current.showModal();
   };
 
   const callAboutUsModal = () => {
-    if (aboutUsRef.current) {
-      aboutUsRef.current.showModal();
-    }
+    if (getHelpRef.current) getHelpRef.current.hideModal?.();
+    if (privacyPolicyRef.current) privacyPolicyRef.current.hideModal?.();
+    if (aboutUsRef.current) aboutUsRef.current.showModal();
   };
 
   return (
