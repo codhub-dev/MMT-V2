@@ -23,7 +23,8 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
     const location = useLocation();
     const current = location.pathname.replace("/", "");
     const getHelpRef = useRef();
-
+    const user = JSON.parse(localStorage.getItem("user"));
+    const isAdmin = user?.isAdmin;
 
     const items = [
         {
@@ -38,15 +39,19 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                 { label: "Income", key: "incomeSummary/income", icon: <BankOutlined /> }
             ]
         },
-        {
-            type: "group",
-            label: "ADMIN",
-            children: [
-                { label: "Admin Portal", key: "admin", icon: <UserOutlined /> },
-                { label: "Logging", key: "log", icon: <FileExclamationOutlined /> },
-                { label: "Artillery", key: "artillery", icon: <LineChartOutlined /> }
-            ]
-        }
+        ...(isAdmin
+            ? [
+                  {
+                      type: "group",
+                      label: "ADMIN",
+                      children: [
+                          { label: "Admin Portal", key: "admin", icon: <UserOutlined /> },
+                          { label: "Logging", key: "log", icon: <FileExclamationOutlined /> },
+                          { label: "Artillery", key: "artillery", icon: <LineChartOutlined /> }
+                      ]
+                  }
+              ]
+            : [])
     ];
 
     const onClick = (e) => {
