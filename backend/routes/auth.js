@@ -16,7 +16,7 @@ router.post("/signup", signUp);
 router.post("/login", logIn);
 router.post("/logout", logOut);
 router.post("/whoami", whoami);
-router.post("/google", signUpWithGoogle);
+router.post("/signUpWithGoogle", signUpWithGoogle);
 
 // Passkey routes
 router.post("/passkey/register/options", passkeyRegisterOptions);
