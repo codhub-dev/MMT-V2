@@ -33,7 +33,7 @@ const MonthlyChart = () => {
     const config = {
         xField: 'time',
         legend: true,
-        title: "Monthly Expenses Overview",
+        title: "Monthly Expenses",
         children: [
             {
                 data: chartData?.expensesData,
