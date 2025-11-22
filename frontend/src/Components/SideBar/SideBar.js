@@ -60,7 +60,7 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                             key: "artillery", 
                             icon: <LineChartOutlined />,
                             onClick: () => {
-                                window.open("https://app.artillery.io/otvgtzeeifjr4/load-tests/trends/test.yml", "_blank");
+                                window.open("https://app.artillery.io/otvgtzeeifjr4/load-tests/tj897_6ztx46p67ejk35533k3zzfhf6397h_xd7t", "_blank");
                             }
                           }
                       ]
