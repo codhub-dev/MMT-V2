@@ -19,6 +19,35 @@ info:
     **APIs Used**
     - REST  : `http://localhost:8000/api/v1/app`
     - graphQL  : `http://localhost:8000/graphql`
+
+    ---
+    ## API Access Control
+
+    ### User Roles
+    The system has two user roles:
+    1. **Regular User** - Standard authenticated users with `isAdmin: false`
+    2. **Admin User** - Privileged users with `isAdmin: true`
+
+    ### Authentication & Authorization
+    - **Public Endpoints**: No authentication required (e.g., signup, login, health check)
+    - **Authenticated Endpoints**: Require valid JWT Bearer token
+    - **Admin-Only Endpoints**: Require valid JWT Bearer token with `isAdmin: true`
+
+    ### Access Matrix
+    | Category | Endpoint Pattern | Regular User | Admin |
+    |----------|------------------|--------------|-------|
+    | **Auth** | `/auth/*` | ✅ Public (signup/login) or Authenticated | ✅ |
+    | **Admin** | `/admin/*` | ❌ Forbidden | ✅ Admin Only |
+    | **Trucks** | `/truck/*`, `/graphql` | ✅ Authenticated (own data) | ✅ All data |
+    | **Expenses** | `/fuelExpenses/*`, `/defExpenses/*`, `/otherExpenses/*` | ✅ Authenticated (own data) | ✅ All data |
+    | **Income** | `/income/*` | ✅ Authenticated (own data) | ✅ All data |
+    | **Loans** | `/calculateLoan/*` | ✅ Authenticated (own data) | ✅ All data |
+    | **Alerts** | `/alerts/*` | ✅ Authenticated (own data) | ✅ All data |
+    | **Drivers** | `/driverProfiles/*` | ✅ Authenticated (own data) | ✅ All data |
+    | **Metadata** | `/metadata/*` | ✅ Authenticated (own data) | ✅ All data |
+    | **Total Expenses** | `/totalExpenses/*` | ✅ Authenticated (own data) | ✅ All data |
+
+    📝 **Note**: Regular users can only access their own data. Admins can access all users' data and perform administrative operations.
   contact:
     name: APIBP-20242YB-Team-09
     email: dev.codhub@gmail.com
