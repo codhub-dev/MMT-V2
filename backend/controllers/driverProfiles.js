@@ -2,6 +2,7 @@ const { default: mongoose } = require('mongoose');
 const DriverProfile = require('../models/driverProfiles-model');
 const { catchAsyncError } = require('../middleware/catchAsyncError');
 const ErrorHandler = require('../middleware/errorHandlers');
+const logger = require('../utils/logger');
 
 // Add a new driver profile
 const addDriverProfile = catchAsyncError(async (req, res, next) => {
@@ -27,6 +28,13 @@ const addDriverProfile = catchAsyncError(async (req, res, next) => {
 
         const savedDriver = await newDriver.save();
 
+        logger.info(`Driver profile created`, {
+            driverId: savedDriver._id,
+            addedBy,
+            name,
+            license
+        });
+
         res.status(201).json({
             success: true,
             message: 'Driver profile created successfully',
@@ -34,6 +42,11 @@ const addDriverProfile = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error adding driver profile:', error);
+        logger.error(`Failed to add driver profile`, {
+            error: error.message,
+            stack: error.stack,
+            body: req.body
+        });
         return next(new ErrorHandler('Failed to add driver profile', 500));
     }
 });
@@ -162,6 +175,12 @@ const updateDriverProfileById = catchAsyncError(async (req, res, next) => {
             return next(new ErrorHandler('Driver profile not found', 404));
         }
 
+        logger.info(`Driver profile updated`, {
+            driverId: id,
+            name: updatedDriver.name,
+            license: updatedDriver.license
+        });
+
         res.status(200).json({
             success: true,
             message: 'Driver profile updated successfully',
@@ -169,6 +188,11 @@ const updateDriverProfileById = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error updating driver profile:', error);
+        logger.error(`Failed to update driver profile`, {
+            driverId: req.params.id,
+            error: error.message,
+            stack: error.stack
+        });
         return next(new ErrorHandler('Failed to update driver profile', 500));
     }
 });
@@ -192,6 +216,12 @@ const deleteDriverProfileById = catchAsyncError(async (req, res, next) => {
             return next(new ErrorHandler('Driver profile not found', 404));
         }
 
+        logger.info(`Driver profile soft deleted`, {
+            driverId: id,
+            name: deletedDriver.name,
+            license: deletedDriver.license
+        });
+
         res.status(200).json({
             success: true,
             message: 'Driver profile deleted successfully',
@@ -199,6 +229,11 @@ const deleteDriverProfileById = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error deleting driver profile:', error);
+        logger.error(`Failed to delete driver profile`, {
+            driverId: req.params.id,
+            error: error.message,
+            stack: error.stack
+        });
         return next(new ErrorHandler('Failed to delete driver profile', 500));
     }
 });
@@ -218,6 +253,12 @@ const permanentDeleteDriverProfileById = catchAsyncError(async (req, res, next) 
             return next(new ErrorHandler('Driver profile not found', 404));
         }
 
+        logger.warn(`Driver profile permanently deleted`, {
+            driverId: id,
+            name: deletedDriver.name,
+            license: deletedDriver.license
+        });
+
         res.status(200).json({
             success: true,
             message: 'Driver profile permanently deleted',
@@ -225,6 +266,11 @@ const permanentDeleteDriverProfileById = catchAsyncError(async (req, res, next) 
         });
     } catch (error) {
         console.error('Error permanently deleting driver profile:', error);
+        logger.error(`Failed to permanently delete driver profile`, {
+            driverId: req.params.id,
+            error: error.message,
+            stack: error.stack
+        });
         return next(new ErrorHandler('Failed to permanently delete driver profile', 500));
     }
 });
@@ -248,6 +294,12 @@ const restoreDriverProfileById = catchAsyncError(async (req, res, next) => {
             return next(new ErrorHandler('Driver profile not found', 404));
         }
 
+        logger.info(`Driver profile restored`, {
+            driverId: id,
+            name: restoredDriver.name,
+            license: restoredDriver.license
+        });
+
         res.status(200).json({
             success: true,
             message: 'Driver profile restored successfully',
@@ -255,6 +307,11 @@ const restoreDriverProfileById = catchAsyncError(async (req, res, next) => {
         });
     } catch (error) {
         console.error('Error restoring driver profile:', error);
+        logger.error(`Failed to restore driver profile`, {
+            driverId: req.params.id,
+            error: error.message,
+            stack: error.stack
+        });
         return next(new ErrorHandler('Failed to restore driver profile', 500));
     }
 });

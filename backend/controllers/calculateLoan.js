@@ -4,10 +4,21 @@ const moment = require("moment");
 const ExcelJS = require("exceljs");
 const Truck = require("../models/truck-model");
 
+// Use global logger (which already handles Papertrail HTTPS + console)
+const logger = require("../utils/logger");
+
 // Controller to add a new loan filling record
 const addLoanCalculation = async (req, res) => {
   try {
     const { truckId, addedBy, date, cost, additionalCharges, note } = req.body;
+
+    logger.info("Adding new loan calculation", {
+      truckId,
+      addedBy,
+      date,
+      cost,
+      additionalCharges
+    });
 
     const newLoanCalculation = new LoanCalculation({
       truckId,
@@ -15,13 +26,24 @@ const addLoanCalculation = async (req, res) => {
       date,
       cost,
       additionalCharges,
-      note,
+      note
     });
 
     const savedLoanCalculation = await newLoanCalculation.save();
+
+    logger.info("Loan calculation added successfully", {
+      calculationId: savedLoanCalculation._id,
+      truckId,
+      cost
+    });
+
     res.status(201).json(savedLoanCalculation);
   } catch (error) {
     console.error("Error adding loan filling:", error);
+    logger.error("Failed to add loan calculation", {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ message: "Failed to add loan filling" });
   }
 };
@@ -31,10 +53,15 @@ const getAllLoanCalculationsByTruckId = async (req, res) => {
     const { truckId, selectedDates } = req.query;
 
     if (!truckId) {
+      logger.warn("Missing truck ID for loan calculation fetch");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
-    // Ensure the dates are in UTC and set the time to 00:00:00 to avoid time zone issues
+    logger.info("Fetching loan calculations by truck ID", {
+      truckId,
+      selectedDates
+    });
+
     const startDate = selectedDates
       ? moment.utc(selectedDates[0]).startOf("day").toDate()
       : null;
@@ -42,64 +69,45 @@ const getAllLoanCalculationsByTruckId = async (req, res) => {
       ? moment.utc(selectedDates[1]).endOf("day").toDate()
       : null;
 
-    // Build the query filter
     const query = { truckId };
 
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
-        // If startDate and endDate are the same, match that specific date
-        query.date = {
-          $eq: startDate,
-        };
+        query.date = { $eq: startDate };
       } else {
-        // Match the range between startDate and endDate
         query.date = { $gte: startDate, $lte: endDate };
       }
     }
 
-    // Fetch all loan calculations for the given truckId and date range
-    const loanCalculations = await LoanCalculation.find(query).sort({
-      date: 1,
-    });
-
-    // if (loanCalculations.length === 0) {
-    //   return res.status(404).json({
-    //     message:
-    //       "No loan calculations found for this truck in the given date range",
-    //   });
-    // }
+    const loanCalculations = await LoanCalculation.find(query).sort({ date: 1 });
 
     const totalCalculation = loanCalculations.reduce(
       (sum, calculation) => sum + calculation.cost,
       0
     );
-    // Fetch total finance amount for the truck
-    const truck = await Truck.findOne({ _id: truckId });
 
+    const truck = await Truck.findOne({ _id: truckId });
     const totalFinanceAmount = truck ? truck.financeAmount : 0;
 
-    // Fetch recent payment
     const recentPayment = await LoanCalculation.findOne({ truckId }).sort({
-      createdAt: -1,
-    }); // Get the latest payment
+      createdAt: -1
+    });
 
-    // Calculate payment left
     const totalPaid = await LoanCalculation.aggregate([
       { $match: { truckId } },
-      { $group: { _id: null, totalPaid: { $sum: "$cost" } } },
+      { $group: { _id: null, totalPaid: { $sum: "$cost" } } }
     ]);
 
     const totalPaidAmount = totalPaid.length > 0 ? totalPaid[0].totalPaid : 0;
 
-    // Calculate total additional charges
     const additionalChargesResult = await LoanCalculation.aggregate([
       { $match: { truckId } },
       {
         $group: {
           _id: null,
-          totalAdditionalCharges: { $sum: "$additionalCharges" },
-        },
-      },
+          totalAdditionalCharges: { $sum: "$additionalCharges" }
+        }
+      }
     ]);
 
     const totalAdditionalCharges =
@@ -107,24 +115,26 @@ const getAllLoanCalculationsByTruckId = async (req, res) => {
         ? additionalChargesResult[0].totalAdditionalCharges
         : 0;
 
-    const paymentLeft = (totalFinanceAmount + totalAdditionalCharges) - totalPaidAmount;
+    const paymentLeft =
+      totalFinanceAmount + totalAdditionalCharges - totalPaidAmount;
 
-    console.log(totalFinanceAmount, totalAdditionalCharges, totalPaidAmount, paymentLeft);
-    
+    const formattedLoanCalculations = loanCalculations.map((calculation, index) => {
+      const date = new Date(calculation.date);
+      const formattedDate = date.toISOString().split("T")[0];
 
-    // Format loan calculations
-    const formattedLoanCalculations = loanCalculations.map(
-      (calculation, index) => {
-        const date = new Date(calculation.date);
-        const formattedDate = date.toISOString().split("T")[0]; // 'YYYY-MM-DD'
+      return {
+        ...calculation.toObject(),
+        date: formattedDate,
+        key: index
+      };
+    });
 
-        return {
-          ...calculation.toObject(),
-          date: formattedDate,
-          key: index,
-        };
-      }
-    );
+    logger.info("Loan calculations retrieved successfully", {
+      truckId,
+      count: loanCalculations.length,
+      totalCalculation,
+      paymentLeft
+    });
 
     res.status(200).json({
       calculations: formattedLoanCalculations,
@@ -132,10 +142,14 @@ const getAllLoanCalculationsByTruckId = async (req, res) => {
       totalFinanceAmount,
       recentPayment,
       paymentLeft,
-      totalAdditionalCharges,
+      totalAdditionalCharges
     });
   } catch (error) {
     console.error("Error retrieving loan calculations:", error);
+    logger.error("Failed to retrieve loan calculations by truck ID", {
+      error: error.message,
+      truckId: req.query.truckId
+    });
     res.status(500).json({ message: "Failed to retrieve loan calculations" });
   }
 };
@@ -145,10 +159,15 @@ const getAllLoanCalculationsByUserId = async (req, res) => {
     const { userId, selectedDates } = req.query;
 
     if (!userId) {
+      logger.warn("Missing user ID for loan calculation fetch");
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    // Ensure the dates are in UTC and set the time to 00:00:00 to avoid time zone issues
+    logger.info("Fetching loan calculations by user ID", {
+      userId,
+      selectedDates
+    });
+
     const startDate = selectedDates
       ? moment.utc(selectedDates[0]).startOf("day").toDate()
       : null;
@@ -156,50 +175,37 @@ const getAllLoanCalculationsByUserId = async (req, res) => {
       ? moment.utc(selectedDates[1]).endOf("day").toDate()
       : null;
 
-    // Build the query filter
     const query = { addedBy: userId };
 
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
-        // If startDate and endDate are the same, match that specific date
-        query.date = {
-          $eq: startDate,
-        };
+        query.date = { $eq: startDate };
       } else {
-        // Match the range between startDate and endDate
         query.date = { $gte: startDate, $lte: endDate };
       }
     }
 
-    // Fetch all loan calculations for the given userId and date range
-    const loanCalculations = await LoanCalculation.find(query).sort({
-      date: 1,
-    });
+    const loanCalculations = await LoanCalculation.find(query).sort({ date: 1 });
 
     if (loanCalculations.length === 0) {
       return res.status(404).json({
-        message:
-          "No loan calculations found for this user in the given date range",
+        message: "No loan calculations found for this user in the given date range"
       });
     }
 
-    // Find registration numbers for each truckId in the loan calculations
     const formattedLoanCalculations = await Promise.all(
       loanCalculations.map(async (calculation, index) => {
         const truck = await Truck.findById(calculation.truckId);
         const registrationNo = truck ? truck.registrationNo : "Unknown";
 
         const date = new Date(calculation.date);
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-        const year = date.getFullYear();
-        const formattedDate = `${day}-${month}-${year}`;
+        const formattedDate = moment(date).format("DD-MM-YYYY");
 
         return {
           ...calculation.toObject(),
           date: formattedDate,
           registrationNo,
-          key: index,
+          key: index
         };
       })
     );
@@ -209,12 +215,22 @@ const getAllLoanCalculationsByUserId = async (req, res) => {
       0
     );
 
+    logger.info("Loan calculations retrieved successfully by user ID", {
+      userId,
+      count: loanCalculations.length,
+      totalCalculation
+    });
+
     res.status(200).json({
       calculations: formattedLoanCalculations,
-      totalCalculation,
+      totalCalculation
     });
   } catch (error) {
     console.error("Error retrieving loan calculations:", error);
+    logger.error("Failed to retrieve loan calculations by user ID", {
+      error: error.message,
+      userId: req.query.userId
+    });
     res.status(500).json({ message: "Failed to retrieve loan calculations" });
   }
 };
@@ -224,21 +240,32 @@ const deleteLoanCalculationById = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      logger.warn("Invalid loan calculation ID for deletion", { id });
       return res.status(400).json({ message: "Invalid Calculation ID" });
     }
 
-    const deletedTruck = await LoanCalculation.findByIdAndDelete(id);
+    logger.info("Deleting loan calculation", { calculationId: id });
 
-    if (!deletedTruck) {
+    const deletedCalculation = await LoanCalculation.findByIdAndDelete(id);
+
+    if (!deletedCalculation) {
+      logger.warn("Loan calculation not found for deletion", { calculationId: id });
       return res.status(404).json({ message: "Calculation not found" });
     }
 
+    logger.info("Loan calculation deleted successfully", {
+      calculationId: id,
+      truckId: deletedCalculation.truckId
+    });
+
     res.status(200).json({ message: "Calculation deleted" });
   } catch (error) {
-    console.error("Error deleting truck:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to delete Calculation", error: error.message });
+    console.error("Error deleting loan calculation:", error);
+    logger.error("Failed to delete loan calculation", {
+      error: error.message,
+      calculationId: req.params.id
+    });
+    res.status(500).json({ message: "Failed to delete Calculation", error: error.message });
   }
 };
 
@@ -247,11 +274,14 @@ const downloadLoanCalculationsExcel = async (req, res) => {
     const { truckId, selectedDates } = req.query;
 
     if (!truckId) {
-      console.log("Truck ID is missing");
       return res.status(400).json({ message: "Truck ID is required" });
     }
 
-    // Ensure the dates are in UTC and set the time to 00:00:00 to avoid time zone issues
+    logger.info("Generating loan calculations Excel file", {
+      truckId,
+      selectedDates
+    });
+
     const startDate = selectedDates
       ? moment.utc(selectedDates[0]).startOf("day").toDate()
       : null;
@@ -259,86 +289,60 @@ const downloadLoanCalculationsExcel = async (req, res) => {
       ? moment.utc(selectedDates[1]).endOf("day").toDate()
       : null;
 
-    // Build the query filter
     const query = { truckId };
 
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
-        // If startDate and endDate are the same, match that specific date
         query.date = { $eq: startDate };
       } else {
-        // Match the range between startDate and endDate
         query.date = { $gte: startDate, $lte: endDate };
       }
     }
 
-    console.log("Query:", query);
-
-    // Fetch all loan calculations for the given truckId and date range
-    const loanCalculations = await LoanCalculation.find(query).sort({
-      date: 1,
-    });
+    const loanCalculations = await LoanCalculation.find(query).sort({ date: 1 });
     const truck = await Truck.findById(truckId);
 
     if (loanCalculations.length === 0) {
-      console.log("No calculations found for the given query");
       return res.status(404).json({
-        message:
-          "No loan calculations found for this truck in the given date range",
+        message: "No loan calculations found for this truck in the given date range"
       });
     }
 
-    // Prepare data for Excel
-    const data = loanCalculations.map((calculation, index) => {
+    const data = loanCalculations.map(calculation => {
       const date = new Date(calculation.date);
       const formattedDate = date.toISOString().split("T")[0];
-
-      const range =
-        index > 0
-          ? calculation.currentKM - loanCalculations[index - 1].currentKM
-          : 0;
-
-      const mileage = range > 0 ? (range / calculation.litres).toFixed(2) : 0;
 
       return {
         Date: formattedDate,
         Cost: calculation.cost,
         AdditionalCharges: calculation.additionalCharges || 0,
-        Note: calculation.note || "",
+        Note: calculation.note || ""
       };
     });
 
-    // Create a new workbook and worksheet
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Loan Calculations");
 
-    // Add the merged header row
     worksheet.mergeCells("A1:D1");
-    worksheet.getCell(
-      "A1"
-    ).value = `${truck.registrationNo} - Loan Calculations ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true };
+    worksheet.getCell("A1").value = `${truck.registrationNo} - Loan Calculations ( ${selectedDates[0]} - ${selectedDates[1]} )`;
+    worksheet.getCell("A1").font = { bold: true, color: { argb: "FFFFFF" } };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" }, // Black background
+      fgColor: { argb: "000000" }
     };
-    worksheet.getCell("A1").font.color = { argb: "FFFFFF" }; // White font color
     worksheet.getCell("A1").alignment = { horizontal: "center" };
 
-    // Add the headings
-    const headings = ["Date", "Cost","Additional Charges", "Note"];
-    worksheet.addRow(headings).font = { bold: true };
+    worksheet.addRow(["Date", "Cost", "Additional Charges", "Note"]).font = {
+      bold: true
+    };
 
-    // Add the data
-    data.forEach((row) => {
+    data.forEach(row => {
       worksheet.addRow([row.Date, row.Cost, row.AdditionalCharges, row.Note]);
     });
 
-    // Write the workbook to a buffer
     const buffer = await workbook.xlsx.writeBuffer();
 
-    // Set headers for the response
     res.setHeader(
       "Content-Disposition",
       "attachment; filename=loanCalculations.xlsx"
@@ -347,12 +351,23 @@ const downloadLoanCalculationsExcel = async (req, res) => {
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
+
+    logger.info("Loan calculations Excel generated successfully", {
+      truckId,
+      recordCount: loanCalculations.length
+    });
+
     res.send(buffer);
   } catch (error) {
     console.error("Error generating Excel file:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to generate Excel file", error: error.message });
+    logger.error("Failed to generate loan calculations Excel", {
+      error: error.message,
+      truckId: req.query.truckId
+    });
+    res.status(500).json({
+      message: "Failed to generate Excel file",
+      error: error.message
+    });
   }
 };
 
@@ -361,9 +376,13 @@ const downloadAllLoanCalculationsExcel = async (req, res) => {
     const { userId, selectedDates } = req.query;
 
     if (!userId) {
-      console.log("User ID is missing");
       return res.status(400).json({ message: "User ID is required" });
     }
+
+    logger.info("Generating Excel for all loan calculations by user", {
+      userId,
+      selectedDates
+    });
 
     const startDate = selectedDates
       ? moment.utc(selectedDates[0]).startOf("day").toDate()
@@ -382,67 +401,54 @@ const downloadAllLoanCalculationsExcel = async (req, res) => {
       }
     }
 
-    const loanCalculations = await LoanCalculation.find(query).sort({
-      date: 1,
-    });
+    const loanCalculations = await LoanCalculation.find(query).sort({ date: 1 });
 
     if (loanCalculations.length === 0) {
-      console.log("No calculations found for the given query");
       return res.status(404).json({
-        message:
-          "No loan calculations found for this user in the given date range",
+        message: "No loan calculations found for this user in the selected range"
       });
     }
 
-    // Prepare data for Excel with registration number
     const data = await Promise.all(
-      loanCalculations.map(async (calculation) => {
-        const date = new Date(calculation.date);
-        const formattedDate = date.toISOString().split("T")[0];
-
+      loanCalculations.map(async calculation => {
         const truck = await Truck.findById(calculation.truckId);
         const registrationNo = truck ? truck.registrationNo : "Unknown";
 
+        const date = new Date(calculation.date);
+        const formattedDate = date.toISOString().split("T")[0];
+
         return {
           Date: formattedDate,
-          "Registration No": registrationNo,
+          RegistrationNo: registrationNo,
           Cost: calculation.cost,
-          Note: calculation.note || "",
+          Note: calculation.note || ""
         };
       })
     );
 
-    // Create a new workbook and worksheet
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Loan Calculations");
 
-    // Add the merged header row
     worksheet.mergeCells("A1:F1");
-    worksheet.getCell(
-      "A1"
-    ).value = `Loan Calculations ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true };
+    worksheet.getCell("A1").value = `Loan Calculations ( ${selectedDates[0]} - ${selectedDates[1]} )`;
+    worksheet.getCell("A1").font = { bold: true, color: { argb: "FFFFFF" } };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" }, // Black background
+      fgColor: { argb: "000000" }
     };
-    worksheet.getCell("A1").font.color = { argb: "FFFFFF" }; // White font color
     worksheet.getCell("A1").alignment = { horizontal: "center" };
 
-    // Add the headings
-    const headings = ["Date", "Registration No", "Cost", "Note"];
-    worksheet.addRow(headings).font = { bold: true };
+    worksheet.addRow(["Date", "Registration No", "Cost", "Note"]).font = {
+      bold: true
+    };
 
-    // Add the data
-    data.forEach((row) => {
-      worksheet.addRow([row.Date, row["Registration No"], row.Cost, row.Note]);
+    data.forEach(row => {
+      worksheet.addRow([row.Date, row.RegistrationNo, row.Cost, row.Note]);
     });
 
-    // Write the workbook to a buffer
     const buffer = await workbook.xlsx.writeBuffer();
 
-    // Set headers for the response
     res.setHeader(
       "Content-Disposition",
       "attachment; filename=loanCalculations.xlsx"
@@ -451,12 +457,23 @@ const downloadAllLoanCalculationsExcel = async (req, res) => {
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
+
+    logger.info("All loan calculations Excel generated successfully", {
+      userId,
+      recordCount: loanCalculations.length
+    });
+
     res.send(buffer);
   } catch (error) {
     console.error("Error generating Excel file:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to generate Excel file", error: error.message });
+    logger.error("Failed to generate all loan calculations Excel", {
+      error: error.message,
+      userId: req.query.userId
+    });
+    res.status(500).json({
+      message: "Failed to generate Excel file",
+      error: error.message
+    });
   }
 };
 
@@ -466,5 +483,5 @@ module.exports = {
   deleteLoanCalculationById,
   downloadLoanCalculationsExcel,
   getAllLoanCalculationsByUserId,
-  downloadAllLoanCalculationsExcel,
+  downloadAllLoanCalculationsExcel
 };
