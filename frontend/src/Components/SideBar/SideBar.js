@@ -55,7 +55,14 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                                 window.open("https://my.ap-01.cloud.solarwinds.com/261721688348511232/logs", "_blank");
                             }
                           },
-                          { label: "Artillery", key: "artillery", icon: <LineChartOutlined /> }
+                          {
+                            label: "Artillery", 
+                            key: "artillery", 
+                            icon: <LineChartOutlined />,
+                            onClick: () => {
+                                window.open("https://app.artillery.io/otvgtzeeifjr4/load-tests/tj897_6ztx46p67ejk35533k3zzfhf6397h_xd7t", "_blank");
+                            }
+                          }
                       ]
                   }
               ]
