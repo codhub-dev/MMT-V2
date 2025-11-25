@@ -6,6 +6,7 @@ const TruckExpense = require("../models/truck-model");
 const FuelExpense = require("../models/fuelExpense-model");
 const DefExpense = require("../models/defExpense-model");
 const OtherExpense = require("../models/otherExpense-model");
+const LoanCalculation = require("../models/calculateLoan-model");
 const logger = require("../utils/logger");
 const { getFullContext } = require("../utils/requestContext");
 
@@ -91,6 +92,10 @@ const getAllIncomesByTruckId = async (req, res) => {
       0
     );
 
+    // Fetch truck details to check if it's financed
+    const truck = await TruckExpense.findById(truckId);
+    const isFinanced = truck ? truck.isFinanced : false;
+
     // Fetch all expenses for the same truck and date range
     const expenseQuery = { truckId };
     if (startDate && endDate) {
@@ -104,11 +109,13 @@ const getAllIncomesByTruckId = async (req, res) => {
     const fuelExpenses = await FuelExpense.find(expenseQuery);
     const defExpenses = await DefExpense.find(expenseQuery);
     const otherExpenses = await OtherExpense.find(expenseQuery);
+    const loanExpenses = isFinanced ? await LoanCalculation.find(expenseQuery) : [];
 
     const totalExpenses =
       fuelExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
       defExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
-      otherExpenses.reduce((sum, expense) => sum + expense.cost, 0);
+      otherExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
+      loanExpenses.reduce((sum, expense) => sum + expense.cost, 0);
 
     const totalProfit = totalIncome - totalExpenses;
 
@@ -202,6 +209,12 @@ const getAllIncomesByUserId = async (req, res) => {
       0
     );
 
+    // Fetch all trucks for the user to check which are financed
+    const userTrucks = await TruckExpense.find({ addedBy: userId });
+    const financedTruckIds = userTrucks
+      .filter(truck => truck.isFinanced)
+      .map(truck => truck._id.toString());
+
     // Fetch all expenses for the same user and date range
     const expenseQuery = { addedBy: userId };
     if (startDate && endDate) {
@@ -216,10 +229,20 @@ const getAllIncomesByUserId = async (req, res) => {
     const defExpenses = await DefExpense.find(expenseQuery);
     const otherExpenses = await OtherExpense.find(expenseQuery);
 
+    // Only fetch loan expenses for financed trucks
+    const loanExpenseQuery = { ...expenseQuery };
+    if (financedTruckIds.length > 0) {
+      loanExpenseQuery.truckId = { $in: financedTruckIds };
+    }
+    const loanExpenses = financedTruckIds.length > 0
+      ? await LoanCalculation.find(loanExpenseQuery)
+      : [];
+
     const totalExpenses =
       fuelExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
       defExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
-      otherExpenses.reduce((sum, expense) => sum + expense.cost, 0);
+      otherExpenses.reduce((sum, expense) => sum + expense.cost, 0) +
+      loanExpenses.reduce((sum, expense) => sum + expense.cost, 0);
 
     const totalProfit = totalIncome - totalExpenses;
 
