@@ -272,6 +272,7 @@ const DriverProfileWidget = () => {
       padding: 26,
       boxShadow: "0 2px 8px rgba(22,119,255,0.07)",
       height: "100%",
+      minHeight: 360,
       overflowY: "auto",
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>

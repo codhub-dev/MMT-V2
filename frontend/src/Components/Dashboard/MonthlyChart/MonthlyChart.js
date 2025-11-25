@@ -79,6 +79,7 @@ const MonthlyChart = () => {
                 borderRadius: 12,
                 padding: 30,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                minHeight: 360,
             }}
         >
             <DualAxes {...config} />
