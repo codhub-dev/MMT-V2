@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Button, ConfigProvider, FloatButton, Table, Select } from "antd";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { PlusOutlined, FileExcelOutlined } from "@ant-design/icons";
 import ExpenseModal from "../../Components/ExpenseModal/ExpenseModal";
 import { Axios } from "../../Config/Axios/Axios";
@@ -247,29 +247,28 @@ const ExpenseSummary = () => {
 
   const expenseModalRef = useRef();
   const { user } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const { catalog, vehicleId } = useParams();
 
   // Fetch all trucks for the user
   useEffect(() => {
-    if (!vehicleId) {
-      Axios.get(`/api/v1/app/truck/getAllTrucksByUser/${user.userId}`, {
-        params: {
-          addedBy: user.userId,
-        },
-        headers: {
-          authorization: `bearer ${localStorage.getItem('token')}`,
-        },
+    Axios.get(`/api/v1/app/truck/getAllTrucksByUser/${user.userId}`, {
+      params: {
+        addedBy: user.userId,
+      },
+      headers: {
+        authorization: `bearer ${localStorage.getItem('token')}`,
+      },
+    })
+      .then((res) => {
+        setTrucks(res.data || []);
       })
-        .then((res) => {
-          setTrucks(res.data || []);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch trucks:", err);
-          setTrucks([]);
-        });
-    }
-  }, [vehicleId, user.userId]);
+      .catch((err) => {
+        console.error("Failed to fetch trucks:", err);
+        setTrucks([]);
+      });
+  }, [user.userId]);
 
   // Determine which truck ID to use (from params or dropdown)
   const activeTruckId = vehicleId || selectedTruckId;
@@ -895,14 +894,20 @@ const ExpenseSummary = () => {
               : `Track all ${expenses[catalog]} across your fleet`}
           </span>
         </div>
-        {!vehicleId && trucks.length > 0 && (
+        {trucks.length > 0 && (
           <div style={{ width: "100%", maxWidth: "300px" }}>
             <Select
               style={{ width: "100%" }}
               placeholder="Select a truck to view details"
               allowClear
-              value={selectedTruckId}
-              onChange={(value) => setSelectedTruckId(value)}
+              value={vehicleId || selectedTruckId}
+              onChange={(value) => {
+                if (value) {
+                  navigate(`/expenseSummary/${catalog}/${value}`);
+                } else {
+                  navigate(`/expenseSummary/${catalog}`);
+                }
+              }}
               options={[
                 { value: null, label: "All Trucks" },
                 ...trucks.map((truck) => ({
