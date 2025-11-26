@@ -18,7 +18,7 @@ import { set } from "date-fns";
 const { Option } = Select;
 
 const ExpenseModal = forwardRef(
-  ({ addExpense, category, formFields, apis, onSuccess }, ref) => {
+  ({ addExpense, category, formFields, apis, onSuccess, catalog, vehicleId }, ref) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [contentLoader, setContentLoader] = useState(false);
@@ -44,7 +44,19 @@ const ExpenseModal = forwardRef(
     }
 
     const location = useLocation();
-    const { catalog, vehicleId } = useParams();
+    const routeParams = useParams();
+
+    // Use catalog prop if provided, otherwise fall back to route params
+    const activeCatalog = catalog || routeParams.catalog;
+    const activeTruckId = vehicleId || routeParams.vehicleId;
+
+    // Determine the actual API path for loan expenses
+    const getApiPath = (cat) => {
+      return cat === 'loanExpenses' ? 'calculateLoan' : cat;
+    };
+
+    // Get the current catalog to use for API calls
+    const currentCatalog = activeCatalog;
 
     useImperativeHandle(ref, () => ({
       showModal: () => {
@@ -58,7 +70,7 @@ const ExpenseModal = forwardRef(
             ? moment(expense.date, "DD-MM-YYYY").format("YYYY-MM-DD")
             : null, // Convert to input-friendly format
         };
-      
+
         setUpdateData(expense);
         form.setFieldsValue(formattedExpense);
       }
@@ -101,11 +113,12 @@ const ExpenseModal = forwardRef(
           ...values,
           date: new Date(values.date).valueOf(),
         };
-        
+
 
         if (updateData && updateData._id) {
+          const apiPath = getApiPath(currentCatalog);
           Axios.put(
-            `/api/v1/app/${catalog}/${getUpdateApiEndpoints(catalog)}/${updateData._id}`,
+            `/api/v1/app/${apiPath}/${getUpdateApiEndpoints(currentCatalog)}/${updateData._id}`,
             {
               ...timestampedValues,
               id: updateData._id,
@@ -130,12 +143,13 @@ const ExpenseModal = forwardRef(
             });
         }
         else {
+          const apiPath = getApiPath(currentCatalog);
           Axios.post(
-            `/api/v1/app/${catalog}/${getApiEndpoints(catalog)}`,
+            `/api/v1/app/${apiPath}/${getApiEndpoints(currentCatalog)}`,
             {
               ...timestampedValues,
               addedBy: user.userId,
-              truckId: vehicleId,
+              truckId: activeTruckId,
             },
             {
               headers: {
@@ -182,7 +196,7 @@ const ExpenseModal = forwardRef(
                 /> */}
                 <input
                   type="date"
-                  value={updateData.date || moment().format("YYYY-MM-DD")} 
+                  value={updateData.date || moment().format("YYYY-MM-DD")}
                   style={{
                     padding: "10px",
                     width: "100%",

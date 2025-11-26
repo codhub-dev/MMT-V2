@@ -3,6 +3,7 @@ import { Navigate, Route, Routes as Switch } from 'react-router-dom'
 import Dashboard from '../Pages/Dashboard/Dashboard'
 import NavBar from '../Components/NavBar/NavBar'
 import ExpenseSummary from '../Pages/ExpenseSummary/ExpenseSummary'
+import Expenses from '../Pages/Expenses/Expenses'
 import CalculateLoan from '../Pages/CalculateLoan/CalculateLoan'
 import AdminPortal from '../Pages/AdminPortal/AdminPortal'
 import SideBar from '../Components/SideBar/SideBar'
@@ -21,6 +22,7 @@ const Home = () => {
                         <Switch>
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/trucks" element={<Trucks />} />
+                            <Route path="/expenses/:vehicleId?" element={<Expenses />} />
                             <Route path="/admin" element={<AdminPortal />} />,
                             <Route path="/calculateLoan/:vehicleId?" element={<CalculateLoan />} />
                             <Route path="/expenseSummary/:catalog/:vehicleId?" element={<ExpenseSummary />} />

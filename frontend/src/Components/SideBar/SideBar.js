@@ -6,15 +6,14 @@ import {
     TruckOutlined,
     CloseOutlined,
     BankOutlined,
-    FireOutlined,
-    WalletOutlined,
+    DollarOutlined,
     UserOutlined,
     LineChartOutlined,
     FileExclamationOutlined
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMobile } from "../MobileContext/MobileContext";
-import GetHelpModal from "../GetHelpModal/GetHelpModal"; 
+import GetHelpModal from "../GetHelpModal/GetHelpModal";
 import { UserContext } from "../../App";
 
 const SideBar = ({ isOpen = true, setIsOpen }) => {
@@ -34,9 +33,7 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
             children: [
                 { label: "Dashboard", key: "dashboard", icon: <HomeOutlined /> },
                 { label: "Trucks", key: "trucks", icon: <TruckOutlined /> },
-                { label: "Fuel Expense", key: "expenseSummary/fuelExpenses", icon: <FireOutlined /> },
-                { label: "Def Expense", key: "expenseSummary/defExpenses", icon: <WalletOutlined /> },
-                { label: "Other Expense", key: "expenseSummary/otherExpenses", icon: <BarChartOutlined /> },
+                { label: "Expenses", key: "expenses", icon: <DollarOutlined /> },
                 { label: "Income", key: "incomeSummary/income", icon: <BankOutlined /> }
             ]
         },
@@ -56,8 +53,8 @@ const SideBar = ({ isOpen = true, setIsOpen }) => {
                             }
                           },
                           {
-                            label: "Artillery", 
-                            key: "artillery", 
+                            label: "Artillery",
+                            key: "artillery",
                             icon: <LineChartOutlined />,
                             onClick: () => {
                                 window.open("https://app.artillery.io/otvgtzeeifjr4/load-tests/tj897_6ztx46p67ejk35533k3zzfhf6397h_xd7t", "_blank");

@@ -69,7 +69,7 @@ const Dashboard = () => {
               }
               value={metadata.monthlyExpenses?.monthlyGrandTotal}
               thisMonth={metadata.grandTotal}
-              route={'/expenseSummary/totalExpenses'}
+              route={'/expenses'}
             />
             <StatisticCard
               cardType="primary"
