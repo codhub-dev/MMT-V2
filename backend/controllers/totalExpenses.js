@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const FuelExpense = require("../models/fuelExpense-model");
 const DefExpense = require("../models/defExpense-model");
 const OtherExpense = require("../models/otherExpense-model");
+const LoanCalculation = require("../models/calculateLoan-model");
 const moment = require("moment");
 const ExcelJS = require("exceljs");
 const TruckExpense = require("../models/truck-model");
@@ -57,7 +58,14 @@ const getAllTotalExpensesByUserId = async (req, res) => {
       catalog: "Other Expense",
     }));
 
-    const allExpenses = [...fuelExpenses, ...defExpenses, ...otherExpenses];
+    const loanExpenses = (
+      await LoanCalculation.find(query).sort({ date: 1 })
+    ).map((expense) => ({
+      ...expense.toObject(),
+      catalog: "Loan Expense",
+    }));
+
+    const allExpenses = [...fuelExpenses, ...defExpenses, ...otherExpenses, ...loanExpenses];
 
     if (allExpenses.length === 0) {
       logger.info(`No total expenses found for user ${userId}`, {
@@ -121,12 +129,12 @@ const getAllTotalExpensesByUserId = async (req, res) => {
 
 const downloadAllTotalExpensesExcel = async (req, res) => {
   try {
-    const { userId, selectedDates } = req.query;
+    const { userId, truckId, selectedDates } = req.query;
 
-    if (!userId) {
-      console.log("User ID is missing");
-      logger.warn("Total expenses Excel download attempted without user ID");
-      return res.status(400).json({ message: "User ID is required" });
+    if (!userId && !truckId) {
+      console.log("User ID or Truck ID is missing");
+      logger.warn("Total expenses Excel download attempted without user ID or truck ID");
+      return res.status(400).json({ message: "User ID or Truck ID is required" });
     }
 
     const startDate = selectedDates
@@ -136,7 +144,7 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
       ? moment.utc(selectedDates[1]).endOf("day").toDate()
       : null;
 
-    const query = { addedBy: userId };
+    const query = truckId ? { truckId } : { addedBy: userId };
 
     if (startDate && endDate) {
       if (startDate.toDateString() === endDate.toDateString()) {
@@ -167,12 +175,20 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
       catalog: "Other Expense",
     }));
 
-    const allExpenses = [...fuelExpenses, ...defExpenses, ...otherExpenses];
+    const loanExpenses = (
+      await LoanCalculation.find(query).sort({ date: 1 })
+    ).map((expense) => ({
+      ...expense.toObject(),
+      catalog: "Loan Expense",
+    }));
+
+    const allExpenses = [...fuelExpenses, ...defExpenses, ...otherExpenses, ...loanExpenses];
 
     if (allExpenses.length === 0) {
       console.log("No expenses found for the given query");
       logger.info(`No total expenses found for Excel download - user ${userId}`, {
         userId,
+        truckId,
         dateRange: selectedDates,
       });
       return res.status(404).json({
@@ -206,7 +222,11 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
       Date: expense.date,
       Registration: expense.registrationNo,
       Type: expense.catalog,
+      "Current KM": expense.currentKM || "",
+      Litres: expense.litres || "",
+      Category: expense.category || "",
       Cost: expense.cost,
+      "Additional Charges": expense.additionalCharges || "",
       Note: expense.note || "",
     }));
 
@@ -215,7 +235,7 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
     const worksheet = workbook.addWorksheet("Total Expenses");
 
     // Main Title
-    worksheet.mergeCells("A1:E1");
+    worksheet.mergeCells("A1:I1");
     worksheet.getCell("A1").value = "Manage My Truck - Total Expenses";
     worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
     worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
@@ -227,13 +247,13 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
     worksheet.getRow(1).height = 36;
 
     // Subtitle (Date Range)
-    worksheet.mergeCells("A2:E2");
+    worksheet.mergeCells("A2:I2");
     worksheet.getCell("A2").value = `Date Range: ${selectedDates[0]} to ${selectedDates[1]}`;
     worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
     worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
 
     // Column Headings
-    const headings = ["Date", "Registration", "Type", "Cost", "Note"];
+    const headings = ["Date", "Registration", "Type", "Current KM", "Litres", "Category", "Cost", "Additional Charges", "Note"];
     const headerRow = worksheet.addRow(headings);
     headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
     headerRow.eachCell((cell) => {
@@ -252,18 +272,26 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
         row.Date,
         row.Registration,
         row.Type,
+        row["Current KM"],
+        row.Litres,
+        row.Category,
         row.Cost,
+        row["Additional Charges"],
         row.Note,
       ]);
     });
 
     // Set column widths
     worksheet.columns = [
-      { width: 15 },
-      { width: 20 },
-      { width: 20 },
-      { width: 10 },
-      { width: 30 },
+      { width: 15 },  // Date
+      { width: 20 },  // Registration
+      { width: 15 },  // Type
+      { width: 12 },  // Current KM
+      { width: 10 },  // Litres
+      { width: 18 },  // Category
+      { width: 12 },  // Cost
+      { width: 18 },  // Additional Charges
+      { width: 30 },  // Note
     ];
 
     // Add borders and center alignment to all cells
@@ -288,6 +316,7 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
 
     logger.info(`Total expenses Excel downloaded for user ${userId}`, {
       userId,
+      truckId,
       count: allExpenses.length,
       dateRange: selectedDates,
     });
@@ -305,6 +334,7 @@ const downloadAllTotalExpensesExcel = async (req, res) => {
     console.error("Error generating Excel file:", error);
     logger.error(`Failed to generate total expenses Excel: ${error.message}`, {
       userId: req.query.userId,
+      truckId: req.query.truckId,
       error: error.message,
       stack: error.stack,
     });
@@ -360,7 +390,14 @@ const getAllTotalExpensesByTruckId = async (req, res) => {
       catalog: "Other Expense",
     }));
 
-    const allExpenses = [...fuelExpenses, ...defExpenses, ...otherExpenses];
+    const loanExpenses = (
+      await LoanCalculation.find(query).sort({ date: 1 })
+    ).map((expense) => ({
+      ...expense.toObject(),
+      catalog: "Loan Expense",
+    }));
+
+    const allExpenses = [...fuelExpenses, ...defExpenses, ...otherExpenses, ...loanExpenses];
 
     if (allExpenses.length === 0) {
       return res.status(404).json({
