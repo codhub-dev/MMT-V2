@@ -324,22 +324,66 @@ const downloadLoanCalculationsExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Loan Calculations");
 
+    // Main Title
     worksheet.mergeCells("A1:D1");
-    worksheet.getCell("A1").value = `${truck.registrationNo} - Loan Calculations ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").value = "Manage My Truck - Loan Calculations";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" }
+      fgColor: { argb: "FF0C4736" }
     };
-    worksheet.getCell("A1").alignment = { horizontal: "center" };
+    worksheet.getRow(1).height = 36;
 
-    worksheet.addRow(["Date", "Cost", "Additional Charges", "Note"]).font = {
-      bold: true
-    };
+    // Subtitle (Truck and Date Range)
+    worksheet.mergeCells("A2:D2");
+    worksheet.getCell("A2").value = `${truck.registrationNo} | ${selectedDates[0]} to ${selectedDates[1]}`;
+    worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
 
+    // Column Headings
+    const headings = ["Date", "Cost", "Additional Charges", "Note"];
+    const headerRow = worksheet.addRow(headings);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF57A773" }
+      };
+    });
+    headerRow.alignment = { horizontal: "center" };
+    headerRow.height = 24;
+
+    // Add Data Rows
     data.forEach(row => {
       worksheet.addRow([row.Date, row.Cost, row.AdditionalCharges, row.Note]);
+    });
+
+    // Set column widths
+    worksheet.columns = [
+      { width: 15 },
+      { width: 15 },
+      { width: 20 },
+      { width: 25 }
+    ];
+
+    // Add borders and center alignment to all cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        const existingFill = cell.fill;
+        cell.border = {
+          top: { style: "thin", color: { argb: "CCCCCC" } },
+          left: { style: "thin", color: { argb: "CCCCCC" } },
+          bottom: { style: "thin", color: { argb: "CCCCCC" } },
+          right: { style: "thin", color: { argb: "CCCCCC" } }
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        if (existingFill) {
+          cell.fill = existingFill;
+        }
+      });
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
@@ -430,22 +474,66 @@ const downloadAllLoanCalculationsExcel = async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Loan Calculations");
 
-    worksheet.mergeCells("A1:F1");
-    worksheet.getCell("A1").value = `Loan Calculations ( ${selectedDates[0]} - ${selectedDates[1]} )`;
-    worksheet.getCell("A1").font = { bold: true, color: { argb: "FFFFFF" } };
+    // Main Title
+    worksheet.mergeCells("A1:D1");
+    worksheet.getCell("A1").value = "Manage My Truck - All Loan Calculations";
+    worksheet.getCell("A1").font = { size: 18, bold: true, color: { argb: "FFFFFF" } };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getCell("A1").fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "000000" }
+      fgColor: { argb: "FF0C4736" }
     };
-    worksheet.getCell("A1").alignment = { horizontal: "center" };
+    worksheet.getRow(1).height = 36;
 
-    worksheet.addRow(["Date", "Registration No", "Cost", "Note"]).font = {
-      bold: true
-    };
+    // Subtitle (Date Range)
+    worksheet.mergeCells("A2:D2");
+    worksheet.getCell("A2").value = `Date Range: ${selectedDates[0]} to ${selectedDates[1]}`;
+    worksheet.getCell("A2").font = { size: 12, bold: true, color: { argb: "333333" } };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
 
+    // Column Headings
+    const headings = ["Date", "Registration No", "Cost", "Note"];
+    const headerRow = worksheet.addRow(headings);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" } };
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF57A773" }
+      };
+    });
+    headerRow.alignment = { horizontal: "center" };
+    headerRow.height = 24;
+
+    // Add Data Rows
     data.forEach(row => {
       worksheet.addRow([row.Date, row.RegistrationNo, row.Cost, row.Note]);
+    });
+
+    // Set column widths
+    worksheet.columns = [
+      { width: 15 },
+      { width: 20 },
+      { width: 15 },
+      { width: 25 }
+    ];
+
+    // Add borders and center alignment to all cells
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        const existingFill = cell.fill;
+        cell.border = {
+          top: { style: "thin", color: { argb: "CCCCCC" } },
+          left: { style: "thin", color: { argb: "CCCCCC" } },
+          bottom: { style: "thin", color: { argb: "CCCCCC" } },
+          right: { style: "thin", color: { argb: "CCCCCC" } }
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        if (existingFill) {
+          cell.fill = existingFill;
+        }
+      });
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
