@@ -101,3 +101,37 @@ module.exports.manageSubscription = catchAsyncError(async (req, res, next) => {
         user,
     });
 });
+
+module.exports.deleteTestUsers = catchAsyncError(async (req, res, next) => {
+    logger.info('Admin attempting to delete test users', getFullContext(req, {
+        admin: req.user?.username || req.username || 'unknown'
+    }));
+
+    // Find all users with email starting with 'testuser_'
+    const testUsers = await userModel.find({
+        email: { $regex: /^testuser_/i }
+    });
+
+    if (testUsers.length === 0) {
+        logger.info('No test users found to delete');
+        return res.status(200).json({
+            message: "No test users found",
+            deletedCount: 0
+        });
+    }
+
+    // Delete all test users
+    const result = await userModel.deleteMany({
+        email: { $regex: /^testuser_/i }
+    });
+
+    logger.info('Test users deleted successfully', {
+        deletedCount: result.deletedCount,
+        deletedBy: req.user?.username || 'unknown'
+    });
+
+    res.status(200).json({
+        message: `Successfully deleted ${result.deletedCount} test users`,
+        deletedCount: result.deletedCount
+    });
+});

@@ -20,6 +20,7 @@ import {
   ReloadOutlined,
   UserAddOutlined,
   FilterOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { Axios } from "../../Config/Axios/Axios";
 
@@ -30,6 +31,7 @@ const { Option } = Select;
 export default function AdminPortal() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
 
@@ -51,6 +53,23 @@ export default function AdminPortal() {
       message.error("Failed to fetch users");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteTestUsers = async () => {
+    try {
+      setDeleteLoading(true);
+      const res = await Axios.delete("/api/v1/app/admin/deleteTestUsers", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      message.success(res.data.message);
+      fetchUsers(); // Refresh the user list
+    } catch (err) {
+      message.error("Failed to delete test users");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -177,6 +196,9 @@ export default function AdminPortal() {
     return matchesSearch && matchesFilter;
   });
 
+  // Count test users
+  const testUsersCount = users.filter(user => user.email?.startsWith('testuser_')).length;
+
   return (
     <div style={{ padding: "0 16px" }}>
       <div className="d-flex flex-column" style={{ marginBottom: "1rem" }}>
@@ -195,7 +217,7 @@ export default function AdminPortal() {
         }}
       >
         <Row gutter={[16, 16]} align="middle">
-          <Col xs={24} sm={24} md={12} lg={14}>
+          <Col xs={24} sm={24} md={12} lg={10}>
             <Search
               placeholder="Search users by name"
               allowClear
@@ -205,7 +227,7 @@ export default function AdminPortal() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </Col>
-          <Col xs={12} sm={12} md={6} lg={5}>
+          <Col xs={12} sm={8} md={6} lg={4}>
             <Select
               size="large"
               value={filter}
@@ -217,7 +239,7 @@ export default function AdminPortal() {
               <Option value="unsubscribed">Unsubscribed</Option>
             </Select>
           </Col>
-          <Col xs={12} sm={12} md={6} lg={5}>
+          <Col xs={12} sm={8} md={6} lg={4}>
             <Button
               icon={<ReloadOutlined />}
               type="default"
@@ -228,6 +250,28 @@ export default function AdminPortal() {
             >
               Refresh
             </Button>
+          </Col>
+          <Col xs={24} sm={8} md={12} lg={6}>
+            <Popconfirm
+              title={`Delete ${testUsersCount} test users?`}
+              description="This will delete all users with email starting with 'testuser_'"
+              okText="Yes, Delete"
+              cancelText="Cancel"
+              okButtonProps={{ danger: true }}
+              onConfirm={deleteTestUsers}
+              placement="topRight"
+            >
+              <Button
+                icon={<DeleteOutlined />}
+                danger
+                size="large"
+                loading={deleteLoading}
+                style={{ width: "100%" }}
+                disabled={testUsersCount === 0}
+              >
+                Delete Test Users
+              </Button>
+            </Popconfirm>
           </Col>
         </Row>
       </Card>
