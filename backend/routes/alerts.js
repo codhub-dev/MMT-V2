@@ -9,7 +9,8 @@ const {
     deleteAlertById,
     permanentDeleteAlertById,
     restoreAlertById,
-    getAlertsSummary
+    getAlertsSummary,
+    markRecurringAlertAsDone
 } = require('../controllers/alerts');
 
 const router = express.Router();
@@ -24,6 +25,7 @@ router.delete('/deleteAlertById/:id', deleteAlertById);
 
 // Alert status operations
 router.put('/markAlertAsRead/:id', markAlertAsRead);
+router.put('/markRecurringAlertAsDone/:id', markRecurringAlertAsDone);
 
 // Admin routes
 router.delete('/permanentDeleteAlertById/:id', permanentDeleteAlertById);

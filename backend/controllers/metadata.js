@@ -4,6 +4,7 @@ const User = require('../models/user-model');
 const Truck = require('../models/truck-model');
 const OtherExpense = require('../models/otherExpense-model');
 const Income = require('../models/income-model');
+const LoanCalculation = require('../models/calculateLoan-model');
 const { default: mongoose } = require('mongoose');
 
 const moment = require("moment");
@@ -136,6 +137,14 @@ const getMetadataByUserId = async (req, res) => {
 
         const otherTotal = otherResult.length > 0 ? otherResult[0].totalCost : 0;
 
+        // Total loan expenses
+        const loanResult = await LoanCalculation.aggregate([
+            { $match: { addedBy: userId } },
+            { $group: { _id: null, totalCost: { $sum: "$cost" } } }
+        ]);
+
+        const loanTotal = loanResult.length > 0 ? loanResult[0].totalCost : 0;
+
         // Total fuel used
         const fuelUsedResult = await FuelExpense.aggregate([
             { $match: { addedBy: userId } },
@@ -168,6 +177,14 @@ const getMetadataByUserId = async (req, res) => {
 
         const otherMonthlyTotal = otherMonthlyResult.length > 0 ? otherMonthlyResult[0].totalCost : 0;
 
+        // Monthly loan expenses
+        const loanMonthlyResult = await LoanCalculation.aggregate([
+            { $match: { addedBy: userId, date: { $gte: startOfMonth, $lte: endOfMonth } } },
+            { $group: { _id: null, totalCost: { $sum: "$cost" } } }
+        ]);
+
+        const loanMonthlyTotal = loanMonthlyResult.length > 0 ? loanMonthlyResult[0].totalCost : 0;
+
         // Monthly fuel used
         const fuelUsedMonthlyResult = await FuelExpense.aggregate([
             { $match: { addedBy: userId, date: { $gte: startOfMonth, $lte: endOfMonth } } },
@@ -197,16 +214,18 @@ const getMetadataByUserId = async (req, res) => {
             fuelTotal,
             defTotal,
             otherTotal,
+            loanTotal,
             fuelUsedTotal,
             incomeTotal,
-            grandTotal: fuelTotal + defTotal + otherTotal,
+            grandTotal: fuelTotal + defTotal + otherTotal + loanTotal,
             monthlyExpenses: {
                 fuel: fuelMonthlyTotal,
                 def: defMonthlyTotal,
                 other: otherMonthlyTotal,
+                loan: loanMonthlyTotal,
                 fuelUsed: fuelUsedMonthlyTotal,
                 income: incomeMonthlyTotal,
-                monthlyGrandTotal: fuelMonthlyTotal + defMonthlyTotal + otherMonthlyTotal
+                monthlyGrandTotal: fuelMonthlyTotal + defMonthlyTotal + otherMonthlyTotal + loanMonthlyTotal
             }
         };
 
@@ -366,6 +385,18 @@ const getSixMonthsDataByUserId = async (req, res) => {
             ]);
             const otherTotal = otherResult.length > 0 ? otherResult[0].totalCost : 0;
 
+            // Loan expenses
+            const loanResult = await LoanCalculation.aggregate([
+                {
+                    $match: {
+                        addedBy: userId,
+                        date: { $gte: month.start, $lte: month.end }
+                    }
+                },
+                { $group: { _id: null, totalCost: { $sum: "$cost" } } }
+            ]);
+            const loanTotal = loanResult.length > 0 ? loanResult[0].totalCost : 0;
+
             // Income
             const incomeResult = await Income.aggregate([
                 {
@@ -382,7 +413,8 @@ const getSixMonthsDataByUserId = async (req, res) => {
             expensesData.push(
                 { time: month.name, value: fuelTotal, type: 'Fuel' },
                 { time: month.name, value: defTotal, type: 'Def' },
-                { time: month.name, value: otherTotal, type: 'Other' }
+                { time: month.name, value: otherTotal, type: 'Other' },
+                { time: month.name, value: loanTotal, type: 'Loan' }
             );
 
             // Add to incomeData array

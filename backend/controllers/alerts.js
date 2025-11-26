@@ -8,7 +8,7 @@ const { getFullContext } = require('../utils/requestContext');
 // Add a new alert
 const addAlert = catchAsyncError(async (req, res, next) => {
     try {
-        const { addedBy, title, description, alertDate, type, priority, truckId, driverId } = req.body;
+        const { addedBy, title, description, alertDate, type, priority, truckId, driverId, isRecurring, recurringType } = req.body;
 
         logger.info('Creating new alert', getFullContext(req, {
             addedBy,
@@ -16,7 +16,9 @@ const addAlert = catchAsyncError(async (req, res, next) => {
             type,
             priority,
             truckId,
-            driverId
+            driverId,
+            isRecurring,
+            recurringType
         }));
 
         const newAlert = new Alert({
@@ -27,7 +29,9 @@ const addAlert = catchAsyncError(async (req, res, next) => {
             type,
             priority,
             truckId,
-            driverId
+            driverId,
+            isRecurring: isRecurring || false,
+            recurringType: recurringType || 'none'
         });
 
         const savedAlert = await newAlert.save();
@@ -37,7 +41,8 @@ const addAlert = catchAsyncError(async (req, res, next) => {
             addedBy,
             title: savedAlert.title,
             type: savedAlert.type,
-            priority: savedAlert.priority
+            priority: savedAlert.priority,
+            isRecurring: savedAlert.isRecurring
         }));
 
         res.status(201).json({
@@ -673,6 +678,67 @@ const getAlertsSummary = catchAsyncError(async (req, res, next) => {
     }
 });
 
+// Mark recurring alert as done and update date for next occurrence
+const markRecurringAlertAsDone = catchAsyncError(async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            logger.warn('Invalid alert ID for recurring completion', { alertId: id });
+            return next(new ErrorHandler('Invalid alert ID', 400));
+        }
+
+        logger.info('Marking recurring alert as done', { alertId: id });
+
+        const alert = await Alert.findById(id);
+
+        if (!alert) {
+            logger.warn('Alert not found for recurring completion', { alertId: id });
+            return next(new ErrorHandler('Alert not found', 404));
+        }
+
+        if (!alert.isRecurring || alert.recurringType === 'none') {
+            logger.warn('Alert is not recurring', { alertId: id });
+            return next(new ErrorHandler('Alert is not a recurring alert', 400));
+        }
+
+        // Calculate next occurrence date based on recurring type
+        let nextAlertDate = new Date(alert.alertDate);
+
+        if (alert.recurringType === 'monthly') {
+            // Add one month to the current alert date
+            nextAlertDate.setMonth(nextAlertDate.getMonth() + 1);
+        }
+
+        // Update the existing alert with new date and reset read status
+        alert.alertDate = nextAlertDate;
+        alert.isRead = false;
+        alert.lastRecurredDate = new Date();
+
+        const updatedAlert = await alert.save();
+
+        logger.info('Recurring alert updated with next occurrence date', {
+            alertId: id,
+            previousDate: alert.alertDate,
+            nextAlertDate: nextAlertDate,
+            recurringType: alert.recurringType
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Recurring alert updated with next occurrence date.',
+            data: updatedAlert
+        });
+    } catch (error) {
+        console.error('Error marking recurring alert as done:', error);
+        logger.error('Failed to mark recurring alert as done', {
+            error: error.message,
+            alertId: req.params.id
+        });
+        return next(new ErrorHandler('Failed to process recurring alert', 500));
+    }
+});
+
 module.exports = {
     addAlert,
     getAlertById,
@@ -683,5 +749,6 @@ module.exports = {
     deleteAlertById,
     permanentDeleteAlertById,
     restoreAlertById,
-    getAlertsSummary
+    getAlertsSummary,
+    markRecurringAlertAsDone
 };

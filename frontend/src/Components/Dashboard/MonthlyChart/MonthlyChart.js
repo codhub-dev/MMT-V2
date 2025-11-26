@@ -50,8 +50,8 @@ const MonthlyChart = () => {
                 },
                 scale: {
                     color: {
-                        domain: ['Fuel', 'Def', 'Other'],
-                        range: ['#13452d', '#5fbd92', '#227d53'],
+                        domain: ['Fuel', 'Def', 'Other', 'Loan'],
+                        range: ['#13452d', '#5fbd92', '#227d53', '#8fd9b6'],
                     },
                     y: { key: 'key1', independent: false }
                 },

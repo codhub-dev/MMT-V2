@@ -20,13 +20,7 @@ const AlertSchema = new mongoose.Schema({
     },
     alertDate: {
         type: Date,
-        required: [true, "Alert date is required"],
-        validate: {
-            validator: function(v) {
-                return v >= new Date();
-            },
-            message: "Alert date cannot be in the past"
-        }
+        required: [true, "Alert date is required"]
     },
     type: {
         type: String,
@@ -67,6 +61,33 @@ const AlertSchema = new mongoose.Schema({
     reminderSent: {
         type: Boolean,
         default: false
+    },
+    isRecurring: {
+        type: Boolean,
+        default: false
+    },
+    recurringType: {
+        type: String,
+        enum: {
+            values: ['none', 'monthly'],
+            message: "Invalid recurring type"
+        },
+        default: 'none'
+    },
+    recurringDayOfMonth: {
+        type: Number,
+        min: [1, "Day of month must be between 1 and 31"],
+        max: [31, "Day of month must be between 1 and 31"],
+        required: false
+    },
+    lastRecurredDate: {
+        type: Date,
+        required: false
+    },
+    parentAlertId: {
+        type: String,
+        ref: 'Alert',
+        required: false
     },
     createdAt: {
         type: Date,
