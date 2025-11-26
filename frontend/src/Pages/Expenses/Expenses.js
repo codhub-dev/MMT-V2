@@ -942,7 +942,7 @@ const Expenses = () => {
   ];
 
   return (
-    <div style={{ marginBottom: '100px' }}>
+    <div>
       <LoaderOverlay isVisible={contentLoader} />
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
         <div className="d-flex flex-column">
