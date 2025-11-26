@@ -41,6 +41,7 @@ const GetHelpModal = forwardRef((props, ref) => {
         width={650}
         centered
         style={{ borderRadius: '16px' }}
+        zIndex={1600}
       >
         <div style={{
           padding: '24px',
