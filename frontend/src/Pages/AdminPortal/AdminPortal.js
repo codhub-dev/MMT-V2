@@ -217,7 +217,7 @@ export default function AdminPortal() {
         }}
       >
         <Row gutter={[16, 16]} align="middle">
-          <Col xs={24} sm={24} md={12} lg={10}>
+          <Col xs={24} sm={24} md={12} lg={testUsersCount > 0 ? 10 : 14}>
             <Search
               placeholder="Search users by name"
               allowClear
@@ -227,7 +227,7 @@ export default function AdminPortal() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </Col>
-          <Col xs={12} sm={8} md={6} lg={4}>
+          <Col xs={12} sm={12} md={6} lg={testUsersCount > 0 ? 4 : 5}>
             <Select
               size="large"
               value={filter}
@@ -239,7 +239,7 @@ export default function AdminPortal() {
               <Option value="unsubscribed">Unsubscribed</Option>
             </Select>
           </Col>
-          <Col xs={12} sm={8} md={6} lg={4}>
+          <Col xs={12} sm={12} md={6} lg={testUsersCount > 0 ? 4 : 5}>
             <Button
               icon={<ReloadOutlined />}
               type="default"
@@ -251,28 +251,29 @@ export default function AdminPortal() {
               Refresh
             </Button>
           </Col>
-          <Col xs={24} sm={8} md={12} lg={6}>
-            <Popconfirm
-              title={`Delete ${testUsersCount} test users?`}
-              description="This will delete all users with email starting with 'testuser_'"
-              okText="Yes, Delete"
-              cancelText="Cancel"
-              okButtonProps={{ danger: true }}
-              onConfirm={deleteTestUsers}
-              placement="topRight"
-            >
-              <Button
-                icon={<DeleteOutlined />}
-                danger
-                size="large"
-                loading={deleteLoading}
-                style={{ width: "100%" }}
-                disabled={testUsersCount === 0}
+          {testUsersCount > 0 && (
+            <Col xs={24} sm={24} md={12} lg={6}>
+              <Popconfirm
+                title={`Delete ${testUsersCount} test users?`}
+                description="This will delete all users with email starting with 'testuser_'"
+                okText="Yes, Delete"
+                cancelText="Cancel"
+                okButtonProps={{ danger: true }}
+                onConfirm={deleteTestUsers}
+                placement="topRight"
               >
-                Delete Test Users
-              </Button>
-            </Popconfirm>
-          </Col>
+                <Button
+                  icon={<DeleteOutlined />}
+                  danger
+                  size="large"
+                  loading={deleteLoading}
+                  style={{ width: "100%" }}
+                >
+                  Delete Test Users
+                </Button>
+              </Popconfirm>
+            </Col>
+          )}
         </Row>
       </Card>
 
