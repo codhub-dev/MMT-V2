@@ -2,10 +2,11 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  /* height: 100vh; */
 }
 
-/* Global button styles - Green gradient for all primary buttons */
+/* ========================= GLOBAL BUTTON STYLES ========================= */
+
+/* Green gradient for all primary buttons */
 .ant-btn-primary {
   background: linear-gradient(135deg, #0a3d2f, #1aa54b) !important;
   border: none !important;
@@ -90,6 +91,44 @@
   background: linear-gradient(135deg, #083327, #149440) !important;
 }
 
+/* ========================= ANT DESIGN GLOBAL CUSTOMIZATIONS ========================= */
+
+/* Custom Ant Design Spin (Loader/Spinner) styling with green gradient theme */
+.ant-spin-dot-item {
+  background-color: #1aa54b !important;
+}
+
+.ant-spin-dot {
+  color: #1aa54b !important;
+}
+
+.ant-spin-lg .ant-spin-dot-item {
+  background-color: #1aa54b !important;
+}
+
+.ant-spin-spinning .ant-spin-dot-item {
+  background: linear-gradient(135deg, #0a3d2f, #1aa54b) !important;
+}
+
+/* Ant Design Table Global Styles */
+.ant-table-thead > tr > th {
+  background: #fafafa !important;
+  color: #333 !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.ant-table-tbody > tr > td {
+  text-align: left;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: #f5f5f5 !important;
+}
+
+/* ========================= GLOBAL UTILITY STYLES ========================= */
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -120,7 +159,6 @@
   from {
     transform: rotate(0deg);
   }
-
   to {
     transform: rotate(360deg);
   }
@@ -130,7 +168,6 @@
   from {
     transform: rotate(0deg);
   }
-
   to {
     transform: rotate(360deg);
   }
@@ -140,625 +177,23 @@
   box-shadow: 2px 3px 7px 2px #a6a6a6;
 }
 
+/* Dashboard grid container - shared across dashboard and other pages */
 .dashboard-grid-container {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(200px, 1fr)
-  );
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
 }
-
-.loan-grid-container {
-  display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(200px, 1fr)
-  );
-  gap: 20px;
-}
-
 
 @media (min-width: 768px) {
-  /* For tablets and above */
   .dashboard-grid-container {
-    grid-template-columns: repeat(
-      auto-fill,
-      minmax(220px, 1fr)
-    ); /* Adjust 220px based on your card's width */
-    gap: 20px; /* Slightly larger gap for medium screens */
-  }
-
-  .loan-grid-container {
-    grid-template-columns: repeat(
-      auto-fill,
-      minmax(220px, 1fr)
-    ); /* Adjust 220px based on your card's width */
-    gap: 20px; /* Slightly larger gap for medium screens */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
   }
 }
 
 @media (min-width: 1024px) {
-  /* For laptops and above */
   .dashboard-grid-container {
-    grid-template-columns: repeat(
-      4,
-      1fr
-    ); /* Exactly 4 cards per row on laptop and larger screens */
-    gap: 20px; /* Larger gap for larger screens */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
   }
-
-  .loan-grid-container {
-    grid-template-columns: repeat(
-      4,
-      1fr
-    ); /* Exactly 4 cards per row on laptop and larger screens */
-    gap: 20px; /* Larger gap for larger screens */
-  }
-}
-
-
-
-
-/* --------------------------login--------------------------------- */
-
-.login-page{
-  background: linear-gradient(135deg, #0a3d2f, #1aa54b );
-
-  .login-page-content{
-    background: transparent;
-  }
-}
-
-.account-block {
-  padding: 0;
-  background-image: url(https://bootdey.com/img/Content/bg1.jpg);
-  background-repeat: no-repeat;
-  background-size: cover;
-  height: 100%;
-  position: relative;
-}
-.account-block .overlay {
-  -webkit-box-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.4);
-}
-.account-block .account-testimonial {
-  text-align: center;
-  color: #fff;
-  position: absolute;
-  margin: 0 auto;
-  padding: 0 1.75rem;
-  bottom: 3rem;
-  left: 0;
-  right: 0;
-}
-
-.text-theme {
-  color: #5369f8 !important;
-}
-
-
-
-/* ------------------loader overlay-------------------- */
-
-.loader-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999; /* Make sure it's on top of other content */
-}
-
-.login-loader-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #f5f7fa 0%, #d1edde 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.login-loader-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 40px;
-  animation: slideUp 0.5s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.login-loader-logo-container {
-  margin-bottom: 24px;
-}
-
-.login-loader-logo-wrapper {
-  width: 100px;
-  height: 100px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.login-loader-logo-skeleton {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.login-loader-logo {
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  animation: pulse 2s ease-in-out infinite;
-  filter: drop-shadow(0 4px 12px rgba(26, 165, 75, 0.3));
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-.login-loader-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 12px 0;
-  background: linear-gradient(135deg, #1aa54b 0%, #15803a 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: fadeInText 0.6s ease-out 0.2s both;
-}
-
-@keyframes fadeInText {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.login-loader-tagline {
-  font-size: 16px;
-  color: #6b7280;
-  margin: 0 0 32px 0;
-  font-weight: 400;
-  animation: fadeInText 0.6s ease-out 0.3s both;
-}
-
-.login-loader-spinner {
-  margin: 20px 0;
-  animation: fadeInText 0.6s ease-out 0.4s both;
-}
-
-.login-loader-text {
-  font-size: 14px;
-  color: #9ca3af;
-  margin: 16px 0 0 0;
-  font-weight: 500;
-  animation: fadeInText 0.6s ease-out 0.5s both, blink 1.5s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-}
-
-.loader {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Custom Ant Design Spin (Loader/Spinner) styling with green gradient theme */
-.ant-spin-dot-item {
-  background-color: #1aa54b !important; /* Primary green color */
-}
-
-.ant-spin-dot {
-  color: #1aa54b !important;
-}
-
-/* Responsive design for smaller screens */
-@media (max-width: 768px) {
-  .login-loader-content {
-    padding: 30px 24px;
-    max-width: 90%;
-  }
-
-  .login-loader-logo-wrapper {
-    width: 80px;
-    height: 80px;
-  }
-
-  .login-loader-logo {
-    width: 80px;
-    height: 80px;
-  }
-
-  .login-loader-title {
-    font-size: 24px;
-  }
-
-  .login-loader-tagline {
-    font-size: 14px;
-  }
-}
-
-/* For large spinners */
-.ant-spin-lg .ant-spin-dot-item {
-  background-color: #1aa54b !important;
-}
-
-/* Spinning circle loader with gradient effect */
-.ant-spin-spinning .ant-spin-dot-item {
-  background: linear-gradient(135deg, #0a3d2f, #1aa54b) !important;
-}
-
-.ant-table-thead > tr > th {
-  background: #fafafa !important;
-  color: #333 !important;
-  font-weight: 600 !important;
-  text-align: center !important;
-  border-bottom: 1px solid #e0e0e0 !important;
-}
-
-.ant-table-tbody > tr > td {
-  text-align: left;
-}
-
-.ant-table-tbody > tr:hover > td {
-  background-color: #f5f5f5 !important;
-}
-
-
-/* --------------------------sidebar--------------------------------- */
-
-.sidebar-container {
-  width: 280px !important;
-  flex-shrink: 0 !important;
-  background: #f6f6f6 !important;
-  padding: 20px 0;
-  overflow-y: auto;              /* scroll content instead of shrinking */
-  border-radius: 20px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;   /* Makes bottom card stick to bottom */
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-}
-
-/* Mobile sidebar behavior */
-@media (max-width: 768px) {
-  .sidebar-container {
-    position: fixed !important;
-    top: 0 !important;
-    left: -280px !important; /* Hide by default - slightly more than width for smooth animation */
-    height: 100vh !important;
-    z-index: 1501 !important; /* Higher than overlay to appear above it */
-    transition: left 0.3s ease-in-out !important;
-    border-radius: 0 20px 20px 0 !important;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  /* Show sidebar when mobile class is present */
-  .sidebar-container.sidebar-mobile {
-    left: 0 !important;
-  }
-
-
-
-  /* Adjust main content when sidebar is hidden on mobile */
-  .main-content {
-    flex: 1 !important;
-    width: 100% !important;
-  }
-
-  /* Ensure proper spacing on mobile */
-  .main-content .container-fluid {
-    padding: 0 !important;
-  }
-}
-
-/* Universal overlay for both sidebar and profile drawer - works on ALL screen sizes */
-.sidebar-overlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  background: rgba(0, 0, 0, 0.5) !important;
-  z-index: 1000 !important; /* Higher z-index to ensure it appears above most content */
-  backdrop-filter: blur(2px) !important;
-  pointer-events: auto !important;
-  display: block !important;
-}
-
-.custom-sidebar-menu {
-    background: transparent !important;
-    border-inline-end: none !important;
-}
-
-
-.custom-sidebar-menu .ant-menu-item-group-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #777;
-    margin-top: 25px;
-    margin-bottom: 10px;
-    letter-spacing: 0.4px;
-    padding-left: 10px !important;
-}
-
-
-.custom-sidebar-menu .ant-menu-item {
-    margin: 4px 0;
-    padding: 10px 0 10px 10px !important;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 15px;
-    font-weight: 500;
-    color: #555 !important;
-    border-radius: 8px;
-}
-
-
-.custom-sidebar-menu .ant-menu-item .ant-menu-item-icon {
-    font-size: 18px;
-    color: #8c8c8c;
-}
-
-
-.custom-sidebar-menu .ant-menu-item:hover {
-    background: #eaeaea !important;
-    color: #222 !important;
-}
-
-.custom-sidebar-menu .ant-menu-item:hover .ant-menu-item-icon {
-    color: #444 !important;
-}
-
-
-.custom-sidebar-menu .ant-menu-item-selected {
-    background: rgba(26, 127, 55, 0.12) !important;
-    color: #000 !important;
-    font-weight: 700 !important;
-    border-radius: 8px;
-    position: relative;
-}
-
-/* active icon color */
-.custom-sidebar-menu .ant-menu-item-selected .ant-menu-item-icon {
-    color: #1a7f37 !important;
-}
-
-/* left highlight bar */
-.custom-sidebar-menu .ant-menu-item-selected::before {
-    content: "";
-    position: absolute;
-    left: -10px;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    background: #1a7f37;
-    border-radius: 4px;
-}
-
-
-.ant-menu-submenu-expand-icon,
-.ant-menu-submenu-arrow {
-    display: none !important;
-}
-
-
-.custom-sidebar-menu .ant-menu-item-group-list {
-    padding-left: 0 !important;
-}
-
-
-/* --------------------------sidebar card--------------------------------- */
-
-/* Sidebar layout fixes */
-.sidebar-contact-card {
-    position: relative;
-    padding: 30px 10px;
-    border-radius: 18px;
-    overflow: hidden;
-    color: #fff;
-
-    /* Background image */
-    background-image: url('../public/contact.avif');
-    background-size: cover;
-    background-position: center;
-}
-
-/* Dark overlay for readability */
-.sidebar-contact-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(1.5px);
-}
-
-/* Content wrapper */
-.contact-card-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-}
-
-/* Title */
-.contact-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 6px;
-}
-
-/* Subtext */
-.contact-subtitle {
-    font-size: 13px;
-    line-height: 1.4;
-    opacity: 0.9;
-    margin-bottom: 15px;
-}
-
-/* CTA Button */
-.contact-btn {
-    background: #1a7f37;
-    padding: 10px 40px;
-    border-radius: 20px;
-    border: none;
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease-in-out;
-}
-
-.contact-btn:hover {
-    background: #166a2f;
-}
-
-/* --------------------------profile drawer consistency--------------------------------- */
-
-/* Profile drawer styling - now matches sidebar structure exactly */
-
-/* Profile drawer container - completely independent styles */
-.profile-drawer-container {
-  position: fixed !important;
-  top: 0 !important;
-  right: -320px !important; /* Hide by default */
-  height: 100vh !important;
-  width: 320px !important;
-  flex-shrink: 0 !important;
-  background: #f6f6f6 !important;
-  padding: 20px 0;
-  overflow-y: auto !important;
-  border-radius: 20px 0 0 20px !important;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15) !important;
-  z-index: 1502 !important;
-  transition: right 0.3s ease-in-out !important;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-/* Show profile drawer when open */
-.profile-drawer-container.profile-drawer-mobile {
-  right: 0 !important;
-}
-
-/* Profile drawer top section */
-.profile-drawer-top {
-  padding-left: 20px;
-  padding-right: 20px;
-  flex: 1;
-}
-
-/* Profile drawer bottom section */
-.profile-drawer-bottom {
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-/* Profile specific button styling to match sidebar aesthetic */
-.profile-btn-group .btn {
-  width: 100%;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  padding: 10px 15px;
-  font-size: 14px;
-  font-weight: 500;
-  border: 1px solid #d9d9d9;
-  background: #fff;
-  color: #555;
-  transition: all 0.2s ease;
-}
-
-.profile-btn-group .btn:hover {
-  background: #eaeaea;
-  border-color: #b5b5b5;
-  color: #222;
-}
-
-.profile-btn-group .btn-danger {
-  background: linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%) !important;
-  border: none !important;
-  color: #fff !important;
-}
-
-.profile-btn-group .btn-danger:hover {
-  background: linear-gradient(135deg, #ff7875 0%, #f5222d 100%) !important;
-  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3) !important;
 }

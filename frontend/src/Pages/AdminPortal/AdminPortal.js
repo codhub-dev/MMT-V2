@@ -166,7 +166,7 @@ export default function AdminPortal() {
               block
               icon={<CloseCircleOutlined />}
             >
-              Unsub
+              Unsubscribe
             </Button>
           </Popconfirm>
         ) : (
@@ -178,7 +178,7 @@ export default function AdminPortal() {
             placement="topRight"
           >
             <Button type="primary" size="small" block icon={<UserAddOutlined />}>
-              Sub
+              Subscribe
             </Button>
           </Popconfirm>
         ),
@@ -200,7 +200,7 @@ export default function AdminPortal() {
   const testUsersCount = users.filter(user => user.email?.startsWith('testuser_')).length;
 
   return (
-    <div style={{ padding: "0 16px" }}>
+    <div>
       <div className="d-flex flex-column" style={{ marginBottom: "1rem" }}>
         <b style={{ fontSize: "clamp(20px, 5vw, 26px)" }}>Admin Dashboard</b>
         <span style={{ fontSize: "clamp(12px, 3vw, 14px)", color: "#939393" }}>
@@ -290,7 +290,7 @@ export default function AdminPortal() {
           dataSource={filteredUsers.map((user) => ({ ...user, key: user.id }))}
           columns={columns}
           loading={loading}
-          pagination={{ 
+          pagination={{
             pageSize: 10,
             responsive: true,
             showSizeChanger: true,

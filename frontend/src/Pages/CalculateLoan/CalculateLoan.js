@@ -10,6 +10,7 @@ import { ArrowRightIcon, DownloadIcon } from "@primer/octicons-react";
 import ConfirmModal from "../../Components/ConfirmModal/ConfirmModal";
 import { Button, FloatButton, Table } from "antd";
 import CalculationsModal from "../../Components/CalculationsModal/CalculationsModal";
+import "../../Styles/CalculateLoan.css";
 
 const CalculateLoan = () => {
   const [contentLoader, setContentLoader] = useState(true);

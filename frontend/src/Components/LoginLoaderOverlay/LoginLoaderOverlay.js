@@ -1,5 +1,6 @@
 import { Spin } from 'antd';
 import React, { useState } from 'react';
+import '../../Styles/LoaderOverlay.css';
 
 const LoginLoaderOverlay = ({ isVisible }) => {
   const [logoLoaded, setLogoLoaded] = useState(false);

@@ -1,5 +1,6 @@
 import { Spin } from 'antd';
 import React from 'react';
+import '../../Styles/LoaderOverlay.css';
 
 const LoaderOverlay = ({ isVisible }) => {
   return (

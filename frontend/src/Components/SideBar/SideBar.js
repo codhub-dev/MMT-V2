@@ -15,6 +15,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useMobile } from "../MobileContext/MobileContext";
 import GetHelpModal from "../GetHelpModal/GetHelpModal";
 import { UserContext } from "../../App";
+import "../../Styles/Sidebar.css";
 
 const SideBar = ({ isOpen = true, setIsOpen }) => {
     const [logoLoading, setLogoLoading] = useState(true);

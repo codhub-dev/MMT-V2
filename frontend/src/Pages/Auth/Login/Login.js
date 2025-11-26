@@ -8,6 +8,7 @@ import { useToast } from "../../../Components/ToastContext/ToastContext";
 import LoginLoaderOverlay from "../../../Components/LoginLoaderOverlay/LoginLoaderOverlay";
 import { Button, Input, Modal } from "antd";
 import { PasskeyFillIcon } from "@primer/octicons-react";
+import "../../../Styles/Login.css";
 
 const Login = ({ setauthenticated }) => {
   const [email, setemail] = useState("");

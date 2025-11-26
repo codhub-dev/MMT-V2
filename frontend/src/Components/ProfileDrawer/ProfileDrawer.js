@@ -14,6 +14,7 @@ import AboutUsModal from "../AboutUsModal/AboutUsModal";
 import { Axios } from "../../Config/Axios/Axios";
 import { UserContext } from "../../App";
 import { useNavigate } from "react-router-dom";
+import "../../Styles/ProfileDrawer.css";
 
 const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
   const [metadata, setMetadata] = useState({});
