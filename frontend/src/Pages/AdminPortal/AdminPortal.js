@@ -88,34 +88,41 @@ export default function AdminPortal() {
       dataIndex: "name",
       key: "name",
       render: (text) => <Text strong>{text}</Text>,
+      fixed: 'left',
+      width: 100,
     },
     {
       title: <div style={{ textAlign: "center" }}>Email</div>,
       dataIndex: "email",
       key: "email",
+      width: 180,
     },
     {
       title: <div style={{ textAlign: "center" }}>Created On</div>,
       dataIndex: "createdAt",
       key: "createdAt",
+      width: 140,
       render: (date) => (
-        <Text>
-          {date?.split("T")[0]}{" "}
-          <Text type="secondary">{date?.split("T")[1]?.split(".")[0]}</Text>
-        </Text>
+        <div>
+          <div>{date?.split("T")[0]}</div>
+          <Text type="secondary" style={{ fontSize: '12px' }}>
+            {date?.split("T")[1]?.split(".")[0]}
+          </Text>
+        </div>
       ),
     },
     {
       title: <div style={{ textAlign: "center" }}>Status</div>,
       key: "status",
+      width: 110,
       render: (_, record) =>
         record.isSubscribed ? (
-          <Tag icon={<CheckCircleOutlined />} style={{ width: "100%", textAlign: "center" }} color="success">
-            Subscribed
+          <Tag icon={<CheckCircleOutlined />} color="success">
+            Active
           </Tag>
         ) : (
-          <Tag icon={<CloseCircleOutlined />} style={{ width: "100%", textAlign: "center" }} color="error">
-            Unsubscribed
+          <Tag icon={<CloseCircleOutlined />} color="error">
+            Inactive
           </Tag>
         ),
     },
@@ -123,10 +130,11 @@ export default function AdminPortal() {
       title: "Action",
       key: "action",
       align: "center",
+      width: 120,
       render: (_, record) =>
         record.isSubscribed ? (
           <Popconfirm
-            title="Are you sure you want to unsubscribe this user?"
+            title="Unsubscribe user?"
             okText="Yes"
             cancelText="No"
             onConfirm={() => confirmAction(record.id, "unsubscribe")}
@@ -134,23 +142,24 @@ export default function AdminPortal() {
           >
             <Button
               type="primary"
-              className="btn-red-gradient"
-              style={{ width: "100%" }}
+              danger
+              size="small"
+              block
               icon={<CloseCircleOutlined />}
             >
-              Unsubscribe
+              Unsub
             </Button>
           </Popconfirm>
         ) : (
           <Popconfirm
-            title="Are you sure you want to subscribe this user?"
+            title="Subscribe user?"
             okText="Yes"
             cancelText="No"
             onConfirm={() => confirmAction(record.id, "subscribe")}
             placement="topRight"
           >
-            <Button type="primary" style={{ width: "100%" }} icon={<UserAddOutlined />}>
-              Subscribe
+            <Button type="primary" size="small" block icon={<UserAddOutlined />}>
+              Sub
             </Button>
           </Popconfirm>
         ),
@@ -169,23 +178,24 @@ export default function AdminPortal() {
   });
 
   return (
-    <div>
-      <div className="d-flex flex-column">
-        <b style={{ fontSize: "26px" }}>Admin Dashboard</b>
-        <span style={{ fontSize: "14px", color: "#939393" }}>Manage users & subscriptions</span>
+    <div style={{ padding: "0 16px" }}>
+      <div className="d-flex flex-column" style={{ marginBottom: "1rem" }}>
+        <b style={{ fontSize: "clamp(20px, 5vw, 26px)" }}>Admin Dashboard</b>
+        <span style={{ fontSize: "clamp(12px, 3vw, 14px)", color: "#939393" }}>
+          Manage users & subscriptions
+        </span>
       </div>
 
       <Card
         bordered={false}
         style={{
           marginBottom: "1.5rem",
-          marginTop: "1.5rem",
           borderRadius: 12,
           boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
         }}
       >
-        <Row gutter={[16, 16]} align="middle" className="w-100">
-          <Col flex="1">
+        <Row gutter={[16, 16]} align="middle">
+          <Col xs={24} sm={24} md={12} lg={14}>
             <Search
               placeholder="Search users by name"
               allowClear
@@ -195,27 +205,26 @@ export default function AdminPortal() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </Col>
-          <Col className="pe-0">
-            <Space style={{ width: "100%" }} align="center">
-              <Select
-                size="large"
-                value={filter}
-                onChange={(value) => setFilter(value)}
-                style={{ width: "100%" }}
-              >
-                <Option value="all">All Users</Option>
-                <Option value="subscribed">Subscribed</Option>
-                <Option value="unsubscribed">Unsubscribed</Option>
-              </Select>
-            </Space>
+          <Col xs={12} sm={12} md={6} lg={5}>
+            <Select
+              size="large"
+              value={filter}
+              onChange={(value) => setFilter(value)}
+              style={{ width: "100%" }}
+            >
+              <Option value="all">All Users</Option>
+              <Option value="subscribed">Subscribed</Option>
+              <Option value="unsubscribed">Unsubscribed</Option>
+            </Select>
           </Col>
-          <Col>
+          <Col xs={12} sm={12} md={6} lg={5}>
             <Button
               icon={<ReloadOutlined />}
               type="default"
               size="large"
               onClick={fetchUsers}
               loading={loading}
+              style={{ width: "100%" }}
             >
               Refresh
             </Button>
@@ -228,6 +237,7 @@ export default function AdminPortal() {
         style={{
           borderRadius: 12,
           boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+          overflowX: "auto",
         }}
       >
         <Table
@@ -235,10 +245,16 @@ export default function AdminPortal() {
           dataSource={filteredUsers.map((user) => ({ ...user, key: user.id }))}
           columns={columns}
           loading={loading}
-          pagination={{ pageSize: 10 }}
+          pagination={{ 
+            pageSize: 10,
+            responsive: true,
+            showSizeChanger: true,
+            showTotal: (total) => `Total ${total} users`
+          }}
           rowClassName={(_, index) =>
             index % 2 === 0 ? "table-row-light" : "table-row-dark"
           }
+          scroll={{ x: 'max-content' }}
           style={{ background: "white" }}
         />
       </Card>
