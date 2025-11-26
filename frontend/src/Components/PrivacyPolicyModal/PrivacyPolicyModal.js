@@ -45,6 +45,7 @@ const PrivacyPolicyModal = forwardRef((props, ref) => {
       centered
       style={{ borderRadius: '16px', maxHeight: '90vh' }}
       bodyStyle={{ padding: 0, maxHeight: '70vh', overflow: 'auto' }}
+      zIndex={1600}
     >
       <div style={{
         padding: '24px',
