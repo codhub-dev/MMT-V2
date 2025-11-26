@@ -14,7 +14,7 @@ const Login = ({ setauthenticated }) => {
   const [pswd, setpswd] = useState("");
   const [viewPassword, setviewPassword] = useState(false);
   const [err, seterr] = useState("");
-  const [loader, setLoader] = useState(true);
+  const [loader, setLoader] = useState(false);
   const [googleIconLoaded, setGoogleIconLoaded] = useState(false);
 
   // Email/Password modal states
@@ -28,35 +28,6 @@ const Login = ({ setauthenticated }) => {
   const { setUser } = useContext(UserContext);
   const toastMessage = useToast();
   const nav = useNavigate();
-
-  useEffect(() => {
-    const checkSession = async () => {
-      setLoader(true);
-      try {
-        const token = localStorage.getItem("token");
-        if (token) {
-          const response = await Axios.post(
-            "/api/v1/app/auth/whoami",
-            {},
-            {
-              headers: {
-                authorization: `bearer ${token}`,
-              },
-            }
-          );
-          setUser(response.data.user);
-        }
-      } catch (err) {
-        console.log(err);
-        seterr("Session Expired! login again...");
-        localStorage.removeItem("token");
-      } finally {
-        setLoader(false);
-      }
-    };
-
-    checkSession();
-  }, [setUser, nav]);
 
   const googleLogin = useGoogleLogin({
     onSuccess: (codeResponse) => {
