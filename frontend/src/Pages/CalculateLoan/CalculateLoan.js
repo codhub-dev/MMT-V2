@@ -314,7 +314,7 @@ const CalculateLoan = () => {
         {vehicleId && (
           <>
             {
-              calculationsList.length &&
+              calculationsList.length > 0 &&
               <FloatButton
                 shape="circle"
                 type="default"
