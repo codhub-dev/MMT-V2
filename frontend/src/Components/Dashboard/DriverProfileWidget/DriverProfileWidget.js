@@ -421,16 +421,14 @@ const DriverProfileWidget = () => {
       >
         {selectedDriver && (
           <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-            <Avatar
+            <img
               src={selectedDriver.photo || "https://randomuser.me/api/portraits/lego/1.jpg"}
-              size={120}
-              shape="square"
+              alt={selectedDriver.name}
               style={{
-                marginRight: 24,
-                background: THEME_GREEN,
                 width: "96px",
-                height: "120px", // 4:5 ratio
-                objectFit: "cover"
+                height: "auto",
+                objectFit: "contain",
+                borderRadius: "8px"
               }}
             />
             <div style={{ textAlign: "left", flex: 1 }}>
@@ -467,17 +465,16 @@ const DriverProfileWidget = () => {
               <Button icon={<UploadOutlined />}>Upload License</Button>
             </Upload>
             {photoUrl && (
-              <Avatar
+              <img
                 src={photoUrl}
-                shape="square"
-                size={80}
+                alt="Preview"
                 style={{
                   marginTop: 12,
                   marginLeft: 24,
                   width: "64px",
-                  height: "80px",
-                  objectFit: "cover",
-                  background: THEME_GREEN
+                  height: "auto",
+                  objectFit: "contain",
+                  borderRadius: "8px"
                 }}
               />
             )}
@@ -580,17 +577,16 @@ const DriverProfileWidget = () => {
               <Button icon={<UploadOutlined />}>Upload Passport Photo</Button>
             </Upload>
             {editPhotoUrl && (
-              <Avatar
+              <img
                 src={editPhotoUrl}
-                shape="square"
-                size={80}
+                alt="Preview"
                 style={{
                   marginTop: 12,
                   marginLeft: 24,
                   width: "64px",
-                  height: "80px",
-                  objectFit: "cover",
-                  background: THEME_GREEN
+                  height: "auto",
+                  objectFit: "contain",
+                  borderRadius: "8px"
                 }}
               />
             )}
