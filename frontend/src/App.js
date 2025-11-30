@@ -12,6 +12,20 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export const UserContext = React.createContext();
 
+// Image preloader utility
+const preloadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    if (!src) {
+      resolve();
+      return;
+    }
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve(); // Resolve anyway to not block app
+    img.src = src;
+  });
+};
+
 function App() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -30,7 +44,14 @@ function App() {
               },
             }
           );
-          setUser(response.data.user);
+          const userData = response.data.user;
+
+          // Preload user profile picture if it exists
+          if (userData?.picture) {
+            await preloadImage(userData.picture);
+          }
+
+          setUser(userData);
         }
       } catch (err) {
         console.log("Session check failed:", err);

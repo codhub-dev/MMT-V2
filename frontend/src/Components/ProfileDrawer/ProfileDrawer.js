@@ -24,9 +24,36 @@ const ProfileDrawer = ({ profileOpen, setProfileOpen }) => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
 
-  // Reset profile image loading state when user changes
+  // Preload and handle profile image when user changes
   useEffect(() => {
-    setProfileImageLoading(true);
+    if (user?.picture) {
+      // Check if image is already cached
+      const img = new Image();
+
+      // Set initial loading state
+      setProfileImageLoading(true);
+
+      img.onload = () => {
+        // Image loaded successfully, hide loading state quickly
+        setProfileImageLoading(false);
+      };
+
+      img.onerror = () => {
+        // Image failed to load
+        setProfileImageLoading(false);
+      };
+
+      // Start loading the image
+      img.src = user.picture;
+
+      // If image is already cached, onload fires immediately
+      if (img.complete) {
+        setProfileImageLoading(false);
+      }
+    } else {
+      // No picture URL, use default
+      setProfileImageLoading(false);
+    }
   }, [user?.picture]);
 
   useEffect(() => {

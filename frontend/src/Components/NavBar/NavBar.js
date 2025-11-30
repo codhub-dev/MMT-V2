@@ -51,10 +51,39 @@ const NavBar = ({ sidebarOpen, setSidebarOpen }) => {
     }
   }, [loc.pathname]);
 
-  // Reset image loading state when user changes
+  // Preload and handle image when user changes
   useEffect(() => {
-    setImageLoading(true);
-    setImageError(false);
+    if (user?.picture) {
+      // Check if image is already cached
+      const img = new Image();
+
+      // Set initial loading state
+      setImageLoading(true);
+      setImageError(false);
+
+      img.onload = () => {
+        // Image loaded successfully, hide loading state quickly
+        setImageLoading(false);
+      };
+
+      img.onerror = () => {
+        // Image failed to load
+        setImageError(true);
+        setImageLoading(false);
+      };
+
+      // Start loading the image
+      img.src = user.picture;
+
+      // If image is already cached, onload fires immediately
+      if (img.complete) {
+        setImageLoading(false);
+      }
+    } else {
+      // No picture URL, use default
+      setImageLoading(false);
+      setImageError(false);
+    }
   }, [user?.picture]);
 
   // Toggle mobile sidebar
@@ -149,10 +178,12 @@ const NavBar = ({ sidebarOpen, setSidebarOpen }) => {
                 }}
               />
             </Button>
-            <div className="ms-2 d-flex flex-column">
-              <b style={{ fontSize: "14px" }} >{user?.name}</b>
-              <span style={{ fontSize: "10px" }}>{user?.email}</span>
-            </div>
+            {!isMobile && (
+              <div className="ms-2 d-flex flex-column">
+                <b style={{ fontSize: "14px" }} >{user?.name}</b>
+                <span style={{ fontSize: "10px" }}>{user?.email}</span>
+              </div>
+            )}
           </div>
       </Space>
       <ProfileDrawer
