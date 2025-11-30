@@ -42,6 +42,19 @@ const Login = ({ setauthenticated }) => {
     }
   });
 
+  const preloadImage = (src) => {
+    return new Promise((resolve) => {
+      if (!src) {
+        resolve();
+        return;
+      }
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = () => resolve();
+      img.src = src;
+    });
+  };
+
   const login = async (credentialResponse) => {
     setLoader(true);
     try {
@@ -52,6 +65,12 @@ const Login = ({ setauthenticated }) => {
         },
       });
       const { user, token: newToken } = response.data;
+
+      // Preload user profile picture before setting user state
+      if (user?.picture) {
+        await preloadImage(user.picture);
+      }
+
       setUser(user);
       localStorage.setItem("token", newToken);
       toastMessage("success", "Login Successful.");
@@ -99,13 +118,15 @@ const Login = ({ setauthenticated }) => {
         const { token } = loginResponse.data;
         const decoded = JSON.parse(atob(token.split('.')[1]));
 
-        setUser({
+        const userData = {
           userId: decoded.username,
           email: passkeyEmail,
           name: passkeyName,
           isSubscribed: false,
           isAdmin: false
-        });
+        };
+
+        setUser(userData);
         localStorage.setItem("token", token);
         setPasskeyModalVisible(false);
         toastMessage("success", "Account created successfully!");
@@ -135,13 +156,15 @@ const Login = ({ setauthenticated }) => {
       const { token } = response.data;
       const decoded = JSON.parse(atob(token.split('.')[1]));
 
-      setUser({
+      const userData = {
         userId: decoded.username,
         email: passkeyEmail,
         name: decoded.username,
         isSubscribed: false,
         isAdmin: false
-      });
+      };
+
+      setUser(userData);
       localStorage.setItem("token", token);
       setPasskeyModalVisible(false);
       toastMessage("success", "Login successful!");
