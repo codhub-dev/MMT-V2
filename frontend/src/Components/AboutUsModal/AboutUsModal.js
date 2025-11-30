@@ -1,5 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { Modal } from "antd";
+import { TruckOutlined, DollarOutlined, LineChartOutlined, RocketOutlined } from "@ant-design/icons";
 
 const AboutUsModal = forwardRef((props, ref) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,152 +22,107 @@ const AboutUsModal = forwardRef((props, ref) => {
         title={
           <div style={{
             textAlign: 'center',
-            color: '#1890ff',
-            fontSize: '24px',
-            fontWeight: 'bold'
+            background: 'linear-gradient(135deg, #0a3d2f, #1aa54b)',
+            margin: '-20px -24px 20px -24px',
+            padding: '24px',
+            color: 'white',
+            borderRadius: '8px 8px 0 0'
           }}>
-            About Manage My Truck
+            <TruckOutlined style={{ fontSize: '32px', marginBottom: '8px' }} />
+            <div style={{ fontSize: '22px', fontWeight: 'bold' }}>About Manage My Truck</div>
           </div>
         }
       open={isModalOpen}
       onOk={handleOk}
       onCancel={handleCancel}
       footer={null}
-      width={700}
+      width={550}
       centered
-      style={{ borderRadius: '16px' }}
       zIndex={1600}
     >
-      <div style={{
-        padding: '24px',
-        background: '#f8f9fa',
-        margin: '-24px -24px 0 -24px'
-      }}>
+      <div style={{ padding: '8px 0' }}>
 
-        {/* Hero Section */}
+        {/* Mission Statement */}
         <div style={{
-          background: '#1890ff',
-          padding: '30px',
+          padding: '20px',
+          background: '#f0f9f4',
           borderRadius: '8px',
-          marginBottom: '24px',
-          color: 'white',
-          textAlign: 'center',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+          marginBottom: '20px',
+          textAlign: 'center'
         }}>
-          <h2 style={{
-            color: 'white',
-            margin: '0 0 16px 0',
-            fontSize: '28px',
-            fontWeight: 'bold'
-          }}>
-            Manage My Truck (MMT)
-          </h2>
           <p style={{
-            fontSize: '18px',
+            fontSize: '15px',
             lineHeight: '1.6',
             margin: 0,
-            opacity: 0.95
+            color: '#0a3d2f'
           }}>
-            Your comprehensive platform for efficient truck fleet management,
-            expense tracking, and profit optimization.
+            Your comprehensive platform for efficient truck fleet management, expense tracking, and profit optimization.
           </p>
         </div>
 
-        {/* Features Grid */}
-        <div style={{
-          background: '#fff',
-          padding: '30px',
-          borderRadius: '12px',
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
-        }}>
-          <h3 style={{
-            color: '#1890ff',
-            marginBottom: '24px',
-            textAlign: 'center',
-            fontSize: '22px',
-            fontWeight: 'bold'
+        {/* Features */}
+        <div style={{ display: 'grid', gap: '16px', marginBottom: '20px' }}>
+
+          <div style={{
+            padding: '20px',
+            borderLeft: '4px solid #1aa54b',
+            background: '#f0f9f4',
+            borderRadius: '8px'
           }}>
-            Key Features & Benefits
-          </h3>
-
-          <div style={{ display: 'grid', gap: '20px' }}>
-            <div style={{
-              padding: '20px',
-              borderLeft: '4px solid #1890ff',
-              background: '#f8f9fa',
-              borderRadius: '8px'
-            }}>
-              <div style={{ marginBottom: '8px' }}>
-                <strong style={{ color: '#1890ff', fontSize: '18px' }}>Smart Expense Tracking</strong>
-              </div>
-              <p style={{ margin: 0, color: '#555', lineHeight: '1.5' }}>
-                Monitor and categorize all your truck-related expenses with detailed insights,
-                automated calculations, and real-time reporting for better financial control.
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              <DollarOutlined style={{ fontSize: '24px', color: '#1aa54b', marginRight: '12px' }} />
+              <strong style={{ color: '#0a3d2f', fontSize: '18px' }}>Smart Expense Tracking</strong>
             </div>
-
-            <div style={{
-              padding: '20px',
-              borderLeft: '4px solid #1890ff',
-              background: '#f8f9fa',
-              borderRadius: '8px'
-            }}>
-              <div style={{ marginBottom: '8px' }}>
-                <strong style={{ color: '#1890ff', fontSize: '18px' }}>Advanced Profit Analysis</strong>
-              </div>
-              <p style={{ margin: 0, color: '#555', lineHeight: '1.5' }}>
-                Analyze your profits over different periods with interactive charts,
-                trend analysis, and predictive insights to maximize your earnings.
-              </p>
-            </div>
-
-            <div style={{
-              padding: '20px',
-              borderLeft: '4px solid #1890ff',
-              background: '#f8f9fa',
-              borderRadius: '8px'
-            }}>
-              <div style={{ marginBottom: '8px' }}>
-                <strong style={{ color: '#1890ff', fontSize: '18px' }}>Comprehensive Cost Management</strong>
-              </div>
-              <p style={{ margin: 0, color: '#555', lineHeight: '1.5' }}>
-                Track and manage all costs associated with truck operation, maintenance,
-                fuel, and logistics with automated alerts and optimization suggestions.
-              </p>
-            </div>
-
-            <div style={{
-              padding: '20px',
-              borderLeft: '4px solid #1890ff',
-              background: '#f8f9fa',
-              borderRadius: '8px'
-            }}>
-              <div style={{ marginBottom: '8px' }}>
-                <strong style={{ color: '#1890ff', fontSize: '18px' }}>Intuitive User Experience</strong>
-              </div>
-              <p style={{ margin: 0, color: '#555', lineHeight: '1.5' }}>
-                Modern, responsive interface built with React, featuring mobile-first design,
-                dark mode support, and accessibility compliance for seamless operation.
-              </p>
-            </div>
+            <p style={{ margin: 0, color: '#555', fontSize: '14px' }}>
+              Monitor all truck expenses with detailed insights and real-time reporting.
+            </p>
           </div>
+
+          <div style={{
+            padding: '20px',
+            borderLeft: '4px solid #1aa54b',
+            background: '#f0f9f4',
+            borderRadius: '8px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              <LineChartOutlined style={{ fontSize: '24px', color: '#1aa54b', marginRight: '12px' }} />
+              <strong style={{ color: '#0a3d2f', fontSize: '18px' }}>Profit Analysis</strong>
+            </div>
+            <p style={{ margin: 0, color: '#555', fontSize: '14px' }}>
+              Analyze profits with interactive charts and predictive insights.
+            </p>
+          </div>
+
+          <div style={{
+            padding: '20px',
+            borderLeft: '4px solid #1aa54b',
+            background: '#f0f9f4',
+            borderRadius: '8px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              <RocketOutlined style={{ fontSize: '24px', color: '#1aa54b', marginRight: '12px' }} />
+              <strong style={{ color: '#0a3d2f', fontSize: '18px' }}>Modern Interface</strong>
+            </div>
+            <p style={{ margin: 0, color: '#555', fontSize: '14px' }}>
+              Responsive design with mobile-first approach for seamless operation.
+            </p>
+          </div>
+
         </div>
 
         {/* Call to Action */}
         <div style={{
           textAlign: 'center',
-          marginTop: '24px',
-          padding: '24px',
-          background: '#1890ff',
+          padding: '20px',
+          background: 'linear-gradient(135deg, #0a3d2f, #1aa54b)',
           borderRadius: '8px',
-          color: '#fff',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+          color: '#fff'
         }}>
-          <h3 style={{ color: 'white', margin: '0 0 8px 0', fontSize: '20px' }}>
-            Ready to Transform Your Truck Business?
-          </h3>
-          <p style={{ margin: 0, opacity: 0.95, fontSize: '16px' }}>
-            Start managing your fleet more efficiently and profitably today!
+          <strong style={{ color: 'white', fontSize: '16px' }}>
+            Transform Your Truck Business Today!
+          </strong>
+          <p style={{ margin: '8px 0 0 0', opacity: 0.95, fontSize: '14px' }}>
+            Start managing your fleet more efficiently
           </p>
         </div>
 
