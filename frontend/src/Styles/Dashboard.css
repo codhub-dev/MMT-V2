@@ -40,6 +40,7 @@
     padding: 4px 0;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    max-width: 100%; /* Ensure carousel doesn't exceed container width */
 }
 
 /* Hide scrollbar for clean appearance */
