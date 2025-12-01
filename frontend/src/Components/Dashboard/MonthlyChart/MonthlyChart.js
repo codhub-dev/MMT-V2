@@ -1,5 +1,6 @@
 import { DualAxes } from '@ant-design/plots';
 import React, { useState, useEffect } from 'react';
+import { Spin } from 'antd';
 import { Axios } from '../../../Config/Axios/Axios';
 import { useContext } from 'react';
 import { UserContext } from '../../../App';
@@ -68,7 +69,11 @@ const MonthlyChart = () => {
     };
 
     if (loading) {
-        return <div className='bg-white p-3 h-100 rounded-4 d-flex align-items-center justify-content-center'>Loading...</div>;
+        return (
+            <div className='bg-white p-3 h-100 rounded-4 d-flex align-items-center justify-content-center'>
+                <Spin size="large" />
+            </div>
+        );
     }
 
     return (

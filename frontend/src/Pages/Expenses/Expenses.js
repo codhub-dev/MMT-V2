@@ -6,10 +6,13 @@ import ExpenseModal from "../../Components/ExpenseModal/ExpenseModal";
 import { Axios } from "../../Config/Axios/Axios";
 import LoaderOverlay from "../../Components/LoaderOverlay/LoaderOverlay";
 import dayjs from "dayjs";
+import quarterOfYear from "dayjs/plugin/quarterOfYear";
 import ConfirmModal from "../../Components/ConfirmModal/ConfirmModal";
 import { ArrowRightIcon, PencilIcon, TrashIcon, DownloadIcon } from "@primer/octicons-react";
 import { UserContext } from "../../App";
 import { FireOutlined, WalletOutlined, BarChartOutlined, CreditCardOutlined } from "@ant-design/icons";
+
+dayjs.extend(quarterOfYear);
 
 const formFields = {
   fuelExpenses: [
@@ -241,6 +244,7 @@ const Expenses = () => {
     dayjs().startOf("month").format("YYYY-MM-DD"),
     dayjs().format("YYYY-MM-DD"),
   ]);
+  const [dateFilterOption, setDateFilterOption] = useState("thisMonth");
   const [vehicleRegistrationNo, setVehicleRegistrationNo] = useState("");
   const [trucks, setTrucks] = useState([]);
   const [selectedTruckId, setSelectedTruckId] = useState(null);
@@ -458,10 +462,63 @@ const Expenses = () => {
     }
   };
 
+  const handleDateFilterChange = (value) => {
+    setDateFilterOption(value);
+    const today = dayjs();
+    let startDate, endDate;
+
+    switch (value) {
+      case "thisWeek":
+        startDate = today.startOf("week");
+        endDate = today.endOf("week");
+        break;
+      case "lastWeek":
+        startDate = today.subtract(1, "week").startOf("week");
+        endDate = today.subtract(1, "week").endOf("week");
+        break;
+      case "thisMonth":
+        startDate = today.startOf("month");
+        endDate = today.endOf("month");
+        break;
+      case "lastMonth":
+        startDate = today.subtract(1, "month").startOf("month");
+        endDate = today.subtract(1, "month").endOf("month");
+        break;
+      case "thisQuarter":
+        startDate = today.startOf("quarter");
+        endDate = today.endOf("quarter");
+        break;
+      case "lastQuarter":
+        startDate = today.subtract(1, "quarter").startOf("quarter");
+        endDate = today.subtract(1, "quarter").endOf("quarter");
+        break;
+      case "thisYear":
+        startDate = today.startOf("year");
+        endDate = today.endOf("year");
+        break;
+      case "lastYear":
+        startDate = today.subtract(1, "year").startOf("year");
+        endDate = today.subtract(1, "year").endOf("year");
+        break;
+      case "custom":
+        // Keep current dates for custom selection
+        return;
+      default:
+        startDate = today.startOf("month");
+        endDate = today.endOf("month");
+    }
+
+    setSelectedDates([
+      startDate.format("YYYY-MM-DD"),
+      endDate.format("YYYY-MM-DD"),
+    ]);
+  };
+
   const handleDateChange = (date, dateString, index) => {
     const newDates = [...selectedDates];
     newDates[index] = dateString;
     setSelectedDates(newDates);
+    setDateFilterOption("custom");
   };
 
   const handleReportDownload = async () => {
@@ -997,6 +1054,25 @@ const Expenses = () => {
       </div>
 
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+        <div className="d-flex gap-3 align-items-center flex-wrap mb-3 mb-md-0">
+        <Select
+            style={{ width: "180px" }}
+            className="green-select"
+            value={dateFilterOption}
+            onChange={handleDateFilterChange}
+            size="large"
+            options={[
+              { value: "thisWeek", label: "This Week" },
+              { value: "lastWeek", label: "Last Week" },
+              { value: "thisMonth", label: "This Month" },
+              { value: "lastMonth", label: "Last Month" },
+              { value: "thisQuarter", label: "This Quarter" },
+              { value: "lastQuarter", label: "Last Quarter" },
+              { value: "thisYear", label: "This Year" },
+              { value: "lastYear", label: "Last Year" },
+              { value: "custom", label: "Custom Range" },
+            ]}
+          />
         <div className="d-flex flex-column flex-md-row gap-3 align-items-center mb-3 mb-md-0">
           <input
             type="date"
@@ -1023,6 +1099,7 @@ const Expenses = () => {
             }
             value={selectedDates[1]}
           />
+        </div>
         </div>
         <div className="d-flex flex-column flex-md-row gap-2">
           <div

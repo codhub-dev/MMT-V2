@@ -56,75 +56,52 @@ const Dashboard = () => {
           <Spin size="large" />
         </div>
       ) : (
-        <div className="statistics-carousel-container">
-          <div className="statistics-carousel">
-            <StatisticCard
-              cardType="primary"
-              title={
-                <span>
-                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                    Total Expense{" "}
-                  </span>
-                </span>
-              }
-              value={metadata.monthlyExpenses?.monthlyGrandTotal}
-              thisMonth={metadata.grandTotal}
-              route={'/expenses'}
-            />
-            <StatisticCard
-              cardType="primary"
-              title={
-                <span>
-                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                    Fuel Expense{" "}
-                  </span>
-                </span>
-              }
-              thisMonth={metadata.fuelTotal}
-              value={metadata.monthlyExpenses?.fuel}
-              route={'/expenseSummary/fuelExpenses'}
-            />
-            <StatisticCard
-              cardType="primary"
-              title={
-                <span>
-                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                    Def Expense{" "}
-                  </span>
-                </span>
-              }
-              thisMonth={metadata.defTotal}
-              value={metadata.monthlyExpenses?.def}
-              route={'/expenseSummary/defExpenses'}
-            />
-            <StatisticCard
-              cardType="primary"
-              title={
-                <span>
-                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                    Other Expense{" "}
-                  </span>
-                </span>
-              }
-              thisMonth={metadata.otherTotal}
-              value={metadata.monthlyExpenses?.other}
-              route={'/expenseSummary/otherExpenses'}
-            />
-            <StatisticCard
-              cardType="primary"
-              title={
-                <span>
-                  <span style={{ fontSize: 16, fontWeight: 500, color: "#f6f6f6" }}>
-                    Fuel Consumed{" "}
-                  </span>
-                </span>
-              }
-              thisMonth={metadata.fuelUsedTotal}
-              value={metadata.monthlyExpenses?.fuelUsed}
-              route={null}
-            />
+        <>
+          <div style={{ marginBottom: 8, marginTop: 16 }}>
+            <span style={{ fontSize: "13px", color: "#6b6b6b", fontWeight: 500 }}>
+              Monthly Statistics
+            </span>
           </div>
-        </div>
+          <div className="statistics-carousel-container">
+            <div className="statistics-carousel">
+              <StatisticCard
+                cardType="primary"
+                title="Total Expense"
+                value={metadata.monthlyExpenses?.monthlyGrandTotal}
+                thisMonth={metadata.grandTotal}
+                route={'/expenses'}
+              />
+              <StatisticCard
+                cardType="primary"
+                title="Fuel Expense"
+                thisMonth={metadata.fuelTotal}
+                value={metadata.monthlyExpenses?.fuel}
+                route={'/expenseSummary/fuelExpenses'}
+              />
+              <StatisticCard
+                cardType="primary"
+                title="Def Expense"
+                thisMonth={metadata.defTotal}
+                value={metadata.monthlyExpenses?.def}
+                route={'/expenseSummary/defExpenses'}
+              />
+              <StatisticCard
+                cardType="primary"
+                title="Other Expense"
+                thisMonth={metadata.otherTotal}
+                value={metadata.monthlyExpenses?.other}
+                route={'/expenseSummary/otherExpenses'}
+              />
+              <StatisticCard
+                cardType="primary"
+                title="Fuel Consumed"
+                thisMonth={metadata.fuelUsedTotal}
+                value={metadata.monthlyExpenses?.fuelUsed}
+                route={null}
+              />
+            </div>
+          </div>
+        </>
       )}
       <Row gutter={[16, 16]} justify="start" align="stretch" className="dashboard-grid-row">
         <Col {...getResponsiveProps('medium')}>

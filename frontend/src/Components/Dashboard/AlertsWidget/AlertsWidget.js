@@ -338,46 +338,48 @@ const AlertsWidget = () => {
         minHeight: 360,
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <b style={{
-            margin: 0,
-            color: "#222",
-            fontSize: "16px",
-            fontWeight: 700,
-            letterSpacing: "0.2px"
-          }}>
-          Alerts
-          {alerts.length > 0 && (
-            <Badge
-              count={alerts.length}
-              style={{ backgroundColor: THEME_GREEN, marginLeft: 8 }}
-            />
-          )}
-        </b>
-        <Button
-          type="primary"
-          icon={<PlusOutlined style={{fontSize: 15}}/>}
-          size="small"
-          onClick={handleAddAlert}
-          style={{
-            borderRadius: 16,
-            background: THEME_GREEN,
-            fontWeight: 500,
-            border: "none",
-            fontSize: "14px",
-            padding: "5px 14px",
-            height: 'auto'
-          }}
-        >
-          Add
-        </Button>
-      </div>
-
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 150 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 308 }}>
           <Spin size="large" />
         </div>
-      ) : hasData ? (
+      ) : (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <b style={{
+                margin: 0,
+                color: "#222",
+                fontSize: "16px",
+                fontWeight: 700,
+                letterSpacing: "0.2px"
+              }}>
+              Alerts
+              {alerts.length > 0 && (
+                <Badge
+                  count={alerts.length}
+                  style={{ backgroundColor: THEME_GREEN, marginLeft: 8 }}
+                />
+              )}
+            </b>
+            <Button
+              type="primary"
+              icon={<PlusOutlined style={{fontSize: 15}}/>}
+              size="small"
+              onClick={handleAddAlert}
+              style={{
+                borderRadius: 16,
+                background: THEME_GREEN,
+                fontWeight: 500,
+                border: "none",
+                fontSize: "14px",
+                padding: "5px 14px",
+                height: 'auto'
+              }}
+            >
+              Add
+            </Button>
+          </div>
+
+          {hasData ? (
         <List
           itemLayout="horizontal"
           dataSource={alerts}
@@ -537,19 +539,21 @@ const AlertsWidget = () => {
             );
           }}
         />
-      ) : (
-        <div style={{ textAlign: 'center', padding: '40px 0', color: '#8c8c8c' }}>
-          <AlertOutlined style={{ fontSize: 48, marginBottom: 16, color: '#d9d9d9' }} />
-          <div>No alerts found</div>
-          <div style={{ fontSize: 12, marginBottom: 16 }}>Click "Add" to create your first alert</div>
-          <Button
-            type="link"
-            onClick={fetchAlerts}
-            style={{ color: THEME_GREEN, fontSize: 12 }}
-          >
-            Refresh
-          </Button>
-        </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px 0', color: '#8c8c8c' }}>
+              <AlertOutlined style={{ fontSize: 48, marginBottom: 16, color: '#d9d9d9' }} />
+              <div>No alerts found</div>
+              <div style={{ fontSize: 12, marginBottom: 16 }}>Click "Add" to create your first alert</div>
+              <Button
+                type="link"
+                onClick={fetchAlerts}
+                style={{ color: THEME_GREEN, fontSize: 12 }}
+              >
+                Refresh
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Add Alert Modal */}

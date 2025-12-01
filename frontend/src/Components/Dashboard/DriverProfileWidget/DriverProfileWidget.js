@@ -275,32 +275,33 @@ const DriverProfileWidget = () => {
       minHeight: 360,
       overflowY: "auto",
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <b style={{
-          margin: 0,
-          color: "#222",
-          fontSize: "16px",
-          fontWeight: 700,
-          letterSpacing: "0.2px"
-        }}>
-          Driver Profiles
-        </b>
-        <Button
-          type="primary"
-          icon={<PlusOutlined style={{fontSize: 15}} />}
-          size="small"
-          onClick={handleAddDriver}
-          style={{ borderRadius: 16, background: THEME_GREEN, fontWeight: 500, border: "none", fontSize: "14px", padding: "16px" }}
-        >
-          Add
-        </Button>
-      </div>
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 308 }}>
           <Spin size="large" />
         </div>
       ) : (
-        drivers.length === 0 ? (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <b style={{
+              margin: 0,
+              color: "#222",
+              fontSize: "16px",
+              fontWeight: 700,
+              letterSpacing: "0.2px"
+            }}>
+              Driver Profiles
+            </b>
+            <Button
+              type="primary"
+              icon={<PlusOutlined style={{fontSize: 15}} />}
+              size="small"
+              onClick={handleAddDriver}
+              style={{ borderRadius: 16, background: THEME_GREEN, fontWeight: 500, border: "none", fontSize: "14px", padding: "16px" }}
+            >
+              Add
+            </Button>
+          </div>
+          {drivers.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: '#939393' }}>
             <UserOutlined style={{ fontSize: 48, marginBottom: 16, color: '#d9d9d9' }} />
             <div>No driver profiles found</div>
@@ -313,70 +314,71 @@ const DriverProfileWidget = () => {
               Refresh
             </Button>
           </div>
-        ) : (
-          <List
-            itemLayout="horizontal"
-            dataSource={drivers}
-            renderItem={driver => (
-          <List.Item
-            style={{
-              cursor: 'pointer',
-              borderRadius: "18px",
-              transition: 'background 0.2s',
-              marginBottom: 0,
-              padding: "6px 8px",
-              background: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between"
-            }}
-            onClick={() => showDriverDetails(driver)}
-            className="driver-list-item"
-          >
-            <Space align="center" size="small">
-              <Avatar
-                src={driver.photo}
-                icon={!driver.photo && <UserOutlined />}
-                size={48}
-                style={{ backgroundColor: THEME_GREEN, color: "#fff" }}
-              />
-              <div>
-                <span style={{
-                  fontWeight: 500,
-                  fontSize: "14px",
-                  color: "#222",
-                  letterSpacing: "0.2px"
-                }}>
-                  {driver.name}
-                </span>
-                <br />
-                <span style={{
-                  fontSize: "12px",
-                  color: "#939393",
-                  fontWeight: 400
-                }}>
-                  {driver.contact}
-                </span>
-              </div>
-            </Space>
-            <span
+          ) : (
+            <List
+              itemLayout="horizontal"
+              dataSource={drivers}
+              renderItem={driver => (
+            <List.Item
               style={{
-                fontSize: 18,
-                color: THEME_GREEN,
-                fontWeight: 700,
-                marginLeft: 12,
-                padding: "0 8px",
-                background: "none",
-                borderRadius: 0,
-                display: "inline-block"
+                cursor: 'pointer',
+                borderRadius: "18px",
+                transition: 'background 0.2s',
+                marginBottom: 0,
+                padding: "6px 8px",
+                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between"
               }}
+              onClick={() => showDriverDetails(driver)}
+              className="driver-list-item"
             >
+              <Space align="center" size="small">
+                <Avatar
+                  src={driver.photo}
+                  icon={!driver.photo && <UserOutlined />}
+                  size={48}
+                  style={{ backgroundColor: THEME_GREEN, color: "#fff" }}
+                />
+                <div>
+                  <span style={{
+                    fontWeight: 500,
+                    fontSize: "14px",
+                    color: "#222",
+                    letterSpacing: "0.2px"
+                  }}>
+                    {driver.name}
+                  </span>
+                  <br />
+                  <span style={{
+                    fontSize: "12px",
+                    color: "#939393",
+                    fontWeight: 400
+                  }}>
+                    {driver.contact}
+                  </span>
+                </div>
+              </Space>
+              <span
+                style={{
+                  fontSize: 18,
+                  color: THEME_GREEN,
+                  fontWeight: 700,
+                  marginLeft: 12,
+                  padding: "0 8px",
+                  background: "none",
+                  borderRadius: 0,
+                  display: "inline-block"
+                }}
+              >
 
-            </span>
-            </List.Item>
+              </span>
+              </List.Item>
+            )}
+          />
           )}
-        />
-        )
+        </>
       )}
       {/* Driver Details Modal */}
       <Modal

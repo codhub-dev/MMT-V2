@@ -110,6 +110,25 @@
   background: linear-gradient(135deg, #0a3d2f, #1aa54b) !important;
 }
 
+/* Green themed Select component */
+.green-select .ant-select-selector {
+  background: linear-gradient(135deg, #0a3d2f, #1aa54b) !important;
+  border: none !important;
+  color: white !important;
+}
+
+.green-select .ant-select-selection-item {
+  color: white !important;
+}
+
+.green-select .ant-select-arrow {
+  color: white !important;
+}
+
+.green-select:hover .ant-select-selector {
+  background: linear-gradient(135deg, #0c4a39, #1ec157) !important;
+}
+
 /* Ant Design Table Global Styles */
 .ant-table-thead > tr > th {
   background: #fafafa !important;
